@@ -1,0 +1,412 @@
+/* ============================================
+   PALETTE DE COULEURS
+   Primaire: #030BA6
+   Secondaire: #030A8C
+   Tertiaire: #1F3A40
+   Accent: #F2B544
+   Neutre: #F2F2F2
+   ============================================ */
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #F2F2F2;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ============================================
+   WRAPPER & SIDEBAR
+   ============================================ */
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+#sidebar {
+    min-width: 270px;
+    max-width: 270px;
+    background: linear-gradient(135deg, #030BA6 0%, #030A8C 100%);
+    color: #fff;
+    transition: all 0.3s;
+    min-height: 100vh;
+    box-shadow: 2px 0 15px rgba(3, 11, 166, 0.15);
+}
+
+#sidebar.active {
+    margin-left: -270px;
+}
+
+#sidebar .sidebar-header {
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(242, 181, 68, 0.3);
+}
+
+#sidebar .sidebar-header h4 {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #fff;
+    position: relative;
+}
+
+#sidebar .sidebar-header h4:after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background-color: #F2B544;
+    border-radius: 2px;
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+}
+
+#sidebar ul li {
+    margin-bottom: 8px;
+}
+
+#sidebar ul li a {
+    padding: 12px 20px;
+    font-size: 1.05em;
+    display: block;
+    transition: all 0.3s;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 10px;
+    margin: 0 12px;
+    font-weight: 500;
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+#sidebar ul li a:hover {
+    background: rgba(242, 181, 68, 0.2);
+    color: #F2B544;
+    transform: translateX(5px);
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+#content {
+    width: 100%;
+    padding: 20px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    background-color: #F2F2F2;
+}
+
+/* ============================================
+   HEADER / NAVBAR
+   ============================================ */
+.navbar {
+    background: white !important;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 12px 20px;
+    margin-bottom: 20px;
+}
+
+#sidebarCollapse {
+    background: #030BA6;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+#sidebarCollapse:hover {
+    background: #F2B544;
+    transform: scale(1.02);
+}
+
+#sidebarCollapse .navbar-toggler-icon {
+    filter: invert(1);
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+
+.navbar-text strong {
+    color: #030BA6;
+    font-weight: 600;
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: white;
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(3, 11, 166, 0.12);
+}
+
+.card-header {
+    border-bottom: none;
+    padding: 18px 24px;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #030BA6, #030A8C) !important;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, #1F3A40, #163035) !important;
+}
+
+.card-header.bg-warning {
+    background: linear-gradient(135deg, #F2B544, #e0a32e) !important;
+    color: #1F3A40 !important;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+/* ============================================
+   FORMULAIRE
+   ============================================ */
+.form-label {
+    font-weight: 600;
+    color: #1F3A40;
+    margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px 15px;
+    transition: all 0.3s;
+    font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #F2B544;
+    box-shadow: 0 0 0 3px rgba(242, 181, 68, 0.2);
+    outline: none;
+}
+
+.input-group .form-control {
+    border-radius: 10px 0 0 10px;
+}
+
+.input-group .btn {
+    border-radius: 0 10px 10px 0;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ============================================
+   BOUTONS
+   ============================================ */
+.btn {
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-primary {
+    background: #030BA6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #F2B544;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(242, 181, 68, 0.3);
+}
+
+.btn-secondary {
+    background: #1F3A40;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #2c4d55;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: #1F3A40;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #F2B544;
+    color: #1F3A40;
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: #F2B544;
+    color: #1F3A40;
+    font-weight: 600;
+}
+
+.btn-warning:hover {
+    background: #e0a32e;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   TABLEAU
+   ============================================ */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: #1F3A40;
+    color: white;
+    font-weight: 600;
+    padding: 14px 12px;
+    border: none;
+}
+
+.table tbody tr {
+    transition: background 0.2s;
+}
+
+.table tbody tr:hover {
+    background: rgba(242, 181, 68, 0.08);
+}
+
+.table td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Badges */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.badge.bg-success {
+    background: #1F3A40 !important;
+}
+
+.badge.bg-danger {
+    background: #dc3545 !important;
+}
+
+/* ============================================
+   ALERTES
+   ============================================ */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 14px 20px;
+}
+
+.alert-success {
+    background: #e8f5e9;
+    color: #1F3A40;
+    border-left: 4px solid #1F3A40;
+}
+
+.alert-danger {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #dc3545;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+footer {
+    background: white !important;
+    border-radius: 12px;
+    margin-top: 30px !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+}
+
+footer .text-center {
+    color: #1F3A40;
+    font-size: 0.85rem;
+    padding: 16px !important;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -270px;
+    }
+    
+    #sidebar.active {
+        margin-left: 0;
+    }
+    
+    #content {
+        padding: 15px;
+    }
+    
+    .card-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .btn {
+        padding: 6px 14px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .alert {
+    animation: fadeIn 0.4s ease-out;
+}
