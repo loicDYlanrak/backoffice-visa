@@ -3,7 +3,7 @@ package com.project.visa.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.time.temporal.ChronoUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,14 +43,7 @@ public class DemandeController {
 
 
     
-    @Autowired
-    private DemandeurService demandeurService;
-    
-    @Autowired
-    private PasseportService passeportService;
-    
-    @Autowired
-    private VisaService visaService;
+   
     
     @GetMapping("/demandes")
     public String list(Model model) {
@@ -60,15 +53,15 @@ public class DemandeController {
         return "template";
     }
     
-    @GetMapping("/demandes/form")
-    public String showForm(Model model) {
-        model.addAttribute("demandeEntity", new DemandeEntity());
-        model.addAttribute("demandeurEntity", new DemandeurEntity());
-        model.addAttribute("passeportEntity", new PasseportEntity());
-        model.addAttribute("visaEntity", new VisaEntity());
-        model.addAttribute("template", "demande/demande-form");
-        return "template";
-    }
+    // @GetMapping("/demandes/form")
+    // public String showForm(Model model) {
+    //     model.addAttribute("demandeEntity", new DemandeEntity());
+    //     model.addAttribute("demandeurEntity", new DemandeurEntity());
+    //     model.addAttribute("passeportEntity", new PasseportEntity());
+    //     model.addAttribute("visaEntity", new VisaEntity());
+    //     model.addAttribute("template", "demande/demande-form");
+    //     return "template";
+    // }
     
     @PostMapping("/demande")
    public String create(@ModelAttribute DemandeEntity demandeEntity, 
@@ -308,11 +301,7 @@ public class DemandeController {
                 return "redirect:/demandes/form";
             }
             
-            String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-            if (!demandeurEntity.getEmail().matches(emailRegex)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le format de l'email est invalide");
-                return "redirect:/demandes/form";
-            }
+           
             
             if (demandeurService.emailExists(demandeurEntity.getEmail())) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Cet email est déjà utilisé");
