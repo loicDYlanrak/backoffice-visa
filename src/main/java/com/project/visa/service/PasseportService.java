@@ -1,6 +1,5 @@
 package com.project.visa.service;
 
-<<<<<<< Updated upstream
 import com.project.visa.entity.PasseportEntity;
 import com.project.visa.repository.PasseportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,21 +51,3 @@ public class PasseportService {
     }
     
 }
-=======
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.project.visa.entity.PasseportEntity;
-import com.project.visa.repository.PasseportRepository;
-
-@Service
-public class PasseportService {
-
-    @Autowired
-    private PasseportRepository passeportRepository;
-
-    public PasseportEntity save(PasseportEntity passeportEntity) {
-        return passeportRepository.save(passeportEntity);
-    }
-}
->>>>>>> Stashed changes

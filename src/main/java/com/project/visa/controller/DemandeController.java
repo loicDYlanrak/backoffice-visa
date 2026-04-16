@@ -71,15 +71,6 @@ public class DemandeController {
     }
     
     @PostMapping("/demande")
-<<<<<<< Updated upstream
-    public String create(@ModelAttribute DemandeEntity demandeEntity, 
-                         @ModelAttribute DemandeurEntity demandeurEntity, 
-                         @ModelAttribute PasseportEntity passeportEntity,
-                         @ModelAttribute VisaEntity visaEntity,
-                         RedirectAttributes redirectAttributes) {
-        try {
-            // ========== VALIDATIONS DEMANDEUR ==========
-=======
    public String create(@ModelAttribute DemandeEntity demandeEntity, 
                      @ModelAttribute DemandeurEntity demandeurEntity, 
                      @ModelAttribute PasseportEntity passeportEntity,
@@ -255,7 +246,6 @@ public class DemandeController {
         
         redirectAttributes.addFlashAttribute("successMessage", 
             "Demande créée avec succès. Référence : " + reference);
->>>>>>> Stashed changes
             
             if (demandeurEntity.getNom() == null || demandeurEntity.getNom().trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Le nom est obligatoire");
@@ -417,8 +407,6 @@ public class DemandeController {
         
         return "redirect:/demandes";
     }
-<<<<<<< Updated upstream
-=======
     
     return "redirect:/demandes";
 }
@@ -473,5 +461,4 @@ public class DemandeController {
         model.addAttribute("prefillTypeVisaId", 1);
     }
     
->>>>>>> Stashed changes
 }

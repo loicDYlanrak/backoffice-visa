@@ -1,24 +1,21 @@
 package com.project.visa.service;
 
-<<<<<<< Updated upstream
-import com.project.visa.entity.*;
-import com.project.visa.repository.*;
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
-=======
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
+import com.project.visa.entity.PasseportEntity;
+import com.project.visa.entity.TypeVisaEntity;
 import com.project.visa.entity.VisaEntity;
+import com.project.visa.repository.PasseportRepository;
+import com.project.visa.repository.TypeVisaRepository;
 import com.project.visa.repository.VisaRepository;
->>>>>>> Stashed changes
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class VisaService {
 
-<<<<<<< Updated upstream
     private final VisaRepository visaRepository;
     private final PasseportRepository passeportRepository;
     private final TypeVisaRepository typeVisaRepository;
@@ -70,12 +67,3 @@ public class VisaService {
         return visaRepository.save(visa);
     }
 }
-=======
-    @Autowired
-    private VisaRepository visaRepository;
-
-    public VisaEntity save(VisaEntity visaEntity) {
-        return visaRepository.save(visaEntity);
-    }
-}
->>>>>>> Stashed changes
