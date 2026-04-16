@@ -25,15 +25,15 @@ import com.project.visa.service.VisaService;
 
 @Controller
 public class DemandeController {
-    
-     @Autowired
+
+    @Autowired
     private DemandeService demandeService;
 
     @Autowired
-    private DemandeurService demandeurService;  // ← manquant
+    private DemandeurService demandeurService; // ← manquant
 
     @Autowired
-    private PasseportService passeportService;  // ← manquant
+    private PasseportService passeportService; // ← manquant
 
     @Autowired
     private VisaService visaService;
@@ -41,10 +41,6 @@ public class DemandeController {
     @Autowired
     private TypeVisaService typeVisaService;
 
-
-    
-   
-    
     @GetMapping("/demandes")
     public String list(Model model) {
         List<DemandeEntity> demandes = demandeService.findAll();
@@ -52,17 +48,17 @@ public class DemandeController {
         model.addAttribute("template", "demande/demande-list");
         return "template";
     }
-    
+
     // @GetMapping("/demandes/form")
     // public String showForm(Model model) {
-    //     model.addAttribute("demandeEntity", new DemandeEntity());
-    //     model.addAttribute("demandeurEntity", new DemandeurEntity());
-    //     model.addAttribute("passeportEntity", new PasseportEntity());
-    //     model.addAttribute("visaEntity", new VisaEntity());
-    //     model.addAttribute("template", "demande/demande-form");
-    //     return "template";
+    // model.addAttribute("demandeEntity", new DemandeEntity());
+    // model.addAttribute("demandeurEntity", new DemandeurEntity());
+    // model.addAttribute("passeportEntity", new PasseportEntity());
+    // model.addAttribute("visaEntity", new VisaEntity());
+    // model.addAttribute("template", "demande/demande-form");
+    // return "template";
     // }
-    
+
     @PostMapping("/demande")
    public String create(@ModelAttribute DemandeEntity demandeEntity, 
                      @ModelAttribute DemandeurEntity demandeurEntity, 
@@ -396,8 +392,9 @@ public class DemandeController {
         
         return "redirect:/demandes";
     }
-    
-    return "redirect:/demandes";
+
+    return"redirect:/demandes";
+
 }
 
     @GetMapping("/demande/formulaire")
@@ -449,5 +446,5 @@ public class DemandeController {
         model.addAttribute("prefillNationaliteOrigineId", 1);
         model.addAttribute("prefillTypeVisaId", 1);
     }
-    
+
 }
