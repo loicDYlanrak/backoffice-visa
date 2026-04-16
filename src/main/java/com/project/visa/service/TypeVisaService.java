@@ -13,18 +13,11 @@ public class TypeVisaService {
     public TypeVisaService(TypeVisaRepository typeVisaRepository) {
         this.typeVisaRepository = typeVisaRepository;
     }
-
-    public List<TypeVisaEntity> listerTous() {
-    }
-
     
     public TypeVisaEntity creerTypeSiInexistant(String libelle) {
         return typeVisaRepository.findByLibelle(libelle)
                 .orElseGet(() -> typeVisaRepository.save(new TypeVisaEntity(libelle)));
     }
-
-    @Autowired
-    private TypeVisaRepository typeVisaRepository;
 
     public TypeVisaEntity findById(Long id) {
         return typeVisaRepository.findById(id).orElse(null);
