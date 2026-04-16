@@ -64,8 +64,6 @@ public class DemandeEntity {
         this.idVisa = idVisa;
         this.observations = observations;
     }
-    public DemandeEntity() {
-    }
     public Long getId() {
         return id;
     }
