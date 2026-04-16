@@ -17,7 +17,7 @@ creer fonction qui Génère une référence unique (ex: RES-2026-0001),done
     Retourner "RES-" + annee + "-" + num → ex: RES-2026-0001
     Gérer le cas où aucune demande n'existe encore (compteur = 0)
 
-creer fonction pour recevoir les données du formulaire (POST):
+creer fonction pour recevoir les données du formulaire (POST): done
     Valide les champs requis (*):    
         pas vide: pour nom, prenom, lieuNaissance, profession, telephone, adresse
         pas null: pour dateNaissance, idSituationFamiliale, idNationaliteActuelle, idNationaliteOrigine, idGenre
@@ -27,11 +27,11 @@ creer fonction pour recevoir les données du formulaire (POST):
 
     Sauvegarde en BDD
         - Vérifier si le demandeur existe déjà (par numéro de passeport ou email/téléphone)
-        - Créer l'entité Passeport(Vérifier que le passeport n'existe pas déjà (passeportRepository.findByNumeroPasseport())) : set numero, dateDelivrance, dateExpiration, paysDelivrance, puis passeportRepository.save()
-        - Créer l'entité Visa : set numeroVisa, dateDebut, dateFin, idTypeVisa, idPasseport, puis visaRepository.save()
-        - Créer l'entité Demandeur (Verifier que le demandeur n'existe pas deja): set nom, prenom, nomJeuneFille, dateNaissance, lieuNaissance, profession, telephone, email, adresse, les ids des foreign keys, puis demandeurRepository.save()
+        x- Créer l'entité Passeport(Vérifier que le passeport n'existe pas déjà x(passeportRepository.findByNumeroPasseport())) : set numero, dateDelivrance, dateExpiration, paysDelivrance, puis passeportRepository.save()
+        x- Créer l'entité Visa : set numeroVisa, dateDebut, dateFin, idTypeVisa, idPasseport, puis visaRepository.save()
+        x- Créer l'entité Demandeur (Verifier que le demandeur n'existe pas deja): set nom, prenom, nomJeuneFille, dateNaissance, lieuNaissance, profession, telephone, email, adresse, les ids des foreign keys, puis demandeurRepository.save()
         - Lier Demandeur et Passeport : créer entrée dans DemandeurPasseport (id_demandeur, id_passeport, est_actif = true)
-        - Créer l'entité Demande : générer la référence, set date_demande = LocalDate.now(), id_statut = 2 (soumise), id_demandeur, id_visa
+        x- Créer l'entité Demande : générer la référence, set date_demande = LocalDate.now(), id_statut = 2 (soumise), id_demandeur, id_visa
 
     retourne JSON (succès/erreur + référence)
     Route POST /demande 
