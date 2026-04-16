@@ -49,10 +49,10 @@
                             <td>${demandeur.telephone}</td>
                             <td>${demandeur.email}</td>
                             <td>${demandeur.adresse}</td>
-                            <td>${demandeur.idSituationFamiliale}</td>
-                            <td>${demandeur.idGenre}</td>
-                            <td>${demandeur.idNationaliteActuelle}</td>
-                            <td>${demandeur.idNationaliteOrigine}</td>
+                            <td>${situationMap[demandeur.idSituationFamiliale]}</td>
+                            <td>${genreMap[demandeur.idGenre]}</td>
+                            <td>${nationaliteMap[demandeur.idNationaliteActuelle]}</td>
+                            <td>${nationaliteMap[demandeur.idNationaliteOrigine]}</td>
                         </tr>
                     </c:forEach>
                     

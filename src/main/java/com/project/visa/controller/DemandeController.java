@@ -2,8 +2,10 @@ package com.project.visa.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -270,8 +272,44 @@ public class DemandeController {
     public String showList(Model model) {
         List<DemandeurEntity> demandeurs = demandeurService.findAll();
         model.addAttribute("demandeurs", demandeurs);
+        model.addAttribute("genreMap", buildGenreMap());
+        model.addAttribute("situationMap", buildSituationMap());
+        model.addAttribute("nationaliteMap", buildNationaliteMap());
         model.addAttribute("template", "demande/liste");
         return "template";
+    }
+
+    private Map<Long, String> buildGenreMap() {
+        return Map.of(
+            1L, "Masculin",
+            2L, "Feminin",
+            3L, "Autre"
+        );
+    }
+
+    private Map<Long, String> buildSituationMap() {
+        return Map.of(
+            1L, "Celibataire",
+            2L, "Marie(e)",
+            3L, "Divorce(e)",
+            4L, "Veuf/Veuve",
+            5L, "Pacse(e)"
+        );
+    }
+
+    private Map<Long, String> buildNationaliteMap() {
+        return Map.of(
+            1L, "Malgache",
+            2L, "Francaise",
+            3L, "Chinoise",
+            4L, "Americaine",
+            5L, "Canadienne",
+            6L, "Allemande",
+            7L, "Italienne",
+            8L, "Espagnole",
+            9L, "Britannique",
+            10L, "Belge"
+        );
     }
 
     private void populateFormDefaults(Model model) {

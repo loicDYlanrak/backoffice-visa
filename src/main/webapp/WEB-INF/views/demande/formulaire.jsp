@@ -164,52 +164,52 @@
             <hr>
             <h5 class="mt-2 mb-3 text-secondary">Pieces communes</h5>
 
-            <div class="row">
+            <div id="piecesCommunes" class="row">
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photos" name="photos" value="true">
+                        <input class="form-check-input" type="checkbox" id="photos" name="photos" value="true" checked>
                         <label class="form-check-label" for="photos">02 Photos</label>
                     </div>
                 </div>
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="notice" name="notice" value="true">
+                        <input class="form-check-input" type="checkbox" id="notice" name="notice" value="true" checked>
                         <label class="form-check-label" for="notice">Notice</label>
                     </div>
                 </div>
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="demandeMinistre" name="demandeMinistre" value="true">
+                        <input class="form-check-input" type="checkbox" id="demandeMinistre" name="demandeMinistre" value="true" checked>
                         <label class="form-check-label" for="demandeMinistre">Demande adressee au ministre</label>
                     </div>
                 </div>
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photocopieVisa" name="photocopieVisa" value="true">
+                        <input class="form-check-input" type="checkbox" id="photocopieVisa" name="photocopieVisa" value="true" checked>
                         <label class="form-check-label" for="photocopieVisa">Photocopie visa</label>
                     </div>
                 </div>
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photocopiePasseport" name="photocopiePasseport" value="true">
+                        <input class="form-check-input" type="checkbox" id="photocopiePasseport" name="photocopiePasseport" value="true" checked>
                         <label class="form-check-label" for="photocopiePasseport">Photocopie passeport</label>
                     </div>
                 </div>
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photocopyCarteResident" name="photocopyCarteResident" value="true">
+                        <input class="form-check-input" type="checkbox" id="photocopyCarteResident" name="photocopyCarteResident" value="true" checked>
                         <label class="form-check-label" for="photocopyCarteResident">Photocopie carte resident</label>
                     </div>
                 </div>
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="certificatResidence" name="certificatResidence" value="true">
+                        <input class="form-check-input" type="checkbox" id="certificatResidence" name="certificatResidence" value="true" checked>
                         <label class="form-check-label" for="certificatResidence">Certificat de residence</label>
                     </div>
                 </div>
                 <div class="col-md-4 mb-2">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="casierJudiciaire" name="casierJudiciaire" value="true">
+                        <input class="form-check-input" type="checkbox" id="casierJudiciaire" name="casierJudiciaire" value="true" checked>
                         <label class="form-check-label" for="casierJudiciaire">Casier judiciaire</label>
                     </div>
                 </div>
@@ -222,19 +222,19 @@
                 <div class="row">
                     <div class="col-md-4 mb-2">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="statutSociete" name="statutSociete" value="true">
+                            <input class="form-check-input" type="checkbox" id="statutSociete" name="statutSociete" value="true" checked>
                             <label class="form-check-label" for="statutSociete">Statut societe</label>
                         </div>
                     </div>
                     <div class="col-md-4 mb-2">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="extraitRCS" name="extraitRCS" value="true">
+                            <input class="form-check-input" type="checkbox" id="extraitRCS" name="extraitRCS" value="true" checked>
                             <label class="form-check-label" for="extraitRCS">Extrait RCS</label>
                         </div>
                     </div>
                     <div class="col-md-4 mb-2">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="carteFiscale" name="carteFiscale" value="true">
+                            <input class="form-check-input" type="checkbox" id="carteFiscale" name="carteFiscale" value="true" checked>
                             <label class="form-check-label" for="carteFiscale">Carte fiscale</label>
                         </div>
                     </div>
@@ -245,13 +245,13 @@
                 <div class="row">
                     <div class="col-md-4 mb-2">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="autorisationEmploi" name="autorisationEmploi" value="true">
+                            <input class="form-check-input" type="checkbox" id="autorisationEmploi" name="autorisationEmploi" value="true" checked>
                             <label class="form-check-label" for="autorisationEmploi">Autorisation d'emploi</label>
                         </div>
                     </div>
                     <div class="col-md-4 mb-2">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="attestationEmployeur" name="attestationEmployeur" value="true">
+                            <input class="form-check-input" type="checkbox" id="attestationEmployeur" name="attestationEmployeur" value="true" checked>
                             <label class="form-check-label" for="attestationEmployeur">Attestation employeur</label>
                         </div>
                     </div>
@@ -271,13 +271,46 @@
         document.getElementById('piecesTravailleur').style.display  = (type === '2') ? 'block' : 'none';
     }
 
+    function setAllChecked(containerId) {
+        var container = document.getElementById(containerId);
+        if (!container) {
+            return;
+        }
+        container.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+            cb.checked = true;
+        });
+    }
+
+    function areAllChecked(containerId) {
+        var container = document.getElementById(containerId);
+        if (!container) {
+            return true;
+        }
+        return Array.from(container.querySelectorAll('input[type="checkbox"]')).every(function (cb) {
+            return cb.checked;
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var typeVisa = document.getElementById('typeVisa');
         var form = document.querySelector('form');
         if (typeVisa) {
             afficherPiecesSpecifiques(typeVisa.value);
+            setAllChecked('piecesCommunes');
+            if (typeVisa.value === '1') {
+                setAllChecked('piecesInvestisseur');
+            }
+            if (typeVisa.value === '2') {
+                setAllChecked('piecesTravailleur');
+            }
             typeVisa.addEventListener('change', function () {
                 afficherPiecesSpecifiques(this.value);
+                if (this.value === '1') {
+                    setAllChecked('piecesInvestisseur');
+                }
+                if (this.value === '2') {
+                    setAllChecked('piecesTravailleur');
+                }
             });
         }
 
@@ -286,6 +319,21 @@
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     form.reportValidity();
+                    return;
+                }
+                if (!areAllChecked('piecesCommunes')) {
+                    event.preventDefault();
+                    alert('Toutes les pieces communes doivent etre cochees');
+                    return;
+                }
+                if (typeVisa && typeVisa.value === '1' && !areAllChecked('piecesInvestisseur')) {
+                    event.preventDefault();
+                    alert('Toutes les pieces investisseur doivent etre cochees');
+                    return;
+                }
+                if (typeVisa && typeVisa.value === '2' && !areAllChecked('piecesTravailleur')) {
+                    event.preventDefault();
+                    alert('Toutes les pieces travailleur doivent etre cochees');
                     return;
                 }
                 var email = document.getElementById('email');
