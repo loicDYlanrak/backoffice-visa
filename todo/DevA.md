@@ -1,15 +1,15 @@
 utiliser script_create_database.sql
 (CREATE DATABASE )
 
-utiliser script
+utiliser script,done
 
-test Connexion à MySQL/MariaDB
+test Connexion à MySQL/MariaDB  done
 
-test d'utilisation de spring boot par le crud de test
+test d'utilisation de spring boot par le crud de test ,done
 
-creer Controller DemandeController
+creer Controller DemandeController 
 
-creer fonction qui Génère une référence unique (ex: RES-2026-0001)
+creer fonction qui Génère une référence unique (ex: RES-2026-0001),done
     dans DemandeService, créer une méthode genererReference()
     Récupérer l'année courante : int annee = LocalDate.now().getYear();
     Compter les demandes: long compteur = demandeRepository.count(); (créer la méthode dans Repository)
@@ -36,7 +36,7 @@ creer fonction pour recevoir les données du formulaire (POST):
     retourne JSON (succès/erreur + référence)
     Route POST /demande 
 
-Endpoint GET /demandes
+Endpoint GET /listes
     Retourne toutes les demandes (id, reference, nom, prenom, date_creation, type_visa)
 
 Endpoint GET /recherche?ref=XXX
