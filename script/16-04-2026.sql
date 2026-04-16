@@ -1,6 +1,3 @@
-DROP DATABASE IF EXISTS demande_resident;
-CREATE DATABASE demande_resident;
-USE demande_resident;
 
 CREATE TABLE Genre (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -17,7 +14,7 @@ CREATE TABLE Situation_familiale (
     libelle VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE Type_visa (
+CREATE TABLE type_visa (
     id INT AUTO_INCREMENT PRIMARY KEY,
     libelle VARCHAR(50) NOT NULL  -- 'investisseur', 'travailleur'
 );
@@ -43,7 +40,7 @@ CREATE TABLE Visa (
     transformable BOOLEAN DEFAULT TRUE,
     id_type_visa INT NOT NULL,
     id_passeport INT NOT NULL,
-    FOREIGN KEY (id_type_visa) REFERENCES Type_visa(id),
+    FOREIGN KEY (id_type_visa) REFERENCES type_visa(id),
     FOREIGN KEY (id_passeport) REFERENCES Passeport(id)
 );
 
@@ -78,7 +75,7 @@ CREATE TABLE Document_requis (
     libelle VARCHAR(255) NOT NULL,
     est_commun BOOLEAN DEFAULT FALSE,  -- TRUE = pièce commune
     id_type_visa INT NULL,              -- NULL = commun, sinon spécifique au type
-    FOREIGN KEY (id_type_visa) REFERENCES Type_visa(id)
+    FOREIGN KEY (id_type_visa) REFERENCES type_visa(id)
 );
 
 CREATE TABLE Demande (
@@ -137,7 +134,7 @@ INSERT INTO Genre (libelle) VALUES ('Masculin'), ('Féminin'), ('Autre');
 INSERT INTO Situation_familiale (libelle) VALUES 
 ('Célibataire'), ('Marié(e)'), ('Divorcé(e)'), ('Veuf/Veuve'), ('Pacsé(e)');
 
-INSERT INTO Type_visa (libelle) VALUES ('investisseur'), ('travailleur');
+INSERT INTO type_visa (libelle) VALUES ('investisseur'), ('travailleur');
 
 INSERT INTO Statut_demande (libelle) VALUES 
 ('brouillon'), ('soumise'), ('en_cours'), ('validee'), ('rejetee');
@@ -157,10 +154,11 @@ INSERT INTO Document_requis (libelle, est_commun, id_type_visa) VALUES
 ('Extrait de casier judiciaire moins de 3 mois', TRUE, NULL);
 
 INSERT INTO Document_requis (libelle, est_commun, id_type_visa) VALUES
-('Statut de la Société', FALSE, (SELECT id FROM Type_visa WHERE libelle = 'investisseur')),
-('Extrait d''inscription au registre de commerce', FALSE, (SELECT id FROM Type_visa WHERE libelle = 'investisseur')),
-('Carte fiscale', FALSE, (SELECT id FROM Type_visa WHERE libelle = 'investisseur'));
+('Statut de la Société', FALSE, (SELECT id FROM type_visa WHERE libelle = 'investisseur')),
+('Extrait d''inscription au registre de commerce', FALSE, (SELECT id FROM type_visa WHERE libelle = 'investisseur')),
+('Carte fiscale', FALSE, (SELECT id FROM type_visa WHERE libelle = 'investisseur'));
 
 INSERT INTO Document_requis (libelle, est_commun, id_type_visa) VALUES
-('Autorisation emploi délivrée à Madagascar par le Ministère de la Fonction publique', FALSE, (SELECT id FROM Type_visa WHERE libelle = 'travailleur')),
-('Attestation d''emploi délivré par l''employeur (Original)', FALSE, (SELECT id FROM Type_visa WHERE libelle = 'travailleur'));
+('Autorisation emploi délivrée à Madagascar par le Ministère de la Fonction publique', FALSE, (SELECT id FROM type_visa WHERE libelle = 'travailleur')),
+('Attestation d''emploi délivré par l''employeur (Original)', FALSE, (SELECT id FROM type_visa WHERE libelle = 'travailleur'));
+

@@ -45,7 +45,7 @@ public class DemandeController {
     public String list(Model model) {
         List<DemandeEntity> demandes = demandeService.findAll();
         model.addAttribute("demandes", demandes);
-        model.addAttribute("template", "demande/demande-list");
+        model.addAttribute("template", "demande/liste");
         return "template";
     }
 
@@ -212,7 +212,7 @@ public class DemandeController {
             
             // 2. Sauvegarder le passeport
             PasseportEntity savedPasseport = passeportService.save(passeportEntity);
-            
+            System.out.println("Passeport sauvegardé avec ID : " + savedPasseport.getId());
             // 3. Récupérer le TypeVisa depuis la BDD
             TypeVisaEntity typeVisa = typeVisaService.findById(visaEntity.getTypeVisa().getId());
             if (typeVisa == null) {
@@ -223,6 +223,7 @@ public class DemandeController {
             
             // 4. Lier le passeport au visa
             visaEntity.setPasseport(savedPasseport);
+            System.out.println("Passeport lié au visa : " + visaEntity.getPasseport().getNumeroPasseport());
             VisaEntity savedVisa = visaService.save(visaEntity);
             
             // 5. Créer la demande
