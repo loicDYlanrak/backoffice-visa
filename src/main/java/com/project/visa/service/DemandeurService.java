@@ -3,6 +3,7 @@ package com.project.visa.service;
 import com.project.visa.entity.DemandeurEntity;
 import com.project.visa.repository.DemandeurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+<<<<<<< Updated upstream
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -441,5 +442,25 @@ public class DemandeurService {
         public String getFirstError() {
             return errors.isEmpty() ? null : errors.values().iterator().next();
         }
+=======
+import org.springframework.stereotype.Service;
+
+@Service
+public class DemandeurService {
+
+    @Autowired
+    private DemandeurRepository demandeurRepository;
+
+    public DemandeurEntity save(DemandeurEntity demandeurEntity) {
+        return demandeurRepository.save(demandeurEntity);
+    }
+
+    public boolean emailExists(String email) {
+        return demandeurRepository.existsByEmail(email);
+    }
+
+    public java.util.List<DemandeurEntity> findAll() {
+        return demandeurRepository.findAll();
+>>>>>>> Stashed changes
     }
 }

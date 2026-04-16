@@ -18,5 +18,16 @@
                 <i class="bi bi-plus-circle"></i> Nouveau Test
             </a>
         </li>
+        <li class="mb-2">
+            <a href="${pageContext.request.contextPath}/demande/create" class="text-white text-decoration-none">
+                <i class="bi bi-plus-circle"></i> Demande 
+            </a>
+        </li>
+
+        <li class="mb-2">
+            <a href="${pageContext.request.contextPath}/demande/liste" class="text-white text-decoration-none">
+                <i class="bi bi-plus-circle"></i> Liste demande 
+            </a>
+        </li>
     </ul>
 </div>

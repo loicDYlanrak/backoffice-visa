@@ -1,7 +1,13 @@
 package com.project.visa.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Demande")
@@ -34,6 +40,9 @@ public class DemandeEntity {
 
     @Column(name = "motif_rejet")
     private String motifRejet;
+
+    public DemandeEntity() {
+    }
 
     public DemandeEntity(long id, String reference, LocalDateTime dateDemande, int idStatus, int idDemandeur, int idVisa, String observations, LocalDateTime dateTraitement, String motifRejet) {
         this.id = id;

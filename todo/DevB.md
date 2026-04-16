@@ -32,6 +32,6 @@
 
 
 -- creer page liste demande
-    Afficher tableau : Référence | Nom complet | Type visa | Date
+    Afficher tableau : Référence | Nom complet | Type visa | Date  
 
     Champ de recherche par référence
