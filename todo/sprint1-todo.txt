@@ -13,14 +13,21 @@ brache sprint/1/1-InsertionDemande
  	
 
 	creer formulaire de demande de carte de resident
-		select choix de type de visa : investisseur , travailleur 
-		input pour le nom* , prenom* , nom de jeune fille, date de naissance *
-		lieu de naissance *, situation familliale* (select), Nationalite actuelle*
-		Nationalite d'origine * , Profession* , contact * ( numero), mail , adresse * 
+		Etat civil 
+		nom*  
+		prenom*  
+		date de naissance *
+		lieu de naissance  
+		situation familliale* (select) 
+		Nationalite *  (select)
+		contact * 
+		mail  
+		adresse * 
 
-		select type de visa 
+		Visa Transformable 
+		Numero Reference 
 
-		case a cocher: PIÈCES COMMUNES
+		Piece justificative
 		02 photos d’identité
 		Notice de renseignement
 		Demande adressée à Mr le Ministère de l’Intérieur et de la Décentralisation avec adresse e-mail et numéro téléphone portable
@@ -30,7 +37,7 @@ brache sprint/1/1-InsertionDemande
 		Certificat de résidence à Madagascar
 		Extrait de casier judiciaire moins de 3 mois
 
-		PIÈCES COMPLÉMENTAIRES SELON LE TYPE DE visa
+		select type de visa 
 		Investisseur
 			Statut de la Société
 			Extrait d’inscription au registre de commerce
@@ -38,6 +45,11 @@ brache sprint/1/1-InsertionDemande
 		Travailleur
 			Autorisation emploi délivrée à Madagascar par le Ministère de la Fonction publique
 			Attestation d’emploi délivré par l’employeur (Original)
+
+
+
+
+
 
         creer controller pour gerer le demande de transformation de visa 
 		enregistrer dans la base de donnes les informations sur la demande 

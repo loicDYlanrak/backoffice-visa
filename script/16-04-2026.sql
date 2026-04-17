@@ -1,12 +1,3 @@
-<<<<<<< Updated upstream
-
-CREATE TABLE Genre (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL
-);
-
-=======
->>>>>>> Stashed changes
 CREATE TABLE Nationalite (
     id INT AUTO_INCREMENT PRIMARY KEY,
     libelle VARCHAR(50) NOT NULL
@@ -57,9 +48,6 @@ CREATE TABLE Visa (
     date_debut DATE NOT NULL,
     date_fin DATE NOT NULL,
     id_passeport INT NOT NULL,
-<<<<<<< Updated upstream
-    FOREIGN KEY (id_type_visa) REFERENCES type_visa(id),
-=======
     FOREIGN KEY (id_passeport) REFERENCES Passeport(id),
     FOREIGN KEY (id_demande) REFERENCES Demande(id)
 );
@@ -72,7 +60,6 @@ CREATE TABLE carte_resident(
     date_fin DATE NOT NULL,
     id_passeport INT NOT NULL,
     FOREIGN KEY (id_demande) REFERENCES Demande(id),
->>>>>>> Stashed changes
     FOREIGN KEY (id_passeport) REFERENCES Passeport(id)
 );
 
@@ -95,14 +82,7 @@ CREATE TABLE Demandeur (
 
 CREATE TABLE Type_demande (
     id INT AUTO_INCREMENT PRIMARY KEY,
-<<<<<<< Updated upstream
-    libelle VARCHAR(255) NOT NULL,
-    est_commun BOOLEAN DEFAULT FALSE,  -- TRUE = pièce commune
-    id_type_visa INT NULL,              -- NULL = commun, sinon spécifique au type
-    FOREIGN KEY (id_type_visa) REFERENCES type_visa(id)
-=======
     libelle VARCHAR(50) NOT NULL  
->>>>>>> Stashed changes
 );
 
 
@@ -129,48 +109,3 @@ CREATE TABLE Statut_demande (
     FOREIGN KEY (id_demande) REFERENCES Demande(id)
 );
 
-<<<<<<< Updated upstream
-CREATE TABLE Demandeur_Passeport (
-    id_demandeur INT NOT NULL,
-    id_passeport INT NOT NULL,
-    est_actif BOOLEAN DEFAULT TRUE,
-    PRIMARY KEY (id_demandeur, id_passeport),
-    FOREIGN KEY (id_demandeur) REFERENCES Demandeur(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_passeport) REFERENCES Passeport(id) ON DELETE CASCADE
-);
-
-INSERT INTO Genre (libelle) VALUES ('Masculin'), ('Féminin'), ('Autre');
-
-INSERT INTO Situation_familiale (libelle) VALUES 
-('Célibataire'), ('Marié(e)'), ('Divorcé(e)'), ('Veuf/Veuve'), ('Pacsé(e)');
-
-INSERT INTO type_visa (libelle) VALUES ('investisseur'), ('travailleur');
-
-INSERT INTO Statut_demande (libelle) VALUES 
-('brouillon'), ('soumise'), ('en_cours'), ('validee'), ('rejetee');
-
-INSERT INTO Nationalite (libelle) VALUES 
-('Malgache'), ('Française'), ('Chinoise'), ('Américaine'), ('Canadienne'), 
-('Allemande'), ('Italienne'), ('Espagnole'), ('Britannique'), ('Belge');
-
-INSERT INTO Document_requis (libelle, est_commun, id_type_visa) VALUES
-('02 photos d''identité', TRUE, NULL),
-('Notice de renseignement', TRUE, NULL),
-('Demande adressée à Mr le Ministère de l''Intérieur et de la Décentralisation avec e-mail et téléphone', TRUE, NULL),
-('Photocopie certifiée du visa en cours de validité', TRUE, NULL),
-('Photocopie certifiée de la première page du passeport', TRUE, NULL),
-('Photocopie certifiée de la carte résident en cours de validité', TRUE, NULL),
-('Certificat de résidence à Madagascar', TRUE, NULL),
-('Extrait de casier judiciaire moins de 3 mois', TRUE, NULL);
-
-INSERT INTO Document_requis (libelle, est_commun, id_type_visa) VALUES
-('Statut de la Société', FALSE, (SELECT id FROM type_visa WHERE libelle = 'investisseur')),
-('Extrait d''inscription au registre de commerce', FALSE, (SELECT id FROM type_visa WHERE libelle = 'investisseur')),
-('Carte fiscale', FALSE, (SELECT id FROM type_visa WHERE libelle = 'investisseur'));
-
-INSERT INTO Document_requis (libelle, est_commun, id_type_visa) VALUES
-('Autorisation emploi délivrée à Madagascar par le Ministère de la Fonction publique', FALSE, (SELECT id FROM type_visa WHERE libelle = 'travailleur')),
-('Attestation d''emploi délivré par l''employeur (Original)', FALSE, (SELECT id FROM type_visa WHERE libelle = 'travailleur'));
-
-=======
->>>>>>> Stashed changes
