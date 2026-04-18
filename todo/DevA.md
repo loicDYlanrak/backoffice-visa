@@ -68,8 +68,8 @@ modifier fonction pour recevoir les données du formulaire (POST)
 
     sauvegarde des entites
     - creer demandeur , passeport(statut automatiquement actif) si il n existe pas 
-    - Créer l'entité VisaTransformable (id_demandeur, id_passeport, date_entree, date_sortie, numero_reference)
-    - Créer l'entité Demande (id_visa_transformable, date_demande, id_demandeur, id_passeport, id_type_visa, id_type_demande, date_traitement = NULL)
+    - Créer l'entité VisaTransformable (id_demandeur, id_passeport(id du passeport qui a ete creer), date_entree, date_sortie, numero_reference)
+    - Créer l'entité Demande (id_visa_transformable, date_demande, id_demandeur, id_passeport(id du passeport qui a ete creer), id_type_visa, id_type_demande, date_traitement = NULL)
     - Créer l'entité StatutDemande (id_demande, statut = 1(creer), date_changement_statut)
     - si il y a une erreur retourner le message d erreur dans le formulaire avec les donnes pour ne plus remplir de nouveau le formulaire 
     - redirection vers page liste demande avec message succes
