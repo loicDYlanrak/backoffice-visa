@@ -48,7 +48,7 @@ Endpoint GET /recherche?ref=XXX
 
 :::::::TODO 2
 
-inserer les donnes dans le script 18-04-2026.sql
+x ,inserer les donnes dans le script 18-04-2026.sql
 
 
 creer une fonction pour valider les donnes 
