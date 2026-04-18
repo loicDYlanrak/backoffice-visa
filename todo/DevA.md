@@ -51,17 +51,17 @@ Endpoint GET /recherche?ref=XXX
 x ,inserer les donnes dans le script 18-04-2026.sql
 
 
-creer une fonction pour valider les donnes 
+x ,creer une fonction pour valider les donnes 
 (creer une fonction de validation par entites. ex: ValidateDemandeur , ensuite mettre tous les validate dans une fonction validate pour le post) 
-validation des champs not null
+x,validation des champs not null
    -pour tous les champs marqués NOT NULL dans la BDD ,creer des conditions if pour verifier qu il ne soit pas null
-   - Si un champ NOT NULL est manquant ou vide → retourner erreur immédiate, ne pas continuer.
+  x, - Si un champ NOT NULL est manquant ou vide → retourner erreur immédiate, ne pas continuer.
 validation des champs specifiques
-   - Pas vide : nom, prenom, lieu_naissance, telephone, adresse
-   - Pas null : date_naissance, id_situation_familiale, id_nationalite
+   x- Pas vide : nom, prenom, lieu_naissance, telephone, adresse
+   x- Pas null : date_naissance, id_situation_familiale, id_nationalite
    - Format email valide (si email fourni)
-   - Vérifier que la date d'expiration du passeport > aujourd'hui
-   - Vérifier que date_sortie > date_entree pour visa_transformable
+   x- Vérifier que la date d'expiration du passeport > aujourd'hui
+   x- Vérifier que date_sortie > date_entree pour visa_transformable
 
 modifier fonction pour recevoir les données du formulaire (POST)
     utilisation des fonctions de validation de donne
@@ -70,7 +70,7 @@ modifier fonction pour recevoir les données du formulaire (POST)
     - creer demandeur , passeport(statut automatiquement actif) si il n existe pas 
     - Créer l'entité VisaTransformable (id_demandeur, id_passeport(id du passeport qui a ete creer), date_entree, date_sortie, numero_reference)
     - Créer l'entité Demande (id_visa_transformable, date_demande, id_demandeur, id_passeport(id du passeport qui a ete creer), id_type_visa, id_type_demande, date_traitement = NULL)
-    - Créer l'entité StatutDemande (id_demande, statut = 1(creer), date_changement_statut)
+    x- Créer l'entité StatutDemande (id_demande, statut = 1(creer), date_changement_statut)
     - si il y a une erreur retourner le message d erreur dans le formulaire avec les donnes pour ne plus remplir de nouveau le formulaire 
     - redirection vers page liste demande avec message succes
 

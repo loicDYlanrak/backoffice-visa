@@ -9,7 +9,7 @@ public class StatutPasseportEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_passeport", nullable = false)
@@ -25,11 +25,11 @@ public class StatutPasseportEntity {
     }
     
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
     

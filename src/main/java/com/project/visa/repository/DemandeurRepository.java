@@ -1,6 +1,9 @@
 package com.project.visa.repository;
 
 import com.project.visa.entity.DemandeurEntity;
+import com.project.visa.entity.NationaliteEntity;
+import com.project.visa.entity.SituationFamilialeEntity;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,18 +25,14 @@ public interface DemandeurRepository extends JpaRepository<DemandeurEntity, Long
     
     List<DemandeurEntity> findByNomAndPrenom(String nom, String prenom);
     
-    List<DemandeurEntity> findByProfession(String profession);
-    
     List<DemandeurEntity> findByLieuNaissance(String lieuNaissance);
 
     // --- Recherches par IDs de référence ---
-    List<DemandeurEntity> findByIdNationaliteActuelle(Long idNationalite);
     
-    List<DemandeurEntity> findByIdNationaliteOrigine(Long idNationalite);
     
-    List<DemandeurEntity> findByIdGenre(Long idGenre);
+    List<DemandeurEntity> findByNationalite(NationaliteEntity Nationalite);
     
-    List<DemandeurEntity> findByIdSituationFamiliale(Long idSituationFamiliale);
+    List<DemandeurEntity> findBySituationFamiliale(SituationFamilialeEntity SituationFamiliale);
 
     // --- Recherches avancées et floues (String) ---
     List<DemandeurEntity> findByNomContainingIgnoreCase(String nom);
@@ -41,12 +40,11 @@ public interface DemandeurRepository extends JpaRepository<DemandeurEntity, Long
     @Query("SELECT d FROM DemandeurEntity d WHERE " +
            "(:nom IS NULL OR d.nom LIKE %:nom%) AND " +
            "(:prenom IS NULL OR d.prenom LIKE %:prenom%) AND " +
-           "(:email IS NULL OR d.email = :email) AND " +
-           "(:profession IS NULL OR d.profession LIKE %:profession%)")
+           "(:email IS NULL OR d.email = :email) " )
     List<DemandeurEntity> searchDemandeurs(@Param("nom") String nom, 
                                            @Param("prenom") String prenom, 
-                                           @Param("email") String email, 
-                                           @Param("profession") String profession);
+                                           @Param("email") String email)
+                                         ;
 
     @Query("SELECT d FROM DemandeurEntity d WHERE d.nom LIKE %:keyword% OR d.prenom LIKE %:keyword%")
     List<DemandeurEntity> searchByNomOrPrenom(@Param("keyword") String keyword);
@@ -64,10 +62,9 @@ public interface DemandeurRepository extends JpaRepository<DemandeurEntity, Long
     
     boolean existsByTelephone(String telephone);
 
-    List<DemandeurEntity> findTop10ByOrderByCreatedAtDesc();
+    
 
-    @Query("SELECT d.idNationaliteActuelle, COUNT(d) FROM DemandeurEntity d GROUP BY d.idNationaliteActuelle")
-    List<Object[]> countDemandeursByNationalite();
+   
 
     boolean existsByEmail(String email);
 

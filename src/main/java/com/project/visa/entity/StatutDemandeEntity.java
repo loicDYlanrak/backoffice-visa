@@ -9,7 +9,7 @@ public class StatutDemandeEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demande", nullable = false)
@@ -25,11 +25,11 @@ public class StatutDemandeEntity {
     }
     
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
     
@@ -37,7 +37,7 @@ public class StatutDemandeEntity {
         return demande;
     }
     
-    public void setPasseport(DemandeEntity demande) {
+    public void setDemande(DemandeEntity demande) {
         this.demande = demande;
     }
     

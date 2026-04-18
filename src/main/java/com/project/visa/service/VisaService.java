@@ -3,6 +3,8 @@ package com.project.visa.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+
+import com.project.visa.entity.PasseportEntity;
 import com.project.visa.entity.VisaEntity;
 import com.project.visa.repository.PasseportRepository;
 import com.project.visa.repository.TypeVisaRepository;
@@ -21,8 +23,8 @@ public class VisaService {
         this.visaRepository = visaRepository;
     }
 
-    public List<VisaEntity> listerVisasParPasseport(Long idPasseport) {
-        return visaRepository.findByPasseportId(idPasseport);
+    public List<VisaEntity> listerVisasParPasseport(PasseportEntity Passeport) {
+        return visaRepository.findByPasseport(Passeport);
     }
 
     @Transactional

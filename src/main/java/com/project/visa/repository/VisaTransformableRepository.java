@@ -1,10 +1,11 @@
 package com.project.visa.repository;
 
-import com.project.visa.entity.DemandeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.project.visa.entity.VisaTransformableEntity;
+
 @Repository
-public interface DemandeRepository extends JpaRepository<DemandeEntity, Long> {
+public interface  VisaTransformableRepository  extends JpaRepository<VisaTransformableEntity, Long>{
     
 }

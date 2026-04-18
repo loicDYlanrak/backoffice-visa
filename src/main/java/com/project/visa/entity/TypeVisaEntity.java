@@ -1,7 +1,6 @@
 package com.project.visa.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "Type_visa")
@@ -9,17 +8,11 @@ public class TypeVisaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(nullable = false, length = 50)
     private String libelle;
     
-    @OneToMany(mappedBy = "typeVisa", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<VisaEntity> visas;
-    
-    @OneToMany(mappedBy = "typeVisa", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DemandeEntity> demandes;
-
     public TypeVisaEntity() {
     }
 
@@ -28,11 +21,11 @@ public class TypeVisaEntity {
     }
 
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -44,19 +37,5 @@ public class TypeVisaEntity {
         this.libelle = libelle;
     }
 
-    public List<VisaEntity> getVisas() {
-        return visas;
-    }
-
-    public void setVisas(List<VisaEntity> visas) {
-        this.visas = visas;
-    }
-
-    public List<DemandeEntity> getDemandes() {
-        return demandes;
-    }
-
-    public void setDemandes(List<DemandeEntity> demandes) {
-        this.demandes = demandes;
-    }
+   
 }

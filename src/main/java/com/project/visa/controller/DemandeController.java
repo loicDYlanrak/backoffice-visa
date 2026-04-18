@@ -5,10 +5,11 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,15 +18,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.project.visa.entity.DemandeEntity;
 import com.project.visa.entity.DemandeurEntity;
 import com.project.visa.entity.PasseportEntity;
-import com.project.visa.entity.TypeVisaEntity;
-import com.project.visa.entity.VisaEntity;
-import com.project.visa.repository.DemandeRepository;
+import com.project.visa.entity.StatutDemandeEntity;
+import com.project.visa.entity.VisaTransformableEntity;
+
 import com.project.visa.service.DemandeService;
 import com.project.visa.service.DemandeurService;
 import com.project.visa.service.PasseportService;
-import com.project.visa.service.TypeVisaService;
-import com.project.visa.service.VisaService;
-
+import com.project.visa.service.StatutDemandeService;
+import com.project.visa.service.VisaTransformableService;
 @Controller
 public class DemandeController {
 
@@ -39,11 +39,11 @@ public class DemandeController {
     private PasseportService passeportService;
 
     @Autowired
-    private VisaService visaService;
-
+    private VisaTransformableService visaTransformableService;
+    
     @Autowired
-    private TypeVisaService typeVisaService;
-
+    private StatutDemandeService statutDemandeService;
+  
     @GetMapping("/demandes")
     public String list(Model model) {
         List<DemandeEntity> demandes = demandeService.findAll();
@@ -52,173 +52,84 @@ public class DemandeController {
         return "template";
     }
 
-    @PostMapping("/demande")
-    public String create(@ModelAttribute DemandeEntity demandeEntity, 
-                         @ModelAttribute DemandeurEntity demandeurEntity, 
-                         @ModelAttribute PasseportEntity passeportEntity,
-                         @ModelAttribute VisaEntity visaEntity,
-                         RedirectAttributes redirectAttributes) {
-        try {
-            // ========== VALIDATIONS DEMANDEUR ==========
-            if (demandeurEntity.getNom() == null || demandeurEntity.getNom().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le nom est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getPrenom() == null || demandeurEntity.getPrenom().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le prénom est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getLieuNaissance() == null || demandeurEntity.getLieuNaissance().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le lieu de naissance est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getTelephone() == null || demandeurEntity.getTelephone().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le téléphone est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getAdresse() == null || demandeurEntity.getAdresse().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "L'adresse est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getDateNaissance() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date de naissance est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getSituationFamiliale() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La situation familiale est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getNationalite() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La nationalité actuelle est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            // Validation email
-            if (demandeurEntity.getEmail() == null || demandeurEntity.getEmail().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "L'email est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-            if (!demandeurEntity.getEmail().matches(emailRegex)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le format de l'email est invalide");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurService.emailExists(demandeurEntity.getEmail())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Cet email est déjà utilisé");
-                return "redirect:/demandes/form";
-            }
-            
-            // ========== VALIDATIONS PASSEPORT ==========
-            if (passeportEntity.getNumeroPasseport() == null || passeportEntity.getNumeroPasseport().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le numéro de passeport est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (passeportEntity.getDateDelivrance() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date de délivrance du passeport est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (passeportEntity.getDateExpiration() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date d'expiration du passeport est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            LocalDate today = LocalDate.now();
-            
-            // Vérification date expiration > aujourd'hui
-            if (passeportEntity.getDateExpiration().isBefore(today) || passeportEntity.getDateExpiration().isEqual(today)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date d'expiration du passeport doit être postérieure à aujourd'hui");
-                return "redirect:/demandes/form";
-            }
-            
-            // Vérification date délivrance pas dans le futur
-            if (passeportEntity.getDateDelivrance().isAfter(today)) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date de délivrance ne peut pas être dans le futur");
-                return "redirect:/demandes/form";
-            }
-            
-            // Vérification date délivrance avant date expiration
-            if (passeportEntity.getDateDelivrance().isAfter(passeportEntity.getDateExpiration())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date de délivrance doit être avant la date d'expiration");
-                return "redirect:/demandes/form";
-            }
-            
-            // Vérification unicité du numéro de passeport
-            if (passeportService.existsByNumeroPasseport(passeportEntity.getNumeroPasseport())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Ce numéro de passeport existe déjà");
-                return "redirect:/demandes/form";
-            }
-            
-            // Attention : expiration dans moins de 6 mois (avertissement seulement)
-            LocalDate sixMonthsLater = today.plusMonths(6);
-            if (passeportEntity.getDateExpiration().isBefore(sixMonthsLater)) {
-                redirectAttributes.addFlashAttribute("warningMessage", "Attention : Le passeport expirera dans moins de 6 mois");
-            }
-            
-            // ========== VALIDATIONS VISA ==========
-            if (visaEntity.getDateDebut() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date de début du visa est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (visaEntity.getDateFin() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date de fin du visa est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (visaEntity.getDateFin().isBefore(visaEntity.getDateDebut()) || 
-                visaEntity.getDateFin().isEqual(visaEntity.getDateDebut())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La date de fin du visa doit être postérieure à la date de début");
-                return "redirect:/demandes/form";
-            }
-
-            // Vérification durée du visa (avertissement seulement)
-            long daysBetween = ChronoUnit.DAYS.between(visaEntity.getDateDebut(), visaEntity.getDateFin());
-            if (daysBetween > 365) {
-                redirectAttributes.addFlashAttribute("warningMessage", "Attention : La durée du visa dépasse 1 an");
-            }
-            
-            // ========== SAUVEGARDE DES DONNÉES ==========
-            
-            // 1. Sauvegarder le demandeur
-            DemandeurEntity savedDemandeur = demandeurService.save(demandeurEntity);
-            
-            // 2. Sauvegarder le passeport
-            PasseportEntity savedPasseport = passeportService.save(passeportEntity);
-            System.out.println("Passeport sauvegardé avec ID : " + savedPasseport.getId());
-            
-            // 4. Lier le passeport au visa
-            visaEntity.setPasseport(savedPasseport);
-            System.out.println("Passeport lié au visa : " + visaEntity.getPasseport().getNumeroPasseport());
-            VisaEntity savedVisa = visaService.save(visaEntity);
-            
-            String reference = demandeService.genererReference();
-            demandeEntity.setDateDemande(sixMonthsLater);
-
-            
-            demandeService.save(demandeEntity);
-            
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Demande créée avec succès. Référence : " + reference);
-            
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Erreur lors de la création de la demande : " + e.getMessage());
-            return "redirect:/demandes/form";
+   @PostMapping("/demande")
+public String createDemande(@ModelAttribute DemandeEntity demandeEntity, 
+                            @ModelAttribute DemandeurEntity demandeurEntity, 
+                            @ModelAttribute PasseportEntity passeportEntity,
+                            @ModelAttribute VisaTransformableEntity visaTransformableEntity,
+                            BindingResult result,
+                            RedirectAttributes redirectAttributes) {
+    
+    LocalDate currentDate = LocalDate.now();
+    
+    // ========== 1. VALIDATION COMPLÈTE AVANT TOUTE SAUVEGARDE ==========
+    
+    // Valider le demandeur
+    if (demandeurEntity == null || !demandeurEntity.isValid(currentDate)) {
+        redirectAttributes.addFlashAttribute("error", "Demandeur invalide : problème dans les informations personnelles.");
+        return "redirect:/demande/formulaire";
+    }
+    
+    // Valider le passeport
+    if (passeportEntity == null || !passeportEntity.isValid(currentDate)) {
+        redirectAttributes.addFlashAttribute("error", "Passeport invalide : problème dans les dates de validité.");
+        return "redirect:/demande/formulaire";
+    }
+    
+    // Valider le visa transformable
+    if (visaTransformableEntity == null || !visaTransformableEntity.demandeValide(currentDate)) {
+        redirectAttributes.addFlashAttribute("error", "Visa transformable invalide : problème dans les dates d'entrée/sortie.");
+        return "redirect:/demande/formulaire";
+    }
+    
+    // Valider la demande
+    if (demandeEntity == null || !demandeEntity.isValide()) {
+        redirectAttributes.addFlashAttribute("error", "Demande invalide : problème dans les dates ou types.");
+        return "redirect:/demande/formulaire";
+    }
+    
+    // ========== 2. SAUVEGARDE (seulement si tout est valide) ==========
+    
+    try {
+        // Sauvegarder le demandeur
+        DemandeurEntity savedDemandeur = demandeurService.save(demandeurEntity);
+        
+        // Sauvegarder le passeport (si non existant)
+        PasseportEntity savedPasseport;
+        Optional<PasseportEntity> existingPasseport = passeportService.findByNumeroPasseport(passeportEntity.getNumeroPasseport());
+        if (existingPasseport.isEmpty()) {
+            savedPasseport = passeportService.save(passeportEntity);
+        } else {
+            savedPasseport = existingPasseport.get();
         }
         
-        return "redirect:/demandes";
+        // Lier le visa transformable au demandeur et passeport
+        visaTransformableEntity.setDemandeur(savedDemandeur);
+        visaTransformableEntity.setPasseport(savedPasseport);
+        VisaTransformableEntity savedVisaTransformable = visaTransformableService.save(visaTransformableEntity);
+        
+        // Lier la demande
+        demandeEntity.setDemandeur(savedDemandeur);
+        demandeEntity.setVisaTransformable(savedVisaTransformable);
+        demandeEntity.setDateDemande(currentDate);
+        DemandeEntity savedDemande = demandeService.save(demandeEntity);
+        
+        // Créer le statut initial
+        StatutDemandeEntity statutDemandeEntity = new StatutDemandeEntity();
+        statutDemandeEntity.setDemande(savedDemande);
+        statutDemandeEntity.setDateChangementStatut(currentDate);
+        statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
+        statutDemandeService.save(statutDemandeEntity);
+        
+        redirectAttributes.addFlashAttribute("successMessage", "Demande créée avec succès" );
+        
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la création : " + e.getMessage());
+        return "redirect:/demande/formulaire";
     }
+    
+    return "redirect:/demandes";
+}
 
     @GetMapping("/demande/formulaire")
     public String showForm(Model model) {

@@ -9,7 +9,7 @@ public class TypeDemandeEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @Column(nullable = false, length = 50)
     private String libelle;
@@ -21,11 +21,11 @@ public class TypeDemandeEntity {
     }
     
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
     

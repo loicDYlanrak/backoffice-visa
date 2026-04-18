@@ -9,7 +9,7 @@ public class VisaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demande", nullable = false)
@@ -20,6 +20,7 @@ public class VisaEntity {
 
     @Column(name = "date_debut", nullable = false)
     private LocalDate dateDebut;
+
 
     @Column(name = "date_fin", nullable = false)
     private LocalDate dateFin;
@@ -32,11 +33,11 @@ public class VisaEntity {
     }
 
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int  id) {
         this.id = id;
     }
 
@@ -59,7 +60,6 @@ public class VisaEntity {
     public LocalDate getDateDebut() {
         return dateDebut;
     }
-
     public void setDateDebut(LocalDate dateDebut) {
         this.dateDebut = dateDebut;
     }

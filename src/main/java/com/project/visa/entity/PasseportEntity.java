@@ -10,7 +10,7 @@ public class PasseportEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demandeur", nullable = false)
@@ -44,11 +44,11 @@ public class PasseportEntity {
     }
 
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -122,5 +122,33 @@ public class PasseportEntity {
 
     public void setCartesResident(List<CarteResidentEntity> cartesResident) {
         this.cartesResident = cartesResident;
+    }
+
+    public boolean isExpired(LocalDate currentDate) {
+        if (dateExpiration == null || currentDate == null) {
+            return true; 
+            }
+        return dateExpiration.isBefore(currentDate);
+    }
+   public boolean isValid(LocalDate currentDate) {
+        if (dateDelivrance == null || dateExpiration == null || currentDate == null||numeroPasseport==null||numeroPasseport.isEmpty()) {
+            return false;
+        }
+        return !dateDelivrance.isAfter(currentDate) 
+            && !isExpired(currentDate) 
+            && dateExpiration.isAfter(dateDelivrance);
+    }
+    public boolean isExpiringSoon(LocalDate currentDate, int months) {
+        if (dateExpiration == null || currentDate == null) {
+            return false;
+            }
+        LocalDate threshold = currentDate.plusMonths(months);
+        return dateExpiration.isBefore(threshold) && !isExpired(currentDate);
+    }
+    public long getDaysUntilExpiration(LocalDate currentDate) {
+        if (dateExpiration == null || currentDate == null || isExpired(currentDate)) {
+            return 0;
+        }
+        return java.time.temporal.ChronoUnit.DAYS.between(currentDate, dateExpiration);
     }
 }

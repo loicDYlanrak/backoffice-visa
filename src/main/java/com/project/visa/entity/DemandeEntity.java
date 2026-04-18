@@ -10,7 +10,7 @@ public class DemandeEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_visa_transformable", nullable = false)
@@ -31,6 +31,7 @@ public class DemandeEntity {
     @JoinColumn(name = "id_type_demande", nullable = false)
     private TypeDemandeEntity typeDemande;
     
+    
     @Column(name = "date_traitement")
     private LocalDate dateTraitement;
     
@@ -44,11 +45,11 @@ public class DemandeEntity {
     }
 
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -114,5 +115,16 @@ public class DemandeEntity {
 
     public void setCartesResident(List<CarteResidentEntity> cartesResident) {
         this.cartesResident = cartesResident;
+    }
+
+    public boolean isValide() {
+        if (visaTransformable == null || dateDemande == null || demandeur == null || typeVisa == null || typeDemande == null) {
+            return false;
+        }
+        if(visaTransformable.demandeValide(dateDemande)) {
+            return true;
+        }else {
+            return false;
+        }
     }
 }

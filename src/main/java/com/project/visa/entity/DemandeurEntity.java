@@ -10,7 +10,7 @@ public class DemandeurEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     
     @Column(name = "nom", nullable = false, length = 50)
     private String nom;
@@ -54,11 +54,11 @@ public class DemandeurEntity {
     }
     
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
     
@@ -156,5 +156,20 @@ public class DemandeurEntity {
     
     public void setDemandes(List<DemandeEntity> demandes) {
         this.demandes = demandes;
+    }
+    public  boolean isValid(LocalDate currentDate) {
+        if (dateNaissance == null || dateNaissance.isAfter(currentDate)) {
+            return false;
+        }
+        if(situationFamiliale == null || nationalite == null) {
+            return false;
+        }
+        if(nom == null || nom.isEmpty() || prenom == null || prenom.isEmpty() || telephone == null || telephone.isEmpty() || adresse == null || adresse.isEmpty()) {
+            return false;
+        }
+        if (passeports == null) {
+           return false;
+        }
+        return true;
     }
 }

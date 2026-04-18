@@ -1,6 +1,8 @@
 package com.project.visa.service;
 
 import com.project.visa.entity.DemandeurEntity;
+import com.project.visa.entity.NationaliteEntity;
+import com.project.visa.entity.SituationFamilialeEntity;
 import com.project.visa.repository.DemandeurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -131,10 +132,7 @@ public class DemandeurService {
     /**
      * Rechercher par profession
      */
-    public List<DemandeurEntity> findByProfession(String profession) {
-        return demandeurRepository.findByProfession(profession);
-    }
-    
+   
     /**
      * Rechercher par lieu de naissance
      */
@@ -152,29 +150,21 @@ public class DemandeurService {
     /**
      * Rechercher par nationalité actuelle
      */
-    public List<DemandeurEntity> findByNationaliteActuelle(Long idNationalite) {
-        return demandeurRepository.findByIdNationaliteActuelle(idNationalite);
-    }
     
     /**
      * Rechercher par nationalité d'origine
      */
-    public List<DemandeurEntity> findByNationaliteOrigine(Long idNationalite) {
-        return demandeurRepository.findByIdNationaliteOrigine(idNationalite);
+    public List<DemandeurEntity> findByNationalite(NationaliteEntity Nationalite) {
+        return demandeurRepository.findByNationalite(Nationalite);
     }
     
     /**
-     * Rechercher par genre
-     */
-    public List<DemandeurEntity> findByGenre(Long idGenre) {
-        return demandeurRepository.findByIdGenre(idGenre);
-    }
-    
+   
     /**
      * Rechercher par situation familiale
      */
-    public List<DemandeurEntity> findBySituationFamiliale(Long idSituationFamiliale) {
-        return demandeurRepository.findByIdSituationFamiliale(idSituationFamiliale);
+    public List<DemandeurEntity> findBySituationFamiliale(SituationFamilialeEntity SituationFamiliale) {
+        return demandeurRepository.findBySituationFamiliale(SituationFamiliale);
     }
     
     // ========== RECHERCHES AVANCÉES ==========
@@ -182,8 +172,8 @@ public class DemandeurService {
     /**
      * Recherche multi-critères
      */
-    public List<DemandeurEntity> searchDemandeurs(String nom, String prenom, String email, String profession) {
-        return demandeurRepository.searchDemandeurs(nom, prenom, email, profession);
+    public List<DemandeurEntity> searchDemandeurs(String nom, String prenom, String email) {
+        return demandeurRepository.searchDemandeurs(nom, prenom, email);
     }
     
     /**
@@ -210,13 +200,7 @@ public class DemandeurService {
         return demandeurRepository.findByDateNaissanceBetween(startDate, endDate);
     }
     
-    /**
-     * Trouver les 10 derniers demandeurs inscrits
-     */
-    public List<DemandeurEntity> findTop10Recent() {
-        return demandeurRepository.findTop10ByOrderByCreatedAtDesc();
-    }
-    
+  
     // ========== VALIDATIONS ==========
     
     /**
@@ -252,58 +236,7 @@ public class DemandeurService {
     /**
      * Valider un demandeur avant création
      */
-    public ValidationResult validateDemandeur(DemandeurEntity demandeur) {
-        ValidationResult result = new ValidationResult();
-        
-        // Vérifier les champs obligatoires
-        if (demandeur.getNom() == null || demandeur.getNom().trim().isEmpty()) {
-            result.addError("nom", "Le nom est obligatoire");
-        }
-        
-        if (demandeur.getPrenom() == null || demandeur.getPrenom().trim().isEmpty()) {
-            result.addError("prenom", "Le prénom est obligatoire");
-        }
-        
-        if (demandeur.getDateNaissance() == null) {
-            result.addError("dateNaissance", "La date de naissance est obligatoire");
-        } else if (demandeur.getDateNaissance().isAfter(LocalDate.now())) {
-            result.addError("dateNaissance", "La date de naissance ne peut pas être dans le futur");
-        }
-        
-        if (demandeur.getLieuNaissance() == null || demandeur.getLieuNaissance().trim().isEmpty()) {
-            result.addError("lieuNaissance", "Le lieu de naissance est obligatoire");
-        }
-        
-        if (demandeur.getTelephone() == null || demandeur.getTelephone().trim().isEmpty()) {
-            result.addError("telephone", "Le téléphone est obligatoire");
-        } else if (telephoneExists(demandeur.getTelephone())) {
-            result.addError("telephone", "Ce numéro de téléphone est déjà utilisé");
-        }
-        
-        if (demandeur.getAdresse() == null || demandeur.getAdresse().trim().isEmpty()) {
-            result.addError("adresse", "L'adresse est obligatoire");
-        }
-        
-        // Vérifier email
-        if (demandeur.getEmail() == null || demandeur.getEmail().trim().isEmpty()) {
-            result.addError("email", "L'email est obligatoire");
-        } else if (!isValidEmail(demandeur.getEmail())) {
-            result.addError("email", "Le format de l'email est invalide");
-        } else if (emailExists(demandeur.getEmail())) {
-            result.addError("email", "Cet email est déjà utilisé");
-        }
-        
-        // Vérifier les IDs de références
-        if (demandeur.getSituationFamiliale().getId() == null) {
-            result.addError("idSituationFamiliale", "La situation familiale est obligatoire");
-        }
-        
-        if (demandeur.getNationalite().getId() == null) {
-            result.addError("idNationaliteActuelle", "La nationalité actuelle est obligatoire");
-        }
-        return result;
-    }
-    
+   
     // ========== MISE À JOUR ==========
     
     /**
@@ -369,10 +302,7 @@ public class DemandeurService {
     /**
      * Compter les demandeurs par nationalité
      */
-    public List<Object[]> countByNationalite() {
-        return demandeurRepository.countDemandeursByNationalite();
-    }
-    
+   
     /**
      * Calculer l'âge d'un demandeur
      */

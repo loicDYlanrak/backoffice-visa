@@ -1,9 +1,14 @@
 package com.project.visa.service;
 
 import com.project.visa.entity.DemandeEntity;
+import com.project.visa.entity.DemandeurEntity;
+import com.project.visa.entity.PasseportEntity;
+import com.project.visa.entity.VisaTransformableEntity;
 import com.project.visa.repository.DemandeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,18 +33,20 @@ public class DemandeService {
     public void deleteById(Long id) {
         demandeRepository.deleteById(id);
     }
+    public boolean validate(DemandeEntity demandeEntity, 
+                        DemandeurEntity demandeurEntity, 
+                        PasseportEntity passeportEntity,
+                        VisaTransformableEntity visaTransformableEntity,LocalDate currentDate ) {
+   
     
-    public List<DemandeEntity> findByIdStatus(Integer status) {
-        return demandeRepository.findByIdStatus(status);
-    }
+    return demandeurEntity != null && demandeurEntity.isValid(currentDate)
+        && passeportEntity != null && passeportEntity.isValid(currentDate)
+        && visaTransformableEntity != null && visaTransformableEntity.demandeValide(currentDate)
+        && demandeEntity != null && demandeEntity.isValide();
+    }   
+   
     
-    public List<DemandeEntity> searchByName(String name) {
-        return demandeRepository.findByReferenceContainingIgnoreCase(name);
-    }
-    public String genererReference() {
-        long count = demandeRepository.count() + 1; // Compter les demandes existantes
-        String reference = String.format("RES-%d-%04d", 2026, count); // Générer la référence
-        return reference;
-    }
+   
+   
     
 }

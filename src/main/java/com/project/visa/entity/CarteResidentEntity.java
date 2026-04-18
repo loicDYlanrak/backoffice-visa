@@ -79,4 +79,10 @@ public class CarteResidentEntity {
     public void setPasseport(PasseportEntity passeport) {
         this.passeport = passeport;
     }
+
+    public boolean isValid(LocalDate currentDate) {
+        return (dateDebut != null && dateFin != null) && 
+               !dateDebut.isAfter(currentDate) && 
+               !dateFin.isBefore(currentDate)&&passeport.isValid(currentDate);
+            }
 }

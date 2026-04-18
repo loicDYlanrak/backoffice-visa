@@ -10,7 +10,7 @@ public class VisaTransformableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demandeur", nullable = false)
@@ -36,11 +36,11 @@ public class VisaTransformableEntity {
     }
 
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -90,5 +90,23 @@ public class VisaTransformableEntity {
 
     public void setDemandes(List<DemandeEntity> demandes) {
         this.demandes = demandes;
+    }
+    public boolean isValid() {
+        if (demandeur == null || passeport == null || dateEntree == null || dateSortie == null || numeroReference == null) {
+            return false;
+        }
+        if (dateEntree.isAfter(dateSortie)) {
+            return false;
+        }
+        if (!numeroReference.matches("REF-\\d{4}-\\d{4}")) {
+            return false;
+        }
+        return true;
+    }
+    public boolean demandeValide(LocalDate currentDate) {
+        if (dateEntree == null || dateSortie == null) {
+            return false;
+        }
+        return !dateEntree.isAfter(currentDate) && !dateSortie.isBefore(currentDate)&&isValid();
     }
 }
