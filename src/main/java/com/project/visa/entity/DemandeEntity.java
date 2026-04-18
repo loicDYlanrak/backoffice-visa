@@ -22,10 +22,6 @@ public class DemandeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demandeur", nullable = false)
     private DemandeurEntity demandeur;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_passeport", nullable = false)
-    private PasseportEntity passeport;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_type_visa", nullable = false)
@@ -78,14 +74,6 @@ public class DemandeEntity {
 
     public void setDemandeur(DemandeurEntity demandeur) {
         this.demandeur = demandeur;
-    }
-
-    public PasseportEntity getPasseport() {
-        return passeport;
-    }
-
-    public void setPasseport(PasseportEntity passeport) {
-        this.passeport = passeport;
     }
 
     public TypeVisaEntity getTypeVisa() {

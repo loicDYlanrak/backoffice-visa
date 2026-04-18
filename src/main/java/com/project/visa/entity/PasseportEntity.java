@@ -32,9 +32,6 @@ public class PasseportEntity {
     private List<StatutPasseportEntity> statuts;
 
     @OneToMany(mappedBy = "passeport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DemandeEntity> demandes;
-
-    @OneToMany(mappedBy = "passeport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<VisaEntity> visas;
 
     @OneToMany(mappedBy = "passeport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -109,14 +106,6 @@ public class PasseportEntity {
 
     public void setVisas(List<VisaEntity> visas) {
         this.visas = visas;
-    }
-
-    public List<DemandeEntity> getDemandes() {
-        return demandes;
-    }
-
-    public void setDemandes(List<DemandeEntity> demandes) {
-        this.demandes = demandes;
     }
 
     public List<VisaTransformableEntity> getVisasTransformables() {
