@@ -2,7 +2,7 @@ package com.project.visa.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Demandeur")
@@ -18,67 +18,39 @@ public class DemandeurEntity {
     @Column(name = "prenom", nullable = false, length = 50)
     private String prenom;
     
-    @Column(name = "nom_jeune_fille", length = 50)
-    private String nomJeuneFille;
-    
     @Column(name = "date_naissance", nullable = false)
     private LocalDate dateNaissance;
     
-    @Column(name = "lieu_naissance", nullable = false, length = 100)
+    @Column(name = "lieu_naissance", nullable = true, length = 100)
     private String lieuNaissance;
-    
-    @Column(name = "profession", nullable = false, length = 100)
-    private String profession;
-    
+
     @Column(name = "telephone", nullable = false, length = 20)
     private String telephone;
     
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email", nullable = true, length = 100)
     private String email;
     
     @Column(name = "adresse", nullable = false, columnDefinition = "TEXT")
     private String adresse;
     
-    @Column(name = "id_situation_familiale", nullable = false)
-    private Long idSituationFamiliale;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_situation_familiale", nullable = false)
+    private SituationFamilialeEntity situationFamiliale;
     
-    @Column(name = "id_nationalite_actuelle", nullable = false)
-    private Long idNationaliteActuelle;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_nationalite", nullable = false)
+    private NationaliteEntity nationalite;
     
-    @Column(name = "id_nationalite_origine", nullable = false)
-    private Long idNationaliteOrigine;
+    @OneToMany(mappedBy = "demandeur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PasseportEntity> passeports;
     
-    @Column(name = "id_genre", nullable = false)
-    private Long idGenre;
+    @OneToMany(mappedBy = "demandeur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<VisaTransformableEntity> visasTransformables;
     
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "demandeur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DemandeEntity> demandes;
     
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-    
-    // Constructeur par défaut (obligatoire pour JPA)
     public DemandeurEntity() {
-    }
-    
-    // Constructeur avec tous les paramètres essentiels
-    public DemandeurEntity(String nom, String prenom, LocalDate dateNaissance, 
-                           String lieuNaissance, String profession, String telephone, 
-                           String email, String adresse, Long idSituationFamiliale, 
-                           Long idNationaliteActuelle, Long idNationaliteOrigine, 
-                           Long idGenre) {
-        this.nom = nom;
-        this.prenom = prenom;
-        this.dateNaissance = dateNaissance;
-        this.lieuNaissance = lieuNaissance;
-        this.profession = profession;
-        this.telephone = telephone;
-        this.email = email;
-        this.adresse = adresse;
-        this.idSituationFamiliale = idSituationFamiliale;
-        this.idNationaliteActuelle = idNationaliteActuelle;
-        this.idNationaliteOrigine = idNationaliteOrigine;
-        this.idGenre = idGenre;
     }
     
     // Getters et Setters
@@ -106,14 +78,6 @@ public class DemandeurEntity {
         this.prenom = prenom;
     }
     
-    public String getNomJeuneFille() {
-        return nomJeuneFille;
-    }
-    
-    public void setNomJeuneFille(String nomJeuneFille) {
-        this.nomJeuneFille = nomJeuneFille;
-    }
-    
     public LocalDate getDateNaissance() {
         return dateNaissance;
     }
@@ -128,14 +92,6 @@ public class DemandeurEntity {
     
     public void setLieuNaissance(String lieuNaissance) {
         this.lieuNaissance = lieuNaissance;
-    }
-    
-    public String getProfession() {
-        return profession;
-    }
-    
-    public void setProfession(String profession) {
-        this.profession = profession;
     }
     
     public String getTelephone() {
@@ -162,74 +118,43 @@ public class DemandeurEntity {
         this.adresse = adresse;
     }
     
-    public Long getIdSituationFamiliale() {
-        return idSituationFamiliale;
+    public SituationFamilialeEntity getSituationFamiliale() {
+        return situationFamiliale;
     }
     
-    public void setIdSituationFamiliale(Long idSituationFamiliale) {
-        this.idSituationFamiliale = idSituationFamiliale;
+    public void setSituationFamiliale(SituationFamilialeEntity situationFamiliale) {
+        this.situationFamiliale = situationFamiliale;
     }
     
-    public Long getIdNationaliteActuelle() {
-        return idNationaliteActuelle;
+    public NationaliteEntity getNationalite() {
+        return nationalite;
     }
     
-    public void setIdNationaliteActuelle(Long idNationaliteActuelle) {
-        this.idNationaliteActuelle = idNationaliteActuelle;
+    public void setNationalite(NationaliteEntity nationalite) {
+        this.nationalite = nationalite;
+    }
+
+    public List<PasseportEntity> getPasseports() {
+        return passeports;
     }
     
-    public Long getIdNationaliteOrigine() {
-        return idNationaliteOrigine;
+    public void setPasseports(List<PasseportEntity> passeports) {
+        this.passeports = passeports;
     }
     
-    public void setIdNationaliteOrigine(Long idNationaliteOrigine) {
-        this.idNationaliteOrigine = idNationaliteOrigine;
+    public List<VisaTransformableEntity> getVisasTransformables() {
+        return visasTransformables;
     }
     
-    public Long getIdGenre() {
-        return idGenre;
+    public void setVisasTransformables(List<VisaTransformableEntity> visasTransformables) {
+        this.visasTransformables = visasTransformables;
     }
     
-    public void setIdGenre(Long idGenre) {
-        this.idGenre = idGenre;
+    public List<DemandeEntity> getDemandes() {
+        return demandes;
     }
     
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public void setDemandes(List<DemandeEntity> demandes) {
+        this.demandes = demandes;
     }
-    
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-    
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-    
-    // Méthodes automatiques pour les timestamps
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-    
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-    
-    @Override
-    public String toString() {
-        return "DemandeurEntity{" +
-                "id=" + id +
-                ", nom='" + nom + '\'' +
-                ", prenom='" + prenom + '\'' +
-                ", email='" + email + '\'' +
-                '}';
-    }
-    
 }

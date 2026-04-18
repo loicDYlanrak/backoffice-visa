@@ -1,13 +1,8 @@
 package com.project.visa.entity;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "Demande")
@@ -17,53 +12,42 @@ public class DemandeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "reference",nullable = false, unique = true)
-    private String reference;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_visa_transformable", nullable = false)
+    private VisaTransformableEntity visaTransformable;
     
-    @Column(name = "date_demande", updatable = false)
-    private LocalDateTime dateDemande;
+    @Column(name = "date_demande", nullable = false)
+    private LocalDate dateDemande;
     
-    @Column(name = "id_status",nullable = false)
-    private int idStatus;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_demandeur", nullable = false)
+    private DemandeurEntity demandeur;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_passeport", nullable = false)
+    private PasseportEntity passeport;
     
-    @Column(name = "id_demandeur",nullable = false)
-    private int idDemandeur;
-
-    @Column(name = "id_visa",nullable = false)
-    private int idVisa;
-
-    @Column(name = "observations")
-    private String observations;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_type_visa", nullable = false)
+    private TypeVisaEntity typeVisa;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_type_demande", nullable = false)
+    private TypeDemandeEntity typeDemande;
+    
     @Column(name = "date_traitement")
-    private LocalDateTime dateTraitement;
-
-    @Column(name = "motif_rejet")
-    private String motifRejet;
-
+    private LocalDate dateTraitement;
+    
+    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<VisaEntity> visas;
+    
+    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CarteResidentEntity> cartesResident;
+    
     public DemandeEntity() {
     }
 
-    public DemandeEntity(long id, String reference, LocalDateTime dateDemande, int idStatus, int idDemandeur, int idVisa, String observations, LocalDateTime dateTraitement, String motifRejet) {
-        this.id = id;
-        this.reference = reference;
-        this.dateDemande = dateDemande;
-        this.idStatus = idStatus;
-        this.idDemandeur = idDemandeur;
-        this.idVisa = idVisa;
-        this.observations = observations;
-        this.dateTraitement = dateTraitement;
-        this.motifRejet = motifRejet;
-    }
-     public DemandeEntity(long id, String reference, LocalDateTime dateDemande, int idStatus, int idDemandeur, int idVisa, String observations) {
-        this.id = id;
-        this.reference = reference;
-        this.dateDemande = dateDemande;
-        this.idStatus = idStatus;
-        this.idDemandeur = idDemandeur;
-        this.idVisa = idVisa;
-        this.observations = observations;
-    }
+    // Getters et Setters
     public Long getId() {
         return id;
     }
@@ -72,67 +56,75 @@ public class DemandeEntity {
         this.id = id;
     }
 
-    public String getReference() {
-        return reference;
+    public VisaTransformableEntity getVisaTransformable() {
+        return visaTransformable;
     }
 
-    public void setReference(String reference) {
-        this.reference = reference;
+    public void setVisaTransformable(VisaTransformableEntity visaTransformable) {
+        this.visaTransformable = visaTransformable;
     }
 
-    public LocalDateTime getDateDemande() {
+    public LocalDate getDateDemande() {
         return dateDemande;
     }
 
-    public void setDateDemande(LocalDateTime dateDemande) {
+    public void setDateDemande(LocalDate dateDemande) {
         this.dateDemande = dateDemande;
     }
 
-    public int getIdStatus() {
-        return idStatus;
+    public DemandeurEntity getDemandeur() {
+        return demandeur;
     }
 
-    public void setIdStatus(int idStatus) {
-        this.idStatus = idStatus;
+    public void setDemandeur(DemandeurEntity demandeur) {
+        this.demandeur = demandeur;
     }
 
-    public int getIdDemandeur() {
-        return idDemandeur;
+    public PasseportEntity getPasseport() {
+        return passeport;
     }
 
-    public void setIdDemandeur(int idDemandeur) {
-        this.idDemandeur = idDemandeur;
+    public void setPasseport(PasseportEntity passeport) {
+        this.passeport = passeport;
     }
 
-    public int getIdVisa() {
-        return idVisa;
+    public TypeVisaEntity getTypeVisa() {
+        return typeVisa;
     }
 
-    public void setIdVisa(int idVisa) {
-        this.idVisa = idVisa;
+    public void setTypeVisa(TypeVisaEntity typeVisa) {
+        this.typeVisa = typeVisa;
     }
 
-    public String getObservations() {
-        return observations;
+    public TypeDemandeEntity getTypeDemande() {
+        return typeDemande;
     }
 
-    public void setObservations(String observations) {
-        this.observations = observations;
+    public void setTypeDemande(TypeDemandeEntity typeDemande) {
+        this.typeDemande = typeDemande;
     }
 
-    public LocalDateTime getDateTraitement() {
+    public LocalDate getDateTraitement() {
         return dateTraitement;
     }
 
-    public void setDateTraitement(LocalDateTime dateTraitement) {
+    public void setDateTraitement(LocalDate dateTraitement) {
         this.dateTraitement = dateTraitement;
     }
 
-    public String getMotifRejet() {
-        return motifRejet;
+    public List<VisaEntity> getVisas() {
+        return visas;
     }
 
-    public void setMotifRejet(String motifRejet) {
-        this.motifRejet = motifRejet;
+    public void setVisas(List<VisaEntity> visas) {
+        this.visas = visas;
+    }
+
+    public List<CarteResidentEntity> getCartesResident() {
+        return cartesResident;
+    }
+
+    public void setCartesResident(List<CarteResidentEntity> cartesResident) {
+        this.cartesResident = cartesResident;
     }
 }

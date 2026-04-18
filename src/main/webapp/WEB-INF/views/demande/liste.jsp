@@ -28,14 +28,11 @@
                         <th>Prenom</th>
                         <th>Date naissance</th>
                         <th>Lieu naissance</th>
-                        <th>Profession</th>
                         <th>Telephone</th>
                         <th>Email</th>
                         <th>Adresse</th>
                         <th>Situation familiale</th>
-                        <th>Genre</th>
                         <th>Nationalite actuelle</th>
-                        <th>Nationalite origine</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,14 +42,11 @@
                             <td>${demandeur.prenom}</td>
                             <td>${demandeur.dateNaissance}</td>
                             <td>${demandeur.lieuNaissance}</td>
-                            <td>${demandeur.profession}</td>
                             <td>${demandeur.telephone}</td>
                             <td>${demandeur.email}</td>
                             <td>${demandeur.adresse}</td>
                             <td>${situationMap[demandeur.idSituationFamiliale]}</td>
-                            <td>${genreMap[demandeur.idGenre]}</td>
                             <td>${nationaliteMap[demandeur.idNationaliteActuelle]}</td>
-                            <td>${nationaliteMap[demandeur.idNationaliteOrigine]}</td>
                         </tr>
                     </c:forEach>
                     

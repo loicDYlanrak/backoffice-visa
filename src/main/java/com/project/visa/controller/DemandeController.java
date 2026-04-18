@@ -19,6 +19,7 @@ import com.project.visa.entity.DemandeurEntity;
 import com.project.visa.entity.PasseportEntity;
 import com.project.visa.entity.TypeVisaEntity;
 import com.project.visa.entity.VisaEntity;
+import com.project.visa.repository.DemandeRepository;
 import com.project.visa.service.DemandeService;
 import com.project.visa.service.DemandeurService;
 import com.project.visa.service.PasseportService;
@@ -74,11 +75,6 @@ public class DemandeController {
                 return "redirect:/demandes/form";
             }
             
-            if (demandeurEntity.getProfession() == null || demandeurEntity.getProfession().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La profession est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
             if (demandeurEntity.getTelephone() == null || demandeurEntity.getTelephone().trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Le téléphone est obligatoire");
                 return "redirect:/demandes/form";
@@ -94,23 +90,13 @@ public class DemandeController {
                 return "redirect:/demandes/form";
             }
             
-            if (demandeurEntity.getIdSituationFamiliale() == null) {
+            if (demandeurEntity.getSituationFamiliale() == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "La situation familiale est obligatoire");
                 return "redirect:/demandes/form";
             }
             
-            if (demandeurEntity.getIdNationaliteActuelle() == null) {
+            if (demandeurEntity.getNationalite() == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "La nationalité actuelle est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getIdNationaliteOrigine() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "La nationalité d'origine est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
-            if (demandeurEntity.getIdGenre() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le genre est obligatoire");
                 return "redirect:/demandes/form";
             }
             
@@ -195,12 +181,7 @@ public class DemandeController {
                 redirectAttributes.addFlashAttribute("errorMessage", "La date de fin du visa doit être postérieure à la date de début");
                 return "redirect:/demandes/form";
             }
-            
-            if (visaEntity.getTypeVisa() == null || visaEntity.getTypeVisa().getId() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Le type de visa est obligatoire");
-                return "redirect:/demandes/form";
-            }
-            
+
             // Vérification durée du visa (avertissement seulement)
             long daysBetween = ChronoUnit.DAYS.between(visaEntity.getDateDebut(), visaEntity.getDateFin());
             if (daysBetween > 365) {
@@ -215,26 +196,15 @@ public class DemandeController {
             // 2. Sauvegarder le passeport
             PasseportEntity savedPasseport = passeportService.save(passeportEntity);
             System.out.println("Passeport sauvegardé avec ID : " + savedPasseport.getId());
-            // 3. Récupérer le TypeVisa depuis la BDD
-            TypeVisaEntity typeVisa = typeVisaService.findById(visaEntity.getTypeVisa().getId());
-            if (typeVisa == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Type de visa introuvable");
-                return "redirect:/demandes/form";
-            }
-            visaEntity.setTypeVisa(typeVisa);
             
             // 4. Lier le passeport au visa
             visaEntity.setPasseport(savedPasseport);
             System.out.println("Passeport lié au visa : " + visaEntity.getPasseport().getNumeroPasseport());
             VisaEntity savedVisa = visaService.save(visaEntity);
             
-            // 5. Créer la demande
             String reference = demandeService.genererReference();
-            demandeEntity.setReference(reference);
-            demandeEntity.setIdDemandeur(savedDemandeur.getId().intValue());
-            demandeEntity.setIdVisa(savedVisa.getId().intValue());
-            demandeEntity.setDateDemande(LocalDateTime.now());
-            demandeEntity.setIdStatus(1); // "brouillon" ou "soumise"
+            demandeEntity.setDateDemande(sixMonthsLater);
+
             
             demandeService.save(demandeEntity);
             

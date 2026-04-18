@@ -30,12 +30,6 @@ public class DemandeurService {
      */
     @Transactional
     public DemandeurEntity save(DemandeurEntity demandeurEntity) {
-        // Vérifications avant sauvegarde
-        if (demandeurEntity.getCreatedAt() == null) {
-            demandeurEntity.setCreatedAt(LocalDateTime.now());
-        }
-        demandeurEntity.setUpdatedAt(LocalDateTime.now());
-        
         return demandeurRepository.save(demandeurEntity);
     }
     
@@ -280,10 +274,6 @@ public class DemandeurService {
             result.addError("lieuNaissance", "Le lieu de naissance est obligatoire");
         }
         
-        if (demandeur.getProfession() == null || demandeur.getProfession().trim().isEmpty()) {
-            result.addError("profession", "La profession est obligatoire");
-        }
-        
         if (demandeur.getTelephone() == null || demandeur.getTelephone().trim().isEmpty()) {
             result.addError("telephone", "Le téléphone est obligatoire");
         } else if (telephoneExists(demandeur.getTelephone())) {
@@ -304,22 +294,13 @@ public class DemandeurService {
         }
         
         // Vérifier les IDs de références
-        if (demandeur.getIdSituationFamiliale() == null) {
+        if (demandeur.getSituationFamiliale().getId() == null) {
             result.addError("idSituationFamiliale", "La situation familiale est obligatoire");
         }
         
-        if (demandeur.getIdNationaliteActuelle() == null) {
+        if (demandeur.getNationalite().getId() == null) {
             result.addError("idNationaliteActuelle", "La nationalité actuelle est obligatoire");
         }
-        
-        if (demandeur.getIdNationaliteOrigine() == null) {
-            result.addError("idNationaliteOrigine", "La nationalité d'origine est obligatoire");
-        }
-        
-        if (demandeur.getIdGenre() == null) {
-            result.addError("idGenre", "Le genre est obligatoire");
-        }
-        
         return result;
     }
     
@@ -333,18 +314,13 @@ public class DemandeurService {
         return demandeurRepository.findById(id).map(existingDemandeur -> {
             existingDemandeur.setNom(updatedDemandeur.getNom());
             existingDemandeur.setPrenom(updatedDemandeur.getPrenom());
-            existingDemandeur.setNomJeuneFille(updatedDemandeur.getNomJeuneFille());
             existingDemandeur.setDateNaissance(updatedDemandeur.getDateNaissance());
             existingDemandeur.setLieuNaissance(updatedDemandeur.getLieuNaissance());
-            existingDemandeur.setProfession(updatedDemandeur.getProfession());
             existingDemandeur.setTelephone(updatedDemandeur.getTelephone());
             existingDemandeur.setEmail(updatedDemandeur.getEmail());
             existingDemandeur.setAdresse(updatedDemandeur.getAdresse());
-            existingDemandeur.setIdSituationFamiliale(updatedDemandeur.getIdSituationFamiliale());
-            existingDemandeur.setIdNationaliteActuelle(updatedDemandeur.getIdNationaliteActuelle());
-            existingDemandeur.setIdNationaliteOrigine(updatedDemandeur.getIdNationaliteOrigine());
-            existingDemandeur.setIdGenre(updatedDemandeur.getIdGenre());
-            existingDemandeur.setUpdatedAt(LocalDateTime.now());
+            existingDemandeur.setSituationFamiliale(updatedDemandeur.getSituationFamiliale());
+            existingDemandeur.setNationalite(updatedDemandeur.getNationalite());
             
             return demandeurRepository.save(existingDemandeur);
         });
@@ -362,17 +338,11 @@ public class DemandeurService {
             if (updatedDemandeur.getPrenom() != null) {
                 existingDemandeur.setPrenom(updatedDemandeur.getPrenom());
             }
-            if (updatedDemandeur.getNomJeuneFille() != null) {
-                existingDemandeur.setNomJeuneFille(updatedDemandeur.getNomJeuneFille());
-            }
             if (updatedDemandeur.getDateNaissance() != null) {
                 existingDemandeur.setDateNaissance(updatedDemandeur.getDateNaissance());
             }
             if (updatedDemandeur.getLieuNaissance() != null) {
                 existingDemandeur.setLieuNaissance(updatedDemandeur.getLieuNaissance());
-            }
-            if (updatedDemandeur.getProfession() != null) {
-                existingDemandeur.setProfession(updatedDemandeur.getProfession());
             }
             if (updatedDemandeur.getTelephone() != null) {
                 existingDemandeur.setTelephone(updatedDemandeur.getTelephone());
@@ -383,20 +353,13 @@ public class DemandeurService {
             if (updatedDemandeur.getAdresse() != null) {
                 existingDemandeur.setAdresse(updatedDemandeur.getAdresse());
             }
-            if (updatedDemandeur.getIdSituationFamiliale() != null) {
-                existingDemandeur.setIdSituationFamiliale(updatedDemandeur.getIdSituationFamiliale());
+            if (updatedDemandeur.getSituationFamiliale() != null) {
+                existingDemandeur.setSituationFamiliale(updatedDemandeur.getSituationFamiliale());
             }
-            if (updatedDemandeur.getIdNationaliteActuelle() != null) {
-                existingDemandeur.setIdNationaliteActuelle(updatedDemandeur.getIdNationaliteActuelle());
-            }
-            if (updatedDemandeur.getIdNationaliteOrigine() != null) {
-                existingDemandeur.setIdNationaliteOrigine(updatedDemandeur.getIdNationaliteOrigine());
-            }
-            if (updatedDemandeur.getIdGenre() != null) {
-                existingDemandeur.setIdGenre(updatedDemandeur.getIdGenre());
+            if (updatedDemandeur.getNationalite() != null) {
+                existingDemandeur.setNationalite(updatedDemandeur.getNationalite());
             }
             
-            existingDemandeur.setUpdatedAt(LocalDateTime.now());
             return demandeurRepository.save(existingDemandeur);
         });
     }

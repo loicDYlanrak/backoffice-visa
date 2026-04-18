@@ -1,3 +1,7 @@
+Dev: Nofy
+
+:::::::TODO 1
+
 utiliser script_create_database.sql
 (CREATE DATABASE )
 
@@ -41,3 +45,41 @@ Endpoint GET /listes
 
 Endpoint GET /recherche?ref=XXX
     Recherche par référence (retourne la demande complète)
+
+:::::::TODO 2
+
+inserer les donnes dans le script 18-04-2026.sql
+
+
+creer une fonction pour valider les donnes 
+(creer une fonction de validation par entites. ex: ValidateDemandeur , ensuite mettre tous les validate dans une fonction validate pour le post) 
+validation des champs not null
+   -pour tous les champs marqués NOT NULL dans la BDD ,creer des conditions if pour verifier qu il ne soit pas null
+   - Si un champ NOT NULL est manquant ou vide → retourner erreur immédiate, ne pas continuer.
+validation des champs specifiques
+   - Pas vide : nom, prenom, lieu_naissance, telephone, adresse
+   - Pas null : date_naissance, id_situation_familiale, id_nationalite
+   - Format email valide (si email fourni)
+   - Vérifier que la date d'expiration du passeport > aujourd'hui
+   - Vérifier que date_sortie > date_entree pour visa_transformable
+
+modifier fonction pour recevoir les données du formulaire (POST)
+    utilisation des fonctions de validation de donne
+
+    sauvegarde des entites
+    - creer demandeur , passeport(statut automatiquement actif) si il n existe pas 
+    - Créer l'entité VisaTransformable (id_demandeur, id_passeport, date_entree, date_sortie, numero_reference)
+    - Créer l'entité Demande (id_visa_transformable, date_demande, id_demandeur, id_passeport, id_type_visa, id_type_demande, date_traitement = NULL)
+    - Créer l'entité StatutDemande (id_demande, statut = 1(creer), date_changement_statut)
+    - si il y a une erreur retourner le message d erreur dans le formulaire avec les donnes pour ne plus remplir de nouveau le formulaire 
+    - redirection vers page liste demande avec message succes
+
+
+creer une fonction pour modifier les donnes d'une demande (POST)
+    - reutiliser les fonctions de validation de donne 
+    - instancier les entites et appeller les .update()
+    demandeur , passeport , visatransformable , demande
+    - si il y a une erreur retourner le message d erreur dans le formulaire avec les donnes pour ne plus remplir de nouveau le formulaire 
+   - vérifier que l'entité existe avant de modifier
+    - redirection vers page liste demande avec message succes
+
