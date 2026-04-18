@@ -61,6 +61,8 @@ public interface DemandeurRepository extends JpaRepository<DemandeurEntity, Long
     void deleteByEmail(String email);
     
     boolean existsByTelephone(String telephone);
+    boolean existsById(int id);
+    DemandeurEntity findById(int id);
 
     
 

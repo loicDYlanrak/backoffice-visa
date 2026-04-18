@@ -12,4 +12,7 @@ public class VisaTransformableService {
     public VisaTransformableEntity save(VisaTransformableEntity visaTransformableEntity ){
         return visaTransformableRepository.save(visaTransformableEntity);
     }
+    public VisaTransformableEntity findById(int id){
+        return visaTransformableRepository.findById(id);
+    }
 }

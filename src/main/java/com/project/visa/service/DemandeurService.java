@@ -88,7 +88,7 @@ public class DemandeurService {
     /**
      * Vérifier si un demandeur existe par ID
      */
-    public boolean existsById(Long id) {
+    public boolean existsById(int id) {
         return demandeurRepository.existsById(id);
     }
     
@@ -157,7 +157,10 @@ public class DemandeurService {
     public List<DemandeurEntity> findByNationalite(NationaliteEntity Nationalite) {
         return demandeurRepository.findByNationalite(Nationalite);
     }
-    
+   
+    public DemandeurEntity findById(int id){
+       return demandeurRepository.findById(id);
+    }
     /**
    
     /**

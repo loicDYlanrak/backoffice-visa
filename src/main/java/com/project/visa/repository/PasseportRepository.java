@@ -14,4 +14,6 @@ public interface PasseportRepository extends JpaRepository<PasseportEntity, Long
     Optional<PasseportEntity> findByNumeroPasseport(String numeroPasseport);
     
   boolean existsByNumeroPasseport(String numeroPasseport);
+  boolean existsById(int id);
+  PasseportEntity findById(int id);
 }

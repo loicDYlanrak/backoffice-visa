@@ -1,8 +1,6 @@
 package com.project.visa.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -52,7 +51,7 @@ public class DemandeController {
         return "template";
     }
 
-   @PostMapping("/demande")
+@PostMapping("/demande")
 public String createDemande(@ModelAttribute DemandeEntity demandeEntity, 
                             @ModelAttribute DemandeurEntity demandeurEntity, 
                             @ModelAttribute PasseportEntity passeportEntity,
@@ -62,9 +61,6 @@ public String createDemande(@ModelAttribute DemandeEntity demandeEntity,
     
     LocalDate currentDate = LocalDate.now();
     
-    // ========== 1. VALIDATION COMPLÈTE AVANT TOUTE SAUVEGARDE ==========
-    
-    // Valider le demandeur
     if (demandeurEntity == null || !demandeurEntity.isValid(currentDate)) {
         redirectAttributes.addFlashAttribute("error", "Demandeur invalide : problème dans les informations personnelles.");
         return "redirect:/demande/formulaire";
@@ -143,6 +139,94 @@ public String createDemande(@ModelAttribute DemandeEntity demandeEntity,
         return showForm(model);
     }
 
+    @PostMapping("/modifier/{id}")
+public String updateDemande(@PathVariable int id,
+                            @ModelAttribute DemandeEntity demandeEntity,
+                            @ModelAttribute DemandeurEntity demandeurEntity,
+                            @ModelAttribute PasseportEntity passeportEntity,
+                            @ModelAttribute VisaTransformableEntity visaTransformableEntity,
+                            RedirectAttributes redirectAttributes) {
+    
+    LocalDate currentDate = LocalDate.now();
+    
+    try {
+        // ========== 1. VÉRIFICATION DE L'EXISTENCE ==========
+        
+       DemandeEntity existingDemande = demandeService.findById(id);
+if (existingDemande == null) {
+    throw new RuntimeException("Demande non trouvée");
+}
+
+// Récupérer le demandeur existant
+DemandeurEntity existingDemandeur = demandeurService.findById(demandeurEntity.getId());
+if (existingDemandeur == null) {
+    throw new RuntimeException("Demandeur non trouvé");
+}
+
+// Récupérer le passeport existant
+PasseportEntity existingPasseport = passeportService.findById(passeportEntity.getId());
+if (existingPasseport == null) {
+    throw new RuntimeException("Passeport non trouvé");
+}
+
+// Récupérer le visa transformable existant
+VisaTransformableEntity existingVisaTransformable = visaTransformableService.findById(visaTransformableEntity.getId());
+if (existingVisaTransformable == null) {
+    throw new RuntimeException("Visa transformable non trouvé");
+}
+        // ========== 2. VALIDATION ==========
+        
+        if (!existingDemandeur.isValid(currentDate)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Demandeur invalide");
+            redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+            return "redirect:/demande/modifier/" + id;
+        }
+        
+        if (!existingPasseport.isValid(currentDate)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Passeport invalide");
+            redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+            return "redirect:/demande/modifier/" + id;
+        }
+        
+        if (!existingVisaTransformable.demandeValide(currentDate)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Visa transformable invalide");
+            redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+            return "redirect:/demande/modifier/" + id;
+        }
+        
+        // ========== 3. MISE À JOUR ==========
+        
+        // Mettre à jour le demandeur
+        existingDemandeur.setNom(demandeurEntity.getNom());
+        existingDemandeur.setPrenom(demandeurEntity.getPrenom());
+        // ... autres champs
+        demandeurService.save(existingDemandeur);
+        
+        // Mettre à jour le passeport
+        existingPasseport.setNumeroPasseport(passeportEntity.getNumeroPasseport());
+        // ... autres champs
+        passeportService.save(existingPasseport);
+        
+        // Mettre à jour le visa transformable
+        existingVisaTransformable.setDateEntree(visaTransformableEntity.getDateEntree());
+        existingVisaTransformable.setDateSortie(visaTransformableEntity.getDateSortie());
+        visaTransformableService.save(existingVisaTransformable);
+        
+        // Mettre à jour la demande
+        existingDemande.setTypeVisa(demandeEntity.getTypeVisa());
+        existingDemande.setTypeDemande(demandeEntity.getTypeDemande());
+        demandeService.save(existingDemande);
+        
+        redirectAttributes.addFlashAttribute("successMessage", "Demande modifiée avec succès");
+        
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Erreur : " + e.getMessage());
+        redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+        return "redirect:/demande/modifier/" + id;
+    }
+    
+    return "redirect:/demandes";
+}
     @GetMapping("/demande/create")
     public String showCreateForm(Model model) {
         populateFormDefaults(model);

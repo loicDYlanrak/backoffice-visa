@@ -34,14 +34,16 @@ public class PasseportService {
         return passeportRepository.findByNumeroPasseport(numeroPasseport);
     }
     
-  
+    public PasseportEntity findById(int id){
+        return passeportRepository.findById(id);
+    }
     // Supprimer un passeport
     public void deleteById(Long id) {
         passeportRepository.deleteById(id);
     }
     
     // Vérifier si un passeport existe
-    public boolean existsById(Long id) {
+    public boolean existsById(int id) {
         return passeportRepository.existsById(id);
     }
     

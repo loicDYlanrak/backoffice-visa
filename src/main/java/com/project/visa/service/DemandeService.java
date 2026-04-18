@@ -22,7 +22,7 @@ public class DemandeService {
         return demandeRepository.findAll();
     }
     
-    public Optional<DemandeEntity> findById(Long id) {
+    public DemandeEntity findById(int id) {
         return demandeRepository.findById(id);
     }
     

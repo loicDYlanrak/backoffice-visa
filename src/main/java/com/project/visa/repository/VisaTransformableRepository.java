@@ -7,5 +7,5 @@ import com.project.visa.entity.VisaTransformableEntity;
 
 @Repository
 public interface  VisaTransformableRepository  extends JpaRepository<VisaTransformableEntity, Long>{
-    
+    VisaTransformableEntity findById(int id);
 }
