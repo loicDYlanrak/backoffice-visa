@@ -22,18 +22,6 @@
         </c:if>
 
         <form action="${pageContext.request.contextPath}${empty formAction ? '/demande' : formAction}" method="post" id="demandeForm" novalidate>
-            <c:if test="${not empty prefillDemandeId}">
-                <input type="hidden" name="id" value="${prefillDemandeId}">
-            </c:if>
-            <c:if test="${not empty prefillDemandeurId}">
-                <input type="hidden" name="demandeur.id" value="${prefillDemandeurId}">
-            </c:if>
-            <c:if test="${not empty prefillPasseportId}">
-                <input type="hidden" name="passeport.id" value="${prefillPasseportId}">
-            </c:if>
-            <c:if test="${not empty prefillVisaTransformableId}">
-                <input type="hidden" name="visaTransformable.id" value="${prefillVisaTransformableId}">
-            </c:if>
             <h5 class="mt-2 mb-3 text-secondary">Informations personnelles</h5>
 
             <div class="row">
@@ -132,9 +120,9 @@
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label for="numeroReference" class="form-label">Numero de reference <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
-                    <input type="text" class="form-control" id="numeroReference" name="numeroReference"
-                           value="${prefillNumeroReference}" pattern="REF-\d{4}-\d{4}" required>
-                    <div class="form-text">Exemple: REF-2026-0001</div>
+                          <input type="text" class="form-control" id="numeroReference" name="numeroReference"
+                              value="${prefillNumeroReference}" pattern="(REF-\d{4}-\d{4}|VISA-\d{4}-\d{3})" required>
+                        <div class="form-text">Exemples: VISA-2024-001 ou REF-2026-0001</div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="dateEntree" class="form-label">Date d'entree <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>

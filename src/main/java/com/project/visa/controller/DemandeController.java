@@ -275,7 +275,7 @@ public class DemandeController {
             model.addAttribute("prefillTypeVisaId", demande.getTypeVisa().getId());
         }
 
-        model.addAttribute("template", "demande/formulaire");
+        model.addAttribute("template", "demande/modification");
         return "template";
     }
 
@@ -290,8 +290,11 @@ public class DemandeController {
                                 @ModelAttribute DemandeurEntity demandeurEntity,
                                 @ModelAttribute PasseportEntity passeportEntity,
                                 @ModelAttribute VisaTransformableEntity visaTransformableEntity,
-                            @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
-                            @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
+                                @RequestParam(name = "demandeur.id", required = false) Integer demandeurId,
+                                @RequestParam(name = "passeport.id", required = false) Integer passeportId,
+                                @RequestParam(name = "visaTransformable.id", required = false) Integer visaTransformableId,
+                                @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
+                                @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
                                 RedirectAttributes redirectAttributes) {
         
         LocalDate currentDate = LocalDate.now();
@@ -305,19 +308,24 @@ public class DemandeController {
     }
 
     // Récupérer le demandeur existant
-    DemandeurEntity existingDemandeur = demandeurService.findById(demandeurEntity.getId());
+    if (demandeurId == null || passeportId == null || visaTransformableId == null) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Identifiants manquants pour la modification.");
+        return "redirect:/demande/modifier/" + id;
+    }
+
+    DemandeurEntity existingDemandeur = demandeurService.findById(demandeurId);
     if (existingDemandeur == null) {
         throw new RuntimeException("Demandeur non trouvé");
     }
 
     // Récupérer le passeport existant
-    PasseportEntity existingPasseport = passeportService.findById(passeportEntity.getId());
+    PasseportEntity existingPasseport = passeportService.findById(passeportId);
     if (existingPasseport == null) {
         throw new RuntimeException("Passeport non trouvé");
     }
 
     // Récupérer le visa transformable existant
-    VisaTransformableEntity existingVisaTransformable = visaTransformableService.findById(visaTransformableEntity.getId());
+    VisaTransformableEntity existingVisaTransformable = visaTransformableService.findById(visaTransformableId);
     if (existingVisaTransformable == null) {
         throw new RuntimeException("Visa transformable non trouvé");
     }
@@ -364,6 +372,11 @@ public class DemandeController {
             demandeurService.save(existingDemandeur);
             
             // Mettre à jour le passeport
+            Optional<PasseportEntity> duplicatePasseport = passeportService.findByNumeroPasseport(passeportEntity.getNumeroPasseport());
+            if (duplicatePasseport.isPresent() && duplicatePasseport.get().getId() != existingPasseport.getId()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Numero de passeport deja utilise.");
+                return "redirect:/demande/modifier/" + id;
+            }
             existingPasseport.setNumeroPasseport(passeportEntity.getNumeroPasseport());
             existingPasseport.setDateDelivrance(passeportEntity.getDateDelivrance());
             existingPasseport.setDateExpiration(passeportEntity.getDateExpiration());
@@ -384,7 +397,7 @@ public class DemandeController {
             redirectAttributes.addFlashAttribute("successMessage", "Demande modifiée avec succès");
             
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Erreur : " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la modification. Veuillez verifier les informations saisies.");
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
             return "redirect:/demande/modifier/" + id;
         }
@@ -425,7 +438,7 @@ public class DemandeController {
         model.addAttribute("prefillDateFin", today.plusMonths(3).toString());
         model.addAttribute("prefillDateEntree", today.minusMonths(1).toString());
         model.addAttribute("prefillDateSortie", today.plusMonths(2).toString());
-        model.addAttribute("prefillNumeroReference", "REF-2026-0001");
+        model.addAttribute("prefillNumeroReference", "VISA-2024-001");
         model.addAttribute("prefillSituationId", 1);
         model.addAttribute("prefillNationaliteActuelleId", 1);
         model.addAttribute("prefillTypeVisaId", 1);

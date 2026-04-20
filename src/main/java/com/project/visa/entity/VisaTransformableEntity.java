@@ -1,8 +1,19 @@
 package com.project.visa.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Visa_transformable")
@@ -98,7 +109,7 @@ public class VisaTransformableEntity {
         if (dateEntree.isAfter(dateSortie)) {
             return false;
         }
-        if (!numeroReference.matches("REF-\\d{4}-\\d{4}")) {
+        if (!numeroReference.matches("(REF-\\d{4}-\\d{4}|VISA-\\d{4}-\\d{3})")) {
             return false;
         }
         return true;
@@ -107,6 +118,6 @@ public class VisaTransformableEntity {
         if (dateEntree == null || dateSortie == null) {
             return false;
         }
-        return !dateEntree.isAfter(currentDate) && !dateSortie.isBefore(currentDate)&&isValid();
+        return !dateEntree.isAfter(dateSortie) && isValid();
     }
 }
