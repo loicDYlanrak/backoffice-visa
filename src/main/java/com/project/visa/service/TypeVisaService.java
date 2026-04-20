@@ -1,8 +1,11 @@
 package com.project.visa.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.project.visa.entity.TypeVisaEntity;
 import com.project.visa.repository.TypeVisaRepository;
-import org.springframework.stereotype.Service;
 
 @Service
 public class TypeVisaService {
@@ -20,5 +23,9 @@ public class TypeVisaService {
 
     public TypeVisaEntity findById(Long id) {
         return typeVisaRepository.findById(id).orElse(null);
+    }
+
+    public List<TypeVisaEntity> findAll() {
+        return typeVisaRepository.findAll();
     }
 }

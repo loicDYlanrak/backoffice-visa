@@ -58,6 +58,10 @@ INSERT INTO type_visa (libelle) VALUES
 ('investisseur'),
 ('travailleur');
 
+INSERT INTO type_demande (libelle) VALUES
+('duplicata'),
+('transformation');
+
 INSERT INTO visa_transformable (id_demandeur, id_passeport, date_entree, date_sortie, numero_reference) VALUES
 (1, 1, '2024-01-15', '2024-06-15', 'VISA-2024-001'),
 (2, 2, '2024-02-01', '2024-08-01', 'VISA-2024-002'),

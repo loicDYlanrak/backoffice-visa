@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.project.visa.entity.StatutDemandeEntity;
 import com.project.visa.repository.StatutDemandeRepository;
+import java.util.Optional;
 
 @Service
 public class StatutDemandeService {
@@ -11,5 +12,9 @@ public class StatutDemandeService {
     private StatutDemandeRepository statutDemandeRepository;
     public StatutDemandeEntity save(StatutDemandeEntity statutDemandeEntity ){
         return statutDemandeRepository.save(statutDemandeEntity);
+    }
+
+    public Optional<StatutDemandeEntity> findLatestByDemandeId(int demandeId) {
+        return statutDemandeRepository.findTopByDemandeIdOrderByDateChangementStatutDesc(demandeId);
     }
 }

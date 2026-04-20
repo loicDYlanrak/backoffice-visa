@@ -2,13 +2,12 @@
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <div class="card">
     <div class="card-header bg-primary text-white">
-        <h3>Liste des demandeurs</h3>
+        <h3>Liste des demandes</h3>
     </div>
     <div class="card-body">
-        <!-- Success/Error Messages from Flash Attributes -->
-        <c:if test="${not empty success}">
+        <c:if test="${not empty successMessage}">
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                ${success}
+                ${successMessage}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
@@ -20,40 +19,55 @@
             </div>
         </c:if>
 
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+
+        <form class="row g-2 align-items-end mb-3" method="get" action="${pageContext.request.contextPath}/demande/liste">
+            <div class="col-md-6">
+                <label for="reference" class="form-label">Recherche par reference</label>
+                <input type="text" class="form-control" id="reference" name="reference" placeholder="RES-2026-001"
+                       value="${reference}">
+            </div>
+            <div class="col-md-6 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/demande/liste">Reinitialiser</a>
+            </div>
+        </form>
+
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th>Nom</th>
-                        <th>Prenom</th>
-                        <th>Date naissance</th>
-                        <th>Lieu naissance</th>
-                        <th>Telephone</th>
-                        <th>Email</th>
-                        <th>Adresse</th>
-                        <th>Situation familiale</th>
-                        <th>Nationalite actuelle</th>
+                        <th>Reference</th>
+                        <th>Nom complet</th>
+                        <th>Type visa</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <c:forEach items="${demandeurs}" var="demandeur">
+                    <c:forEach items="${demandes}" var="demande">
                         <tr>
-                            <td>${demandeur.nom}</td>
-                            <td>${demandeur.prenom}</td>
-                            <td>${demandeur.dateNaissance}</td>
-                            <td>${demandeur.lieuNaissance}</td>
-                            <td>${demandeur.telephone}</td>
-                            <td>${demandeur.email}</td>
-                            <td>${demandeur.adresse}</td>
-                            <td>${situationMap[demandeur.idSituationFamiliale]}</td>
-                            <td>${nationaliteMap[demandeur.idNationaliteActuelle]}</td>
+                            <td>${referenceMap[demande.id]}</td>
+                            <td>${demande.demandeur.nom} ${demande.demandeur.prenom}</td>
+                            <td>${demande.typeVisa.libelle}</td>
+                            <td>${demande.dateDemande}</td>
+                            <td>${statusMap[demande.id]}</td>
+                            <td>
+                                <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/demande/modifier/${demande.id}">Modifier</a>
+                            </td>
                         </tr>
                     </c:forEach>
                     
-                    <c:if test="${empty demandeurs}">
+                    <c:if test="${empty demandes}">
                         <tr>
-                            <td colspan="11" class="text-center text-muted">
-                                Aucun demandeur trouvé.
+                            <td colspan="6" class="text-center text-muted">
+                                Aucune demande trouvee.
                             </td>
                         </tr>
                     </c:if>
