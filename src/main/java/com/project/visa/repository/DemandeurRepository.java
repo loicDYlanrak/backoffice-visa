@@ -18,6 +18,7 @@ public interface DemandeurRepository extends JpaRepository<DemandeurEntity, Long
 
     // --- Recherches de base ---
     Optional<DemandeurEntity> findByEmail(String email);
+    Optional<DemandeurEntity> findTopByEmail(String email);
     
     List<DemandeurEntity> findByNom(String nom);
     

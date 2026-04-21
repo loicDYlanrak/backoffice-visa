@@ -125,11 +125,11 @@
                         <div class="form-text">Exemples: VISA-2024-001 ou REF-2026-0001</div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="dateEntree" class="form-label">Date d'entree <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
+                    <label for="dateEntree" class="form-label">Date de delivrance <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
                     <input type="date" class="form-control" id="dateEntree" name="dateEntree" value="${prefillDateEntree}" required>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="dateSortie" class="form-label">Date de sortie <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
+                    <label for="dateSortie" class="form-label">Date d'expiration<span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
                     <input type="date" class="form-control" id="dateSortie" name="dateSortie" value="${prefillDateSortie}" required>
                 </div>
             </div>

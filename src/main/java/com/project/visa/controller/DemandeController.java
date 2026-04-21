@@ -169,7 +169,14 @@ public class DemandeController {
         
         try {
             // Sauvegarder le demandeur
-            DemandeurEntity savedDemandeur = demandeurService.save(demandeurEntity);
+            DemandeurEntity savedDemandeur=new DemandeurEntity();
+            if(!demandeurService.emailExists(demandeurEntity.getEmail())){
+                savedDemandeur= demandeurService.save(demandeurEntity);
+            }
+            else{
+                savedDemandeur=demandeurService.findTopByEmail(demandeurEntity.getEmail()).get();
+            }
+             
             
             // Sauvegarder le passeport (si non existant)
             PasseportEntity savedPasseport;
@@ -202,11 +209,16 @@ public class DemandeController {
                 "Votre demande N° " + reference + " a été enregistrée");
             
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la creation. Veuillez verifier les informations saisies.");
+            String message= e.getMessage()+" "+e.getStackTrace();
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la creation. Veuillez verifier les informations saisies."+message);
+            System.out.println("demande/formulaire");
+        
             return "redirect:/demande/formulaire";
         }
-        
+        System.out.println("demande/liste");
         return "redirect:/demande/liste";
+
     }
 
     @GetMapping("/demande/formulaire")

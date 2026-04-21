@@ -62,6 +62,10 @@ public class DemandeurService {
         return demandeurRepository.findByEmail(email);
     }
     
+    public Optional<DemandeurEntity> findTopByEmail(String email) {
+        return demandeurRepository.findTopByEmail(email);
+    }
+    
     /**
      * Trouver un demandeur par son téléphone
      */
@@ -90,6 +94,10 @@ public class DemandeurService {
      */
     public boolean existsById(int id) {
         return demandeurRepository.existsById(id);
+    }
+
+    public boolean existsByEmail(String email){
+        return demandeurRepository.existsByEmail(email);
     }
     
     /**
