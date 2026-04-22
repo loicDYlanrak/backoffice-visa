@@ -151,125 +151,109 @@
             <hr>
             <h5 class="mt-2 mb-3 text-secondary">Pieces communes</h5>
 
-            <div id="piecesCommunes" class="row">
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photos" name="photos" value="true" checked>
-                        <label class="form-check-label" for="photos">02 photos</label>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="notice" name="notice" value="true" checked>
-                        <label class="form-check-label" for="notice">Notice</label>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="demandeMinistre" name="demandeMinistre" value="true" checked>
-                        <label class="form-check-label" for="demandeMinistre">Demande adressee au ministre</label>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photocopieVisa" name="photocopieVisa" value="true" checked>
-                        <label class="form-check-label" for="photocopieVisa">Photocopie visa</label>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photocopiePasseport" name="photocopiePasseport" value="true" checked>
-                        <label class="form-check-label" for="photocopiePasseport">Photocopie passeport</label>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photocopieCarteResident" name="photocopieCarteResident" value="true" checked>
-                        <label class="form-check-label" for="photocopieCarteResident">Photocopie carte resident</label>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="certificatResidence" name="certificatResidence" value="true" checked>
-                        <label class="form-check-label" for="certificatResidence">Certificat residence</label>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="casierJudiciaire" name="casierJudiciaire" value="true" checked>
-                        <label class="form-check-label" for="casierJudiciaire">Casier judiciaire</label>
-                    </div>
+            <%-- Section des Pièces Communes --%>
+<div id="piecesCommunes" class="row">
+    <c:forEach items="${listpiece}" var="piece">
+        <c:if test="${piece.typeVisa == null}">
+            <div class="col-md-4 mb-2">
+                <div class="form-check">
+                    <%-- Logique de check --%>
+                    <c:set var="isChecked" value="" />
+                    <c:forEach items="${pieceDemandes}" var="pd">
+                        <c:if test="${pd.piece.id == piece.id}">
+                            <c:set var="isChecked" value="checked" />
+                        </c:if>
+                    </c:forEach>
+
+                    <input class="form-check-input" type="checkbox" 
+                           id="piece_${piece.id}" name="piecesIds" 
+                           value="${piece.id}" ${isChecked}>
+                    <label class="form-check-label" for="piece_${piece.id}">
+                        ${piece.libelle}
+                    </label>
                 </div>
             </div>
+        </c:if>
+    </c:forEach>
+</div>
 
-            <hr>
-            <h5 class="mt-2 mb-3 text-secondary">Type de visa</h5>
+<hr>
+<h5 class="mt-2 mb-3 text-secondary">Type de visa</h5>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="typeVisa" class="form-label">Type de visa <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
-                    <select class="form-select" id="typeVisa" name="typeVisa.id" required>
-                        <option value="">-- Selectionner --</option>
-                        <c:forEach items="${typeVisas}" var="typeVisa">
-                            <option value="${typeVisa.id}" data-visa-label="${typeVisa.libelle}" ${prefillTypeVisaId == typeVisa.id ? 'selected' : ''}>
-                                ${typeVisa.libelle}
-                            </option>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="typeVisa" class="form-label">Type de visa <span class="text-danger">*</span></label>
+        <select class="form-select" id="typeVisa" name="typeVisa.id" required>
+            <option value="">-- Selectionner --</option>
+            <c:forEach items="${typeVisas}" var="tv">
+                <%-- On sélectionne le type de visa actuel de la demande --%>
+                <option value="${tv.id}" data-visa-label="${tv.libelle}" 
+                    ${demande.typeVisa.id == tv.id ? 'selected' : ''}>
+                    ${tv.libelle}
+                </option>
+            </c:forEach>
+        </select>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Pieces specifiques</label>
+        <div class="text-muted">Selection automatique selon le type de visa.</div>
+    </div>
+</div>
+
+<hr>
+<h5 class="mt-2 mb-3 text-secondary">Pieces specifiques</h5>
+
+<%-- Bloc Investisseur (ID = 1) --%>
+<div id="piecesInvestisseur" style="${demande.typeVisa.id == 1 ? 'display:block;' : 'display:none;'}">
+    <div class="row">
+        <c:forEach items="${listpiece}" var="piece">
+            <c:if test="${piece.typeVisa != null && piece.typeVisa.id == 1}">
+                <div class="col-md-4 mb-2">
+                    <div class="form-check">
+                        <c:set var="isChecked" value="" />
+                        <c:forEach items="${pieceDemandes}" var="pd">
+                            <c:if test="${pd.piece.id == piece.id}">
+                                <c:set var="isChecked" value="checked" />
+                            </c:if>
                         </c:forEach>
-                    </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Pieces specifiques</label>
-                    <div class="text-muted">Selection automatique selon le type de visa.</div>
-                </div>
-            </div>
-
-            <hr>
-            <h5 class="mt-2 mb-3 text-secondary">Pieces specifiques</h5>
-
-            <div id="piecesInvestisseur" style="display:none;">
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="statutSociete" name="statutSociete" value="true" checked>
-                            <label class="form-check-label" for="statutSociete">Statut societe</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="extraitRCS" name="extraitRCS" value="true" checked>
-                            <label class="form-check-label" for="extraitRCS">Extrait RCS</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="carteFiscale" name="carteFiscale" value="true" checked>
-                            <label class="form-check-label" for="carteFiscale">Carte fiscale</label>
-                        </div>
+                        <input class="form-check-input" type="checkbox" 
+                               id="piece_${piece.id}" name="piecesIds" 
+                               value="${piece.id}" ${isChecked}>
+                        <label class="form-check-label" for="piece_${piece.id}">${piece.libelle}</label>
                     </div>
                 </div>
-            </div>
+            </c:if>
+        </c:forEach>
+    </div>
+</div>
 
-            <div id="piecesTravailleur" style="display:none;">
-                <div class="row">
-                    <div class="col-md-6 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="autorisationEmploi" name="autorisationEmploi" value="true" checked>
-                            <label class="form-check-label" for="autorisationEmploi">Autorisation emploi</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="attestationEmployeur" name="attestationEmployeur" value="true" checked>
-                            <label class="form-check-label" for="attestationEmployeur">Attestation employeur</label>
-                        </div>
+<%-- Bloc Travailleur (ID = 2) --%>
+<div id="piecesTravailleur" style="${demande.typeVisa.id == 2 ? 'display:block;' : 'display:none;'}">
+    <div class="row">
+        <c:forEach items="${listpiece}" var="piece">
+            <c:if test="${piece.typeVisa != null && piece.typeVisa.id == 2}">
+                <div class="col-md-4 mb-2">
+                    <div class="form-check">
+                        <c:set var="isChecked" value="" />
+                        <c:forEach items="${pieceDemandes}" var="pd">
+                            <c:if test="${pd.piece.id == piece.id}">
+                                <c:set var="isChecked" value="checked" />
+                            </c:if>
+                        </c:forEach>
+                        <input class="form-check-input" type="checkbox" 
+                               id="piece_${piece.id}" name="piecesIds" 
+                               value="${piece.id}" ${isChecked}>
+                        <label class="form-check-label" for="piece_${piece.id}">${piece.libelle}</label>
                     </div>
                 </div>
-            </div>
+            </c:if>
+        </c:forEach>
+    </div>
+</div>
 
-            <hr>
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-            <a href="${pageContext.request.contextPath}/demande/liste" class="btn btn-secondary">Annuler</a>
-        </form>
+<hr>
+<button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+<a href="${pageContext.request.contextPath}/demande/liste" class="btn btn-secondary">Annuler</a>
     </div>
 </div>
 

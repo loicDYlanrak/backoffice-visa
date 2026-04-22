@@ -17,23 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.project.visa.entity.DemandeEntity;
-import com.project.visa.entity.DemandeurEntity;
-import com.project.visa.entity.NationaliteEntity;
-import com.project.visa.entity.PasseportEntity;
-import com.project.visa.entity.SituationFamilialeEntity;
-import com.project.visa.entity.StatutDemandeEntity;
-import com.project.visa.entity.TypeDemandeEntity;
-import com.project.visa.entity.VisaTransformableEntity;
-import com.project.visa.service.DemandeService;
-import com.project.visa.service.DemandeurService;
-import com.project.visa.service.NationaliteService;
-import com.project.visa.service.PasseportService;
-import com.project.visa.service.SituationFamilialeService;
-import com.project.visa.service.StatutDemandeService;
-import com.project.visa.service.TypeDemandeService;
-import com.project.visa.service.TypeVisaService;
-import com.project.visa.service.VisaTransformableService;
+import com.project.visa.entity.*;
+import com.project.visa.service.*;
 @Controller
 public class DemandeController {
 
@@ -45,6 +30,12 @@ public class DemandeController {
 
     @Autowired
     private PasseportService passeportService;
+
+    @Autowired
+    private PieceService pieceService;
+    
+    @Autowired
+    private PieceDemandeService pieceDemandeService;
 
     @Autowired
     private VisaTransformableService visaTransformableService;
@@ -97,6 +88,7 @@ public class DemandeController {
                                 @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
                                 @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
                                 BindingResult result,
+                                @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
                                 RedirectAttributes redirectAttributes) {
         
         LocalDate currentDate = LocalDate.now();
@@ -205,6 +197,19 @@ public class DemandeController {
             statutDemandeService.save(statutDemandeEntity);
             
             String reference = buildReference(savedDemande);
+            if (piecesIds != null) {
+                for (Long id : piecesIds) {
+                        System.out.println("ID de la pièce cochée : " + id);
+                        PieceEntity piece=pieceService.findById(id.intValue());
+                        if(piece!=null){
+                            PieceDemandeEntity pieceDemande=new PieceDemandeEntity(piece,savedDemande);
+                            pieceDemandeService.save(pieceDemande);
+                        }else{
+                            System.out.println("un piece null id:  "+id);
+                        }
+                        
+                    }
+            }
             redirectAttributes.addFlashAttribute("successMessage",
                 "Votre demande N° " + reference + " a été enregistrée");
             
@@ -225,6 +230,7 @@ public class DemandeController {
     public String showForm(Model model) {
         populateFormDefaults(model);
         populateFormOptions(model);
+
         model.addAttribute("formTitle", "Nouvelle demande");
         model.addAttribute("formAction", "/demande");
         model.addAttribute("template", "demande/modification");
@@ -242,7 +248,9 @@ public class DemandeController {
         DemandeurEntity demandeur = demande.getDemandeur();
         PasseportEntity passeport = demande.getVisaTransformable() != null ? demande.getVisaTransformable().getPasseport() : null;
         VisaTransformableEntity visaTransformable = demande.getVisaTransformable();
+        List<PieceDemandeEntity> pieceDemandes=pieceDemandeService.findByIdDemande(id);
 
+        model.addAttribute("pieceDemandes",pieceDemandes);
         populateFormOptions(model);
         model.addAttribute("formTitle", "Modifier la demande");
         model.addAttribute("formAction", "/modifier/" + id);
@@ -307,6 +315,7 @@ public class DemandeController {
                                 @RequestParam(name = "visaTransformable.id", required = false) Integer visaTransformableId,
                                 @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
                                 @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
+                                @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
                                 RedirectAttributes redirectAttributes) {
         
         LocalDate currentDate = LocalDate.now();
@@ -405,12 +414,21 @@ public class DemandeController {
             existingDemande.setTypeVisa(demandeEntity.getTypeVisa());
             existingDemande.setTypeDemande(demandeEntity.getTypeDemande());
             demandeService.save(existingDemande);
-            
+            pieceDemandeService.deleteByDemandeId(existingDemande.getId());
+
+            if (piecesIds != null) {
+                for (Long ids : piecesIds) {
+                    PieceEntity piece = pieceService.findById(ids.intValue());
+                    pieceDemandeService.save(new PieceDemandeEntity(piece, existingDemande));
+                }
+            }             
             redirectAttributes.addFlashAttribute("successMessage", "Demande modifiée avec succès");
             
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la modification. Veuillez verifier les informations saisies.");
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la modification. Veuillez verifier les informations saisies."+e.getMessage());
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+
             return "redirect:/demande/modifier/" + id;
         }
         
@@ -462,6 +480,7 @@ public class DemandeController {
         model.addAttribute("nationalites", nationaliteService.findAll());
         model.addAttribute("typeDemandes", typeDemandeService.findAll());
         model.addAttribute("typeVisas", typeVisaService.findAll());
+        model.addAttribute("listpiece",pieceService.findAll());
     }
 
     private String buildReference(DemandeEntity demande) {
