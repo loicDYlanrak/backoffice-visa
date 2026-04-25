@@ -1,0 +1,36 @@
+Team lead : 
+Dev : 
+
+backoffice
+brache sprint/2/1-SansDonneeInterieur
+ 	quand je clique sur le menu de nouvel demande 
+	je vais dans une page de choix type de demande que je fais:
+		1- soit nouveau titre : qui va dans le formulaire d insert de base 
+		2- soit demande de duplicata de carte de residence (perte de carte de residence)
+		3- soit demande de transfert de visa (perte de passeport)
+		4- soit demande de transfert de visa et duplicata de carte de residence(perte des deux)
+		
+	cas 1-nouveau titre :
+		meme etapes que le 1 on va dans le formulaire et ensuite on est dans la liste de demande
+	
+	cas 2-demande de duplicata :
+		on va dans une formulaire de recherche ou on doit entrer le numero du carte de resident ou du visa 
+		et on valide et on entre dans une page ou on vois le resumes des informations et on accepter 
+		et la demande est status termine
+
+	cas 3-demande de transfert de visa :
+		on va dans une formulaire ou on recherche le numero du visa ou du carete de resident 
+		ensuite on va dans une formulaire de insert de nouvel numero de passerport 
+		on entre dans une page ou on vois le resumes des informations et on accepte
+
+	cas 4-demande de transfert de visa et duplicata:
+		on fait le formulaire de transfert de visa et apres validation on va tous de suite dans le duplicata
+		c est apres la validation du transfert de visa que c est termine
+
+	Remarque: dans les trois cas 2 3 et 4 ,au dessus de chaque formulaire:
+	 	on ajoute un bouton sans donne anterieur , lorque on clique dessus 
+		on va vers le formulaire de insertion de nouveau titre 
+		mais apres lorsqu on valide le demande a tous de suite une status (visa approuve) avec visa ou carte resident
+		et apres on reprend l etapes normale
+
+	

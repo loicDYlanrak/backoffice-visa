@@ -22,7 +22,7 @@ creer fonction qui Génère une référence unique (ex: RES-2026-0001),done
     Gérer le cas où aucune demande n'existe encore (compteur = 0)
 
 creer fonction pour recevoir les données du formulaire (POST): done
-    Valide les champs requis (*):    
+    Valide les champs requis ():    
         pas vide: pour nom, prenom, lieuNaissance, profession, telephone, adresse
         pas null: pour dateNaissance, idSituationFamiliale, idNationaliteActuelle, idNationaliteOrigine, idGenre
         format email: pour email
@@ -83,3 +83,59 @@ creer une fonction pour modifier les donnes d'une demande (POST)
    - vérifier que l'entité existe avant de modifier
     - redirection vers page liste demande avec message succes
 
+:::::::TODO 3
+
+Créer page choix_type_demande( respecter le style existant) :
+      - 4 boutons :
+          1. Nouveau titre
+          2. Demande de duplicata (perte carte résidence)
+          3. Demande de transfert de visa (perte passeport)
+          4. Demande de transfert de visa et duplicata (perte des deux)
+
+modifier la redirection du lien nouvelle demande
+      - Au clic sur "Nouvelle demande" -> redirection vers nouvel page choix_type_demande GET /choix-type
+
+lorsqu on clique sur les booutons : 
+    CAS 1 : Nouveau titre
+        - rediriger vers le formulaire exitant (faire nouveau titre comme d habitude)
+
+    CAS 2 : Demande de duplicata 
+        - créer page recherche_par_numero :
+            - mettre au dessus du formalaire le bouton : 
+                - Bouton "Sans donné antérieur" 
+            - Champ : "Numéro de carte résident"
+            - Champ : "Numéro de visa"
+            - Bouton "Rechercher" -> POST /duplicata/rechercher
+            - Ca affiche la demande relier au numero , on selectinne cette demande 
+            - et ensuite une bouton continuer s affiche et on se dirige vers la page resume duplicata avec les informaitons dont on a besoin dans cette page
+
+        - créer page resume_duplicata :
+            - Affiche les infos du titre trouvé (nom, prénom, numéro titre, date expiration)
+            - Message " validation de demande de duplicata"
+            - Bouton "Accepter" -> POST /duplicata/accepter
+            - Après acceptation -> message "Demande terminée" 
+            - redirection vers liste de demande avec message succes
+
+    CAS 3 : Demande de transfert de visa 
+        - utiliser page recherche_par_numero :
+            - cette fois ci redirige vers page nouveau_passeport
+            
+        - créer page nouveau_passeport :
+            - Affiche les infos du visa trouvé
+            - Champ : "Nouveau numéro de passeport" (obligatoire)
+            - Bouton "Valider" -> POST /transfert/save-passeport
+
+        - créer page resume_transfert :
+            - Affiche résumé : ancien visa, nouveau passeport, infos personne
+            - Bouton "Accepter" -> POST /transfert/accepter
+            - Après acceptation -> message "Demande terminée"
+            - redirection vers liste de demande avec message succes
+
+    CAS 4 : Transfert + duplicata 
+            - rediriger page identique à CAS 3 jusqu'à acceptation
+            - après acceptation du transfert -> charger automatiquement la page resume_duplicata (même numéro carte de resident)
+
+    Formulaire "Sans donné antérieur" après clic 
+            - rediriger vers formulaire_demande pour inserer les demandes
+            - valider le formulaire avec champ caché provenance (DUPLICATA ou TRANSFERT ou les deux) 
+            - après validation du formulaire -> retourner à la page resume correspondante (avec le nouveau numéro généré)
