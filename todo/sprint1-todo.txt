@@ -1,0 +1,60 @@
+Team lead : 3305
+Dev : 
+
+backoffice
+brache sprint/1/1-InsertionDemande
+ 	creer script create database 
+	creer script create table 
+	creer connexion base de donne projet
+
+	creer un page d accueil  avec titre, sous titre et menu
+
+	formulaire de demande de carte de resident
+ 	
+
+	creer formulaire de demande de carte de resident
+		Etat civil 
+		nom*  
+		prenom*  
+		date de naissance *
+		lieu de naissance  
+		situation familliale* (select) 
+		Nationalite *  (select)
+		contact * 
+		mail  
+		adresse * 
+
+		Visa Transformable 
+		Numero Reference 
+
+		Piece justificative
+		02 photos d’identité
+		Notice de renseignement
+		Demande adressée à Mr le Ministère de l’Intérieur et de la Décentralisation avec adresse e-mail et numéro téléphone portable
+		Photocopie certifiée du visa en cours de validité
+		Photocopie certifiée de la première page du passeport
+		Photocopie certifiée de la carte résident en cours de validité
+		Certificat de résidence à Madagascar
+		Extrait de casier judiciaire moins de 3 mois
+
+		select type de visa 
+		Investisseur
+			Statut de la Société
+			Extrait d’inscription au registre de commerce
+			Carte fiscale
+		Travailleur
+			Autorisation emploi délivrée à Madagascar par le Ministère de la Fonction publique
+			Attestation d’emploi délivré par l’employeur (Original)
+
+
+
+
+
+
+        creer controller pour gerer le demande de transformation de visa 
+		enregistrer dans la base de donnes les informations sur la demande 
+
+		creer liste de deemande de transformation visa 
+		ajouter recherhce par reference 
+
+
