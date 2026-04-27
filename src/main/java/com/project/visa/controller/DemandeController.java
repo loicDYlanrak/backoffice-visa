@@ -443,14 +443,17 @@ public class DemandeController {
     }
     
     @GetMapping("/demande/create")
-    public String showCreateForm(Model model) {
+    public String showCreateForm(Model model,@RequestParam(value = "provenance", required = false) String provenance) {
         populateFormDefaults(model);
         populateFormOptions(model);
         model.addAttribute("formTitle", "Nouvelle demande");
         model.addAttribute("formAction", "/demande");
         model.addAttribute("template", "demande/formulaire");
+        model.addAttribute("demande", new DemandeEntity());
+        model.addAttribute("provenance", provenance);
         return "template";
     }
+    
 
     @GetMapping("/demande/liste")
     public String showList(@RequestParam(name = "reference", required = false) String reference,

@@ -3,6 +3,7 @@
 
 <div class="card">
     <div class="card-body">
+    
         <form action="${pageContext.request.contextPath}/duplicata/rechercher" method="post">
             <input type="hidden" name="transfer" value="${finalTransfer}">
             <input type="hidden" name="duplicata" value="${finalDuplicata}">
@@ -22,7 +23,10 @@
 <%-- Capturer les variables peu importe si elles viennent du POST (Flash) ou du GET (URL) --%>
 <c:set var="finalTransfer" value="${not empty transfer ? transfer : param.transfer}" />
 <c:set var="finalDuplicata" value="${not empty duplicata ? duplicata : param.duplicata}" />
-
+ <a href="${pageContext.request.contextPath}/demande/create?provenance=${finalTransfer == '2' ? 'TRANSFERT_DUPLICATA' : (finalTransfer == '1' ? 'TRANSFERT' : 'DUPLICATA')}" 
+    class="btn btn-secondary">
+    Sans donnée antérieure
+    </a>
 <c:if test="${not empty demande}">
     <div class="card-footer">
         <p>Dossier trouvé : <strong>${demande.demandeur.nom} ${demande.demandeur.prenom}</strong></p>
@@ -47,5 +51,7 @@
             Continuer vers l'étape suivante
         </a>
     </div>
+    
 </c:if>
+   
 </div>
