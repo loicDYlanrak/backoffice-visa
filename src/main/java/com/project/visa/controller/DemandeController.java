@@ -54,7 +54,14 @@ public class DemandeController {
 
     @Autowired
     private TypeVisaService typeVisaService;
-  
+
+    @GetMapping("/demande/choix_type_demande")
+    public String choix_type_demande( Model model){
+         model.addAttribute("template", "demande/choix_type_demande");
+        return "template";
+    }
+    
+
     @GetMapping("/demandes")
     public String list(@RequestParam(name = "reference", required = false) String reference,
                        Model model) {

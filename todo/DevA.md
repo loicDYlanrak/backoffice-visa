@@ -96,7 +96,7 @@ modifier la redirection du lien nouvelle demande
       - Au clic sur "Nouvelle demande" -> redirection vers nouvel page choix_type_demande GET /choix-type
 
 lorsqu on clique sur les booutons : 
-    CAS 1 : Nouveau titre
+    x,CAS 1 : Nouveau titre
         - rediriger vers le formulaire exitant (faire nouveau titre comme d habitude)
 
     CAS 2 : Demande de duplicata 
@@ -123,8 +123,8 @@ lorsqu on clique sur les booutons :
         - créer page nouveau_passeport :
             - Affiche les infos du visa trouvé
             - Champ : "Nouveau numéro de passeport" (obligatoire)
-            - Bouton "Valider" -> POST /transfert/save-passeport
-
+            - Bouton "Valider" -> GET /transfert/save-passeport
+    
         - créer page resume_transfert :
             - Affiche résumé : ancien visa, nouveau passeport, infos personne
             - Bouton "Accepter" -> POST /transfert/accepter
