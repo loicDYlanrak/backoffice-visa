@@ -3,63 +3,49 @@
 
 <div class="card">
     <div class="card-body">
-        <div class="mb-4">
-            <button type="button" class="btn btn-secondary" id="btnSansDonnees">
-                Sans donnée antérieure
-            </button>
-        </div>
-
-        <hr>
-        <c:set var="valeurTransfert" value="${not empty param.transfer ? param.transfer: '0'}" />
         <form action="${pageContext.request.contextPath}/duplicata/rechercher" method="post">
+            <input type="hidden" name="transfer" value="${finalTransfer}">
+            <input type="hidden" name="duplicata" value="${finalDuplicata}">
+
             <div class="mb-3">
                 <label for="numCarte" class="form-label">Numéro de carte résident</label>
-                <input type="text" name="numCarte" id="numCarte" class="form-control" placeholder="Entrez le numéro de carte">
+                <input type="text" name="numCarte" id="numCarte" class="form-control">
             </div>
-            <input type="hidden" name="transfer" value="${valeurTransfert}">
             <div class="mb-3">
                 <label for="numVisa" class="form-label">Numéro de visa</label>
-                <input type="text" name="numVisa" id="numVisa" class="form-control" placeholder="Entrez le numéro de visa">
+                <input type="text" name="numVisa" id="numVisa" class="form-control">
             </div>
 
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Rechercher
-                </button>
-            </div>
+            <button type="submit" class="btn btn-primary w-100">Rechercher</button>
         </form>
     </div>
+<%-- Capturer les variables peu importe si elles viennent du POST (Flash) ou du GET (URL) --%>
+<c:set var="finalTransfer" value="${not empty transfer ? transfer : param.transfer}" />
+<c:set var="finalDuplicata" value="${not empty duplicata ? duplicata : param.duplicata}" />
 
-    <c:if test="${not empty demande}">
-        <div class="card-footer border-top">
-            <div class="row p-3">
-                <h3 class="text-primary">Détails de la demande trouvée</h3>
-                <hr>
-                <div class="col-md-6 p-3">
-                    <p><strong>ID Demande :</strong> ${demande.id}</p>
-                    <p><strong>Date de la demande :</strong> ${demande.dateDemande}</p>
-                </div>
-                    <c:choose>
-                        <c:when test="${transfer == 1}">
-                            <c:set var="chemin" value="resume_duplicata" />
-                        </c:when>
-                        <c:otherwise>
-                            <c:set var="chemin" value="nouveau_passeport" />
-                        </c:otherwise>
-                    </c:choose>
+<c:if test="${not empty demande}">
+    <div class="card-footer">
+        <p>Dossier trouvé : <strong>${demande.demandeur.nom} ${demande.demandeur.prenom}</strong></p>
+        
+        <c:choose>
+            <%-- CAS 3 & 4 (Transfert simple ou Transfert+Duplicata) --%>
+            <c:when test="${finalTransfer == '1' || finalTransfer == '2'}">
+                <c:url var="urlEtapeSuivante" value="/duplicata/nouveau_passeport">
+                    <c:param name="id" value="${demande.id}" />
+                    <c:param name="duplicata" value="${finalDuplicata}" />
+                </c:url>
+            </c:when>
+            <%-- CAS 2 (Duplicata simple) --%>
+            <c:otherwise>
+                <c:url var="urlEtapeSuivante" value="/duplicata/resume_duplicata">
+                    <c:param name="id" value="${demande.id}" />
+                </c:url>
+            </c:otherwise>
+        </c:choose>
 
-                    <%-- Utilisation de la variable dans le lien --%>
-                    <a href="${pageContext.request.contextPath}/duplicata/${chemin}?id=${demande.id}" class="btn btn-success">
-                        Continuer vers le résumé
-                    </a>
-                
-            </div>
-        </div>
-    </c:if>
-
-    <c:if test="${not empty errorMessage}">
-        <div class="alert alert-danger m-3">
-            ${errorMessage}
-        </div>
-    </c:if>
+        <a href="${urlEtapeSuivante}" class="btn btn-success w-100">
+            Continuer vers l'étape suivante
+        </a>
+    </div>
+</c:if>
 </div>

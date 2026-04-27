@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CarteResidentRepository extends JpaRepository<CarteResidentEntity, Long> {
     CarteResidentEntity findById(int id);
-    @Query("SELECT c FROM CarteResidentEntity c " +
-           "JOIN FETCH c.demande d " + 
-           "JOIN FETCH d.demandeur " + 
-           "WHERE c.reference = :ref")
-    CarteResidentEntity findByReference(@Param("ref") String reference);
+   @Query("SELECT c FROM CarteResidentEntity c " +
+       "JOIN FETCH c.demande d " +
+       "JOIN FETCH d.demandeur " + 
+       "WHERE c.reference = :ref")
+CarteResidentEntity findByReference(@Param("ref") String reference);
 
 }

@@ -1,3 +1,5 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <div class="card shadow">
     <div class="card-header bg-primary text-white"><h3>Nouveau Passeport</h3></div>
     <div class="card-body">
