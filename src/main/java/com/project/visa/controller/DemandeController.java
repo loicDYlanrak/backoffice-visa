@@ -1,6 +1,7 @@
 package com.project.visa.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.project.visa.entity.*;
 import com.project.visa.service.*;
+
 @Controller
 public class DemandeController {
 
@@ -33,13 +35,13 @@ public class DemandeController {
 
     @Autowired
     private PieceService pieceService;
-    
+
     @Autowired
     private PieceDemandeService pieceDemandeService;
 
     @Autowired
     private VisaTransformableService visaTransformableService;
-    
+
     @Autowired
     private StatutDemandeService statutDemandeService;
 
@@ -56,15 +58,14 @@ public class DemandeController {
     private TypeVisaService typeVisaService;
 
     @GetMapping("/demande/choix_type_demande")
-    public String choix_type_demande( Model model){
-         model.addAttribute("template", "demande/choix_type_demande");
+    public String choix_type_demande(Model model) {
+        model.addAttribute("template", "demande/choix_type_demande");
         return "template";
     }
-    
 
     @GetMapping("/demandes")
     public String list(@RequestParam(name = "reference", required = false) String reference,
-                       Model model) {
+            Model model) {
         List<DemandeEntity> demandes = demandeService.findAll();
         Map<Integer, String> referenceMap = buildReferenceMap(demandes);
         Map<Integer, String> statusMap = buildStatusMap(demandes);
@@ -88,20 +89,22 @@ public class DemandeController {
     }
 
     @PostMapping("/demande")
-    public String createDemande(@ModelAttribute DemandeEntity demandeEntity, 
-                                @ModelAttribute DemandeurEntity demandeurEntity, 
-                                @ModelAttribute PasseportEntity passeportEntity,
-                                @ModelAttribute VisaTransformableEntity visaTransformableEntity,
-                                @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
-                                @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
-                                BindingResult result,
-                                @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
-                                RedirectAttributes redirectAttributes) {
-        
+    public String createDemande(@ModelAttribute DemandeEntity demandeEntity,
+            @ModelAttribute DemandeurEntity demandeurEntity,
+            @ModelAttribute PasseportEntity passeportEntity,
+            @ModelAttribute VisaTransformableEntity visaTransformableEntity,
+            @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
+            @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
+            BindingResult result,
+            @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
+            @RequestParam(value = "provenance", required = false) String provenance,
+            RedirectAttributes redirectAttributes) {
+
         LocalDate currentDate = LocalDate.now();
-        
+
         if (demandeurEntity == null) {
-            redirectAttributes.addFlashAttribute("error", "Demandeur invalide : problème dans les informations personnelles.");
+            redirectAttributes.addFlashAttribute("error",
+                    "Demandeur invalide : problème dans les informations personnelles.");
             return "redirect:/demande/formulaire";
         }
 
@@ -130,22 +133,25 @@ public class DemandeController {
         }
 
         if (!demandeurEntity.isValid(currentDate)) {
-            redirectAttributes.addFlashAttribute("error", buildDemandeurValidationMessage(demandeurEntity, currentDate));
+            redirectAttributes.addFlashAttribute("error",
+                    buildDemandeurValidationMessage(demandeurEntity, currentDate));
             return "redirect:/demande/formulaire";
         }
-        
+
         // Valider le visa transformable
         if (visaTransformableEntity == null) {
-            redirectAttributes.addFlashAttribute("error", "Visa transformable invalide : problème dans les dates d'entrée/sortie.");
+            redirectAttributes.addFlashAttribute("error",
+                    "Visa transformable invalide : problème dans les dates d'entrée/sortie.");
             return "redirect:/demande/formulaire";
         }
         visaTransformableEntity.setDemandeur(demandeurEntity);
         visaTransformableEntity.setPasseport(passeportEntity);
         if (!visaTransformableEntity.demandeValide(currentDate)) {
-            redirectAttributes.addFlashAttribute("error", "Visa transformable invalide : problème dans les dates d'entrée/sortie.");
+            redirectAttributes.addFlashAttribute("error",
+                    "Visa transformable invalide : problème dans les dates d'entrée/sortie.");
             return "redirect:/demande/formulaire";
         }
-        
+
         // Valider la demande
         if (demandeEntity == null) {
             redirectAttributes.addFlashAttribute("error", "Demande invalide : problème dans les dates ou types.");
@@ -163,69 +169,108 @@ public class DemandeController {
             redirectAttributes.addFlashAttribute("error", "Demande invalide : problème dans les dates ou types.");
             return "redirect:/demande/formulaire";
         }
-        
+
         // ========== 2. SAUVEGARDE (seulement si tout est valide) ==========
-        
+
         try {
             // Sauvegarder le demandeur
-            DemandeurEntity savedDemandeur=new DemandeurEntity();
-            if(!demandeurService.emailExists(demandeurEntity.getEmail())){
-                savedDemandeur= demandeurService.save(demandeurEntity);
+            DemandeurEntity savedDemandeur = new DemandeurEntity();
+            if (!demandeurService.emailExists(demandeurEntity.getEmail())) {
+                savedDemandeur = demandeurService.save(demandeurEntity);
+            } else {
+                savedDemandeur = demandeurService.findTopByEmail(demandeurEntity.getEmail()).get();
             }
-            else{
-                savedDemandeur=demandeurService.findTopByEmail(demandeurEntity.getEmail()).get();
-            }
-             
-            
+
             // Sauvegarder le passeport (si non existant)
             PasseportEntity savedPasseport;
-            Optional<PasseportEntity> existingPasseport = passeportService.findByNumeroPasseport(passeportEntity.getNumeroPasseport());
+            Optional<PasseportEntity> existingPasseport = passeportService
+                    .findByNumeroPasseport(passeportEntity.getNumeroPasseport());
             if (existingPasseport.isEmpty()) {
                 savedPasseport = passeportService.save(passeportEntity);
             } else {
                 savedPasseport = existingPasseport.get();
             }
-            
+
             // Lier le visa transformable au demandeur et passeport
             visaTransformableEntity.setDemandeur(savedDemandeur);
             visaTransformableEntity.setPasseport(savedPasseport);
             VisaTransformableEntity savedVisaTransformable = visaTransformableService.save(visaTransformableEntity);
-            
+
             // Lier la demande
             demandeEntity.setDemandeur(savedDemandeur);
             demandeEntity.setVisaTransformable(savedVisaTransformable);
             DemandeEntity savedDemande = demandeService.save(demandeEntity);
-            
+
             // Créer le statut initial
             StatutDemandeEntity statutDemandeEntity = new StatutDemandeEntity();
             statutDemandeEntity.setDemande(savedDemande);
             statutDemandeEntity.setDateChangementStatut(currentDate);
             statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
+            if (provenance != null) {
+                statutDemandeEntity.setStatut(30);
+            }
             statutDemandeService.save(statutDemandeEntity);
-            
+
             String reference = buildReference(savedDemande);
             if (piecesIds != null) {
                 for (Long id : piecesIds) {
-                        System.out.println("ID de la pièce cochée : " + id);
-                        PieceEntity piece=pieceService.findById(id.intValue());
-                        if(piece!=null){
-                            PieceDemandeEntity pieceDemande=new PieceDemandeEntity(piece,savedDemande);
-                            pieceDemandeService.save(pieceDemande);
-                        }else{
-                            System.out.println("un piece null id:  "+id);
-                        }
-                        
+                    System.out.println("ID de la pièce cochée : " + id);
+                    PieceEntity piece = pieceService.findById(id.intValue());
+                    if (piece != null) {
+                        PieceDemandeEntity pieceDemande = new PieceDemandeEntity(piece, savedDemande);
+                        pieceDemandeService.save(pieceDemande);
+                    } else {
+                        System.out.println("un piece null id:  " + id);
                     }
+
+                }
             }
             redirectAttributes.addFlashAttribute("successMessage",
-                "Votre demande N° " + reference + " a été enregistrée");
-            
+                    "Votre demande N° " + reference + " a été enregistrée");
+
+            if (provenance != null) {
+                if (provenance.equals("TRANSFERT")) {
+                    // Redirection pour le transfert
+                    redirectAttributes.addAttribute("demandeId", savedDemande.getId());
+                    return "redirect:/transfert/formulaire";
+
+                } else if (provenance.equals("DUPLICATA")) {
+                    // Redirection pour le duplicata avec les paramètres nécessaires
+                    // Récupérer les IDs des demandeurs (dans votre cas, un seul demandeur)
+                    List<Integer> demandeurIds = new ArrayList<>();
+                    demandeurIds.add(savedDemandeur.getId());
+
+                    // Récupérer les informations du nouveau passeport
+                    List<String> nouveauxNumPasseports = new ArrayList<>();
+                    List<LocalDate> dateDelivrances = new ArrayList<>();
+                    List<LocalDate> dateExpirations = new ArrayList<>();
+                    List<String> paysEmetteurs = new ArrayList<>();
+
+                    nouveauxNumPasseports.add(passeportEntity.getNumeroPasseport());
+                    dateDelivrances.add(passeportEntity.getDateDelivrance());
+                    dateExpirations.add(passeportEntity.getDateExpiration());
+                    paysEmetteurs.add(passeportEntity.getPaysDelivrance());
+
+                    // Ajout des attributs à redirectAttributes
+                    redirectAttributes.addAttribute("demandeId", savedDemande.getId());
+                    redirectAttributes.addAttribute("duplicata", "1");
+                    redirectAttributes.addAttribute("demandeurId", demandeurIds);
+                    redirectAttributes.addAttribute("nouveauNumPasseport", nouveauxNumPasseports);
+                    redirectAttributes.addAttribute("dateDelivrance", dateDelivrances);
+                    redirectAttributes.addAttribute("dateExpiration", dateExpirations);
+                    redirectAttributes.addAttribute("paysEmetteur", paysEmetteurs);
+
+                    return "redirect:/transfert/resume_transfert";
+                }
+            }
+
         } catch (Exception e) {
-            String message= e.getMessage()+" "+e.getStackTrace();
+            String message = e.getMessage() + " " + e.getStackTrace();
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la creation. Veuillez verifier les informations saisies."+message);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la creation. Veuillez verifier les informations saisies." + message);
             System.out.println("demande/formulaire");
-        
+
             return "redirect:/demande/formulaire";
         }
         System.out.println("demande/liste");
@@ -253,11 +298,13 @@ public class DemandeController {
         }
 
         DemandeurEntity demandeur = demande.getDemandeur();
-        PasseportEntity passeport = demande.getVisaTransformable() != null ? demande.getVisaTransformable().getPasseport() : null;
+        PasseportEntity passeport = demande.getVisaTransformable() != null
+                ? demande.getVisaTransformable().getPasseport()
+                : null;
         VisaTransformableEntity visaTransformable = demande.getVisaTransformable();
-        List<PieceDemandeEntity> pieceDemandes=pieceDemandeService.findByIdDemande(id);
+        List<PieceDemandeEntity> pieceDemandes = pieceDemandeService.findByIdDemande(id);
 
-        model.addAttribute("pieceDemandes",pieceDemandes);
+        model.addAttribute("pieceDemandes", pieceDemandes);
         populateFormOptions(model);
         model.addAttribute("formTitle", "Modifier la demande");
         model.addAttribute("formAction", "/modifier/" + id);
@@ -296,7 +343,7 @@ public class DemandeController {
         }
 
         if (demande.getTypeDemande() != null) {
-            model.addAttribute("prefillTypeDemandeId", demande.getTypeDemande().getId());
+            model.addAttribute("prefillTypeDemandeId", 2);
         }
         if (demande.getTypeVisa() != null) {
             model.addAttribute("prefillTypeVisaId", demande.getTypeVisa().getId());
@@ -313,72 +360,72 @@ public class DemandeController {
 
     @PostMapping("/modifier/{id}")
     public String updateDemande(@PathVariable int id,
-                                @ModelAttribute DemandeEntity demandeEntity,
-                                @ModelAttribute DemandeurEntity demandeurEntity,
-                                @ModelAttribute PasseportEntity passeportEntity,
-                                @ModelAttribute VisaTransformableEntity visaTransformableEntity,
-                                @RequestParam(name = "demandeur.id", required = false) Integer demandeurId,
-                                @RequestParam(name = "passeport.id", required = false) Integer passeportId,
-                                @RequestParam(name = "visaTransformable.id", required = false) Integer visaTransformableId,
-                                @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
-                                @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
-                                @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
-                                RedirectAttributes redirectAttributes) {
-        
+            @ModelAttribute DemandeEntity demandeEntity,
+            @ModelAttribute DemandeurEntity demandeurEntity,
+            @ModelAttribute PasseportEntity passeportEntity,
+            @ModelAttribute VisaTransformableEntity visaTransformableEntity,
+            @RequestParam(name = "demandeur.id", required = false) Integer demandeurId,
+            @RequestParam(name = "passeport.id", required = false) Integer passeportId,
+            @RequestParam(name = "visaTransformable.id", required = false) Integer visaTransformableId,
+            @RequestParam(name = "idSituationFamiliale", required = false) Integer idSituationFamiliale,
+            @RequestParam(name = "idNationaliteActuelle", required = false) Integer idNationaliteActuelle,
+            @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
+            RedirectAttributes redirectAttributes) {
+
         LocalDate currentDate = LocalDate.now();
-        
+
         try {
             // ========== 1. VÉRIFICATION DE L'EXISTENCE ==========
-            
-        DemandeEntity existingDemande = demandeService.findById(id);
-    if (existingDemande == null) {
-        throw new RuntimeException("Demande non trouvée");
-    }
 
-    // Récupérer le demandeur existant
-    if (demandeurId == null || passeportId == null || visaTransformableId == null) {
-        redirectAttributes.addFlashAttribute("errorMessage", "Identifiants manquants pour la modification.");
-        return "redirect:/demande/modifier/" + id;
-    }
+            DemandeEntity existingDemande = demandeService.findById(id);
+            if (existingDemande == null) {
+                throw new RuntimeException("Demande non trouvée");
+            }
 
-    DemandeurEntity existingDemandeur = demandeurService.findById(demandeurId);
-    if (existingDemandeur == null) {
-        throw new RuntimeException("Demandeur non trouvé");
-    }
+            // Récupérer le demandeur existant
+            if (demandeurId == null || passeportId == null || visaTransformableId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Identifiants manquants pour la modification.");
+                return "redirect:/demande/modifier/" + id;
+            }
 
-    // Récupérer le passeport existant
-    PasseportEntity existingPasseport = passeportService.findById(passeportId);
-    if (existingPasseport == null) {
-        throw new RuntimeException("Passeport non trouvé");
-    }
+            DemandeurEntity existingDemandeur = demandeurService.findById(demandeurId);
+            if (existingDemandeur == null) {
+                throw new RuntimeException("Demandeur non trouvé");
+            }
 
-    // Récupérer le visa transformable existant
-    VisaTransformableEntity existingVisaTransformable = visaTransformableService.findById(visaTransformableId);
-    if (existingVisaTransformable == null) {
-        throw new RuntimeException("Visa transformable non trouvé");
-    }
+            // Récupérer le passeport existant
+            PasseportEntity existingPasseport = passeportService.findById(passeportId);
+            if (existingPasseport == null) {
+                throw new RuntimeException("Passeport non trouvé");
+            }
+
+            // Récupérer le visa transformable existant
+            VisaTransformableEntity existingVisaTransformable = visaTransformableService.findById(visaTransformableId);
+            if (existingVisaTransformable == null) {
+                throw new RuntimeException("Visa transformable non trouvé");
+            }
             // ========== 2. VALIDATION ==========
-            
+
             if (!existingDemandeur.isValid(currentDate)) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Demandeur invalide");
                 redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
                 return "redirect:/demande/modifier/" + id;
             }
-            
+
             if (!existingPasseport.isValid(currentDate)) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Passeport invalide");
                 redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
                 return "redirect:/demande/modifier/" + id;
             }
-            
+
             if (!existingVisaTransformable.demandeValide(currentDate)) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Visa transformable invalide");
                 redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
                 return "redirect:/demande/modifier/" + id;
             }
-            
+
             // ========== 3. MISE À JOUR ==========
-            
+
             // Mettre à jour le demandeur
             existingDemandeur.setNom(demandeurEntity.getNom());
             existingDemandeur.setPrenom(demandeurEntity.getPrenom());
@@ -398,9 +445,10 @@ public class DemandeController {
                 existingDemandeur.setNationalite(nationalite);
             }
             demandeurService.save(existingDemandeur);
-            
+
             // Mettre à jour le passeport
-            Optional<PasseportEntity> duplicatePasseport = passeportService.findByNumeroPasseport(passeportEntity.getNumeroPasseport());
+            Optional<PasseportEntity> duplicatePasseport = passeportService
+                    .findByNumeroPasseport(passeportEntity.getNumeroPasseport());
             if (duplicatePasseport.isPresent() && duplicatePasseport.get().getId() != existingPasseport.getId()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Numero de passeport deja utilise.");
                 return "redirect:/demande/modifier/" + id;
@@ -410,13 +458,13 @@ public class DemandeController {
             existingPasseport.setDateExpiration(passeportEntity.getDateExpiration());
             existingPasseport.setPaysDelivrance(passeportEntity.getPaysDelivrance());
             passeportService.save(existingPasseport);
-            
+
             // Mettre à jour le visa transformable
             existingVisaTransformable.setDateEntree(visaTransformableEntity.getDateEntree());
             existingVisaTransformable.setDateSortie(visaTransformableEntity.getDateSortie());
             existingVisaTransformable.setNumeroReference(visaTransformableEntity.getNumeroReference());
             visaTransformableService.save(existingVisaTransformable);
-            
+
             // Mettre à jour la demande
             existingDemande.setTypeVisa(demandeEntity.getTypeVisa());
             existingDemande.setTypeDemande(demandeEntity.getTypeDemande());
@@ -428,22 +476,23 @@ public class DemandeController {
                     PieceEntity piece = pieceService.findById(ids.intValue());
                     pieceDemandeService.save(new PieceDemandeEntity(piece, existingDemande));
                 }
-            }             
+            }
             redirectAttributes.addFlashAttribute("successMessage", "Demande modifiée avec succès");
-            
+
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Erreur lors de la modification. Veuillez verifier les informations saisies."+e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la modification. Veuillez verifier les informations saisies." + e.getMessage());
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
 
             return "redirect:/demande/modifier/" + id;
         }
-        
+
         return "redirect:/demande/liste";
     }
-    
+
     @GetMapping("/demande/create")
-    public String showCreateForm(Model model,@RequestParam(value = "provenance", required = false) String provenance) {
+    public String showCreateForm(Model model, @RequestParam(value = "provenance", required = false) String provenance) {
         populateFormDefaults(model);
         populateFormOptions(model);
         model.addAttribute("formTitle", "Nouvelle demande");
@@ -453,11 +502,10 @@ public class DemandeController {
         model.addAttribute("provenance", provenance);
         return "template";
     }
-    
 
     @GetMapping("/demande/liste")
     public String showList(@RequestParam(name = "reference", required = false) String reference,
-                           Model model) {
+            Model model) {
         return list(reference, model);
     }
 
@@ -490,7 +538,7 @@ public class DemandeController {
         model.addAttribute("nationalites", nationaliteService.findAll());
         model.addAttribute("typeDemandes", typeDemandeService.findAll());
         model.addAttribute("typeVisas", typeVisaService.findAll());
-        model.addAttribute("listpiece",pieceService.findAll());
+        model.addAttribute("listpiece", pieceService.findAll());
     }
 
     private String buildReference(DemandeEntity demande) {
@@ -536,8 +584,7 @@ public class DemandeController {
     private Map<Integer, String> buildReferenceMap(List<DemandeEntity> demandes) {
         return demandes.stream().collect(java.util.stream.Collectors.toMap(
                 DemandeEntity::getId,
-                this::buildReference
-        ));
+                this::buildReference));
     }
 
     private Map<Integer, String> buildStatusMap(List<DemandeEntity> demandes) {
@@ -545,8 +592,7 @@ public class DemandeController {
                 DemandeEntity::getId,
                 demande -> statutDemandeService.findLatestByDemandeId(demande.getId())
                         .map(statut -> mapStatutLabel(statut.getStatut()))
-                        .orElse("Cree")
-        ));
+                        .orElse("Cree")));
     }
 
     private String mapStatutLabel(Integer statut) {

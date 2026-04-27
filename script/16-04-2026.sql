@@ -79,7 +79,7 @@ CREATE TABLE demande (
 CREATE TABLE statut_demande (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_demande INT NOT NULL,
-    statut INT NOT NULL,-- 'brouillon', 'soumise', 'en_cours', 'validee', 'rejetee'
+    statut INT NOT NULL,-- 'creer : 1', 'en_cours_scan: 10', 'scanne : 20 ', 'approuve : 30', ' rejeter : 40 '
     date_changement_statut DATE,
     FOREIGN KEY (id_demande) REFERENCES demande(id)
 );

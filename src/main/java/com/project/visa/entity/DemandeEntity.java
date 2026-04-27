@@ -40,6 +40,9 @@ public class DemandeEntity {
     
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CarteResidentEntity> cartesResident;
+
+    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<StatutDemandeEntity> statuts;
     
     public DemandeEntity() {
     }
@@ -115,6 +118,14 @@ public class DemandeEntity {
 
     public void setCartesResident(List<CarteResidentEntity> cartesResident) {
         this.cartesResident = cartesResident;
+    }
+
+    public List<StatutDemandeEntity> getStatuts() {
+        return statuts;
+    }
+
+    public void setStatuts(List<StatutDemandeEntity> statuts) {
+        this.statuts = statuts;
     }
 
     public boolean isValide() {

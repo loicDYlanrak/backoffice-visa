@@ -34,3 +34,6 @@ INSERT INTO piece (libelle,id_type_visa) VALUES ('Attestation employeur',2);
 
 INSERT INTO visa (id_demande, reference, date_debut, date_fin, id_passeport,id_type_visa) 
 VALUES (1, 'V-2026-XYZ-789', '2026-05-01', '2027-05-01', 1,1);
+
+INSERT INTO visa (id_demande, reference, date_debut, date_fin, id_passeport) 
+VALUES (1, 'V-2026-XYZ-789', '2026-05-01', '2027-05-01', 1);

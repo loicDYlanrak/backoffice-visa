@@ -1,7 +1,6 @@
 package com.project.visa.repository;
 
 import com.project.visa.entity.CarteResidentEntity;
-import com.project.visa.entity.DemandeEntity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
