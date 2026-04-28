@@ -51,18 +51,52 @@
                     </tr>
                 </thead>
                 <tbody>
+
                     <c:forEach items="${demandes}" var="demande">
+                        <c:set var="currentStatus" value="${statusMap[demande.id]}" />
+                        
                         <tr>
                             <td>${referenceMap[demande.id]}</td>
                             <td>${demande.demandeur.nom} ${demande.demandeur.prenom}</td>
                             <td>${demande.typeVisa.libelle}</td>
                             <td>${demande.dateDemande}</td>
-                            <td>${statusMap[demande.id]}</td>
                             <td>
-                                <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/demande/modifier/${demande.id}">Modifier</a>
+                                <c:choose>
+                                    <c:when test="${currentStatus == 'valide'}">
+                                        <span class="badge bg-success">Validée</span>
+                                    </c:when>
+                                    <c:when test="${currentStatus == 'rejete'}">
+                                        <span class="badge bg-danger">Rejetée</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge bg-secondary">${currentStatus}</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <c:choose>
+                                        <c:when test="${currentStatus == 'Cree'}">
+                                            <a href="${pageContext.request.contextPath}/demande/scanner/${demande.id}" 
+                                            class="btn btn-sm btn-info text-white">Scanner</a>
+                                        </c:when>
+                                        
+                                        <c:when test="${currentStatus == 'Scanner'}">
+                                            <a href="${pageContext.request.contextPath}/demande/valider/${demande.id}" 
+                                            class="btn btn-sm btn-success">Valider</a>
+                                            <a href="${pageContext.request.contextPath}/demande/rejeter/${demande.id}" 
+                                            class="btn btn-sm btn-danger">Rejeter</a>
+                                        </c:when>
+                                        
+                                        
+                                           
+                                    </c:choose>
+                                     
+                                </div>
                             </td>
                         </tr>
                     </c:forEach>
+
                     
                     <c:if test="${empty demandes}">
                         <tr>
