@@ -12,13 +12,24 @@
     <div class="card-body">
         <c:if test="${not empty error}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                ${error}
+                <strong>Erreur :</strong> ${error}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                ${errorMessage}
+                <strong>Erreur de validation :</strong> ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+        <c:if test="${not empty fieldErrors}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Veuillez corriger les erreurs suivantes :</strong>
+                <ul>
+                    <c:forEach items="${fieldErrors}" var="error">
+                        <li>${error}</li>
+                    </c:forEach>
+                </ul>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
@@ -213,7 +224,7 @@
                         <option value="">-- Selectionner --</option>
                         <c:forEach items="${typeVisas}" var="tv">
                             <option value="${tv.id}" data-visa-label="${tv.libelle}" 
-                                ${demande.typeVisa.id == tv.id ? 'selected' : ''}>
+                                ${(not empty prefillTypeVisaId and prefillTypeVisaId == tv.id) or (demandeEntity.typeVisa.id == tv.id) ? 'selected' : ''}>
                                 ${tv.libelle}
                             </option>
                         </c:forEach>
