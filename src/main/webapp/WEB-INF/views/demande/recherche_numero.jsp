@@ -6,6 +6,12 @@
         <div class="card-header">
             <h2>${pageTitle}</h2>
         </div>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
         <form action="${pageContext.request.contextPath}/duplicata/rechercher" method="post">
             <input type="hidden" name="transfer" value="${finalTransfer}">
             <input type="hidden" name="duplicata" value="${finalDuplicata}">
