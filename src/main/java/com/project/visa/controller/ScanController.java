@@ -2,6 +2,7 @@ package com.project.visa.controller;
 
 import com.project.visa.entity.*;
 import com.project.visa.service.*;
+import com.project.visa.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.ui.Model;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,13 @@ public class ScanController {
 
     @Autowired
     private StatutDemandeService statutDemandeService;
+
+    @Autowired
+    private PieceDemandeService pieceDemandeService;
+
+    @Autowired
+    private StatutDemandeRepository statutDemandeRepository;
+
 
     /**
      * Affiche la page des documents à scanner pour une demande
@@ -237,14 +246,20 @@ public class ScanController {
         // 1. Récupérer la liste des documents avec leur statut (votre DTO interne)
         List<ScanFichierService.DocumentUploadStatus> docsAvecStatut = 
             scanFichierService.getDocumentsAvecStatutUpload(id);
-        
+        List<PieceDemandeEntity> piecedemande=pieceDemandeService.findByIdDemande(id.intValue());        
         // 2. Calculer les compteurs pour la barre de progression
         long nbUpload = docsAvecStatut.stream()
             .filter(ScanFichierService.DocumentUploadStatus::isUploaded)
             .count();
-        int nbTotal = docsAvecStatut.size();
-
+        int nbTotal = piecedemande.size();
+        DemandeEntity demande=demandeService.findById(id.intValue());
+        StatutDemandeEntity status=new StatutDemandeEntity();
+        status.setDemande(demande);
+        status.setStatut(10);
+        status.setDateChangementStatut(LocalDate.now());
+        statutDemandeRepository.save(status);
         // 3. Envoyer les données à la JSP
+        model.addAttribute("pieceDemande", piecedemande);
         model.addAttribute("idDemande", id);
         model.addAttribute("documentsStatus", docsAvecStatut);
         model.addAttribute("nbUpload", nbUpload);

@@ -2,6 +2,7 @@ package com.project.visa.controller;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,7 +78,7 @@ public class DemandeController {
         List<DemandeEntity> demandes = demandeService.findAll();
         Map<Integer, String> referenceMap = buildReferenceMap(demandes);
         Map<Integer, String> statusMap = buildStatusMap(demandes);
-
+        Map<Integer, Boolean> canBeScannedMap = new HashMap<>();
         if (reference != null && !reference.isBlank()) {
             String trimmed = reference.trim().toUpperCase();
             demandes = demandes.stream()
@@ -87,7 +88,13 @@ public class DemandeController {
                     })
                     .collect(Collectors.toList());
         }
-
+        for (DemandeEntity demande : demandes) {
+            // On passe l'ID ou l'objet demande selon ta signature de méthode
+            boolean canScan = demandeService.canBeScan(demande); 
+            canBeScannedMap.put(demande.getId(), canScan);
+        }
+        
+        model.addAttribute("canBeScannedMap", canBeScannedMap);
         model.addAttribute("reference", reference);
         model.addAttribute("referenceMap", referenceMap);
         model.addAttribute("statusMap", statusMap);
