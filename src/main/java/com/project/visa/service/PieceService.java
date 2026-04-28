@@ -20,4 +20,8 @@ public class PieceService {
         return pieceRepository.save(pieceEntity);
     }
 
+    public List<PieceEntity> findByTypeVisaId(int typeVisaId) {
+        return pieceRepository.findByTypeVisaEntity_Id(typeVisaId);
+    }
+
 }

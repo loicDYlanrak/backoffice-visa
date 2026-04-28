@@ -20,4 +20,6 @@ public interface VisaRepository extends JpaRepository<VisaEntity, Long> {
        "JOIN FETCH d.demandeur " +
        "WHERE v.reference = :ref")
     VisaEntity findByReference(@Param("ref") String reference);
+
+    List<VisaEntity> findByDemandeId(int demandeId);
 }
