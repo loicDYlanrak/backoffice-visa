@@ -14,7 +14,7 @@ import java.util.List;
 
 @Repository
 public interface StatutDemandeRepository extends JpaRepository<StatutDemandeEntity, Long> {
-	Optional<StatutDemandeEntity> findTopByDemandeIdOrderByDateChangementStatutAsc(int demandeId);
+	Optional<StatutDemandeEntity> findTopByDemandeIdOrderByDateChangementStatutDesc(int demandeId);
 
 	boolean existsByDemandeAndStatut(DemandeEntity demande, Integer statutCode);
 

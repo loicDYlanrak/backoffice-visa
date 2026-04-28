@@ -79,6 +79,9 @@ public class DemandeController {
         Map<Integer, String> referenceMap = buildReferenceMap(demandes);
         Map<Integer, String> statusMap = buildStatusMap(demandes);
         Map<Integer, Boolean> canBeScannedMap = new HashMap<>();
+        statusMap.forEach((id, statut) -> {
+    System.out.println("ID Demande: " + id + " | Statut: " + statut);
+});
         if (reference != null && !reference.isBlank()) {
             String trimmed = reference.trim().toUpperCase();
             demandes = demandes.stream()
@@ -648,23 +651,11 @@ public class DemandeController {
         return demandes.stream().collect(Collectors.toMap(
                 DemandeEntity::getId,
                 demande -> statutDemandeService.findLatestByDemandeId(demande.getId())
-                        .map(statut -> mapStatutLabel(statut.getStatut()))
+                        .<String>map(statut -> statut.getLibelleStatut())
                         .orElse("Cree")));
     }
 
-    private String mapStatutLabel(Integer statut) {
-        if (statut == null) {
-            return "Cree";
-        }
-        return switch (statut) {
-            case 1 -> "Cree";
-            case 2 -> "Soumise";
-            case 3 -> "En cours";
-            case 4 -> "Validee";
-            case 5 -> "Rejetee";
-            default -> "Cree";
-        };
-    }
+    
 
     private VisaEntity generateVisa(DemandeEntity demande, PasseportEntity passeport,
             String numeroVisa, LocalDate dateFinVisa) {

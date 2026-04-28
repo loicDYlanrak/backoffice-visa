@@ -53,56 +53,73 @@
                 <tbody>
 
         <c:forEach items="${demandes}" var="demande">
-            <%-- Extraction des données des Maps --%>
-            <c:set var="currentStatus" value="${statusMap[demande.id]}" />
-            <c:set var="canScan" value="${canBeScannedMap[demande.id]}" />
-            
-            <tr>
-                <td>${referenceMap[demande.id]}</td>
-                <td>${demande.demandeur.nom} ${demande.demandeur.prenom}</td>
-                <td>${demande.typeVisa.libelle}</td>
-                <td>${demande.dateDemande}</td>
-                <td>
-                    <c:choose>
-                        <c:when test="${currentStatus == 'valide'}">
-                            <span class="badge bg-success">Validée</span>
-                        </c:when>
-                        <c:when test="${currentStatus == 'rejete'}">
-                            <span class="badge bg-danger">Rejetée</span>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="badge bg-secondary">${currentStatus}</span>
-                        </c:otherwise>
-                    </c:choose>
-                </td>
-                <td>
-                    <div class="d-flex gap-1">
-                        <c:choose>
-                            <%-- CAS : Statut 'Cree' --%>
-                            <c:when test="${currentStatus == 'Cree'}">
-                                <%-- On affiche le bouton Scanner SEULEMENT si la logique métier l'autorise --%>
-                                <c:if test="${canScan}">
-                                    <a href="${pageContext.request.contextPath}/demande/scanner/${demande.id}" 
-                                    class="btn btn-sm btn-info text-white">Scanner</a>
-                                </c:if>
-                                
-                                <%-- Le bouton Modifier reste visible pour corriger les infos si besoin --%>
-                                <a class="btn btn-sm btn-warning" 
-                                href="${pageContext.request.contextPath}/demande/modifier/${demande.id}">Modifier</a>
-                            </c:when>
-                            
-                            <%-- CAS : Statut 'Scanner' (Prêt pour validation finale) --%>
-                            <c:when test="${currentStatus == 'Scanner'}">
-                                <a href="${pageContext.request.contextPath}/demande/valider/${demande.id}" 
-                                class="btn btn-sm btn-success">Valider</a>
-                                <a href="${pageContext.request.contextPath}/demande/rejeter/${demande.id}" 
-                                class="btn btn-sm btn-danger">Rejeter</a>
-                            </c:when>
-                        </c:choose>
-                    </div>
-                </td>
-            </tr>
-        </c:forEach>
+    <c:set var="status" value="${statusMap[demande.id]}" />
+    <c:set var="canScan" value="${canBeScannedMap[demande.id]}" />
+
+    <tr>
+        <%-- Référence --%>
+        <td>${referenceMap[demande.id]}</td>
+        
+        <%-- Nom Complet --%>
+        <td>${demande.demandeur.nom} ${demande.demandeur.prenom}</td>
+        
+        <%-- Type Visa --%>
+        <td>${demande.typeVisa.libelle}</td>
+        
+        <%-- Date --%>
+        <td>${demande.dateDemande}</td>
+        
+        <%-- Statut avec Badge --%>
+        <td>
+            <c:choose>
+                <c:when test="${status == 'Créé'}">
+                    <span class="badge bg-success">crée</span>
+                </c:when>
+                <c:when test="${status == 'En cours de scan'}">
+                    <span class="badge bg-danger">En cours de scan</span>
+                </c:when>
+                <c:otherwise>
+                    <span class="badge bg-secondary">${status}</span>
+                </c:otherwise>
+            </c:choose>
+        </td>
+        
+        <%-- Actions --%>
+        <td>
+            <div class="d-flex gap-1">
+                <%-- Correction : Ajout du <c:choose> obligatoire autour des <c:when> --%>
+                <c:choose>
+                    <%-- Logique pour le statut Cree --%>
+                    
+                    <c:when test="${status == 'Créé' || status == 'En cours de scan'}">
+                    
+                        <c:if test="${canScan}">
+                            <a href="${pageContext.request.contextPath}/demande/scanner/${demande.id}" 
+                               class="btn btn-sm btn-info text-white">Scanner</a>
+                        </c:if>
+                        <c:if test="${status == 'Créé'}">
+                            <a href="${pageContext.request.contextPath}/demande/modifier/${demande.id}" 
+                           class="btn btn-sm btn-warning">Modifier</a>
+                        </c:if>
+                       
+                    </c:when>
+
+                    <%-- Logique pour le statut Scanner --%>
+                    <c:when test="${status == 'Scanner'}">
+                        <a href="${pageContext.request.contextPath}/demande/valider/${demande.id}" 
+                           class="btn btn-sm btn-success">Valider</a>
+                        <a href="${pageContext.request.contextPath}/demande/rejeter/${demande.id}" 
+                           class="btn btn-sm btn-danger">Rejeter</a>
+                    </c:when>
+                    
+                    <c:otherwise>
+                         <span class="text-muted small">Aucune action</span>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </td>
+    </tr>
+</c:forEach>y
                     
                     <c:if test="${empty demandes}">
                         <tr>

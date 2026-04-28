@@ -19,9 +19,9 @@ public class StatutDemandeService {
     }
 
     public Optional<StatutDemandeEntity> findLatestByDemandeId(int demandeId) {
-        return statutDemandeRepository.findTopByDemandeIdOrderByDateChangementStatutAsc(demandeId);
+        return statutDemandeRepository.findTopByDemandeIdOrderByDateChangementStatutDesc(demandeId);
     }
-    
+
     public StatutDemandeEntity addStatut(DemandeEntity demande, Integer statutCode) {
         StatutDemandeEntity statut = new StatutDemandeEntity();
         statut.setDemande(demande);
