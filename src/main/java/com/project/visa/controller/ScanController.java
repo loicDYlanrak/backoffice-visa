@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.ui.Model;
 
 import java.util.List;
 import java.util.Map;
@@ -230,5 +231,42 @@ public class ScanController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", e.getMessage()));
         }
+    }
+    @GetMapping("/scanner/{id}")
+    public String pageScan(@PathVariable Long id, Model model) {
+        // 1. Récupérer la liste des documents avec leur statut (votre DTO interne)
+        List<ScanFichierService.DocumentUploadStatus> docsAvecStatut = 
+            scanFichierService.getDocumentsAvecStatutUpload(id);
+        
+        // 2. Calculer les compteurs pour la barre de progression
+        long nbUpload = docsAvecStatut.stream()
+            .filter(ScanFichierService.DocumentUploadStatus::isUploaded)
+            .count();
+        int nbTotal = docsAvecStatut.size();
+
+        // 3. Envoyer les données à la JSP
+        model.addAttribute("idDemande", id);
+        model.addAttribute("documentsStatus", docsAvecStatut);
+        model.addAttribute("nbUpload", nbUpload);
+        model.addAttribute("nbTotal", nbTotal);
+        model.addAttribute("template", "demande/documents_a_scanner");
+        return "template";
+    }
+
+    // Gère l'upload via le formulaire du modal
+    @PostMapping("/upload-doc")
+    public String uploadDocument(@RequestParam("demandeId") Long demandeId,
+                                 @RequestParam("documentId") Long documentId,
+                                 @RequestParam("fichier") MultipartFile file,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            scanFichierService.uploadFichier(demandeId, documentId, file);
+            redirectAttributes.addFlashAttribute("successMessage", "Document chargé avec succès !");
+        } catch (RuntimeException e) {
+            // On attrape vos exceptions personnalisées (Fichier vide, type non autorisé, etc.)
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        
+        return "redirect:/demande/scanner/" + demandeId;
     }
 }
