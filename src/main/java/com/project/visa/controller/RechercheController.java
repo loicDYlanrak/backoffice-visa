@@ -122,7 +122,7 @@ public class RechercheController {
         demandeDuplicata.setDateTraitement(LocalDate.now());
         StatutDemandeEntity status = new StatutDemandeEntity();
         status.setDemande(demandeDuplicata);
-        status.setStatut(30);
+        status.setStatut(1);
         status.setDateChangementStatut(LocalDate.now());
         try {
             demandeRepository.save(demandeDuplicata);
@@ -238,7 +238,7 @@ public class RechercheController {
         demandeTransfert.setDateTraitement(LocalDate.now());
         StatutDemandeEntity status = new StatutDemandeEntity();
         status.setDemande(demandeTransfert);
-        status.setStatut(30);
+        status.setStatut(1);
         status.setDateChangementStatut(LocalDate.now());
 
         PasseportEntity nouveauPasseport = new PasseportEntity();
