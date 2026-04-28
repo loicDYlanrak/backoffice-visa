@@ -155,6 +155,26 @@
             </div>
 
             <hr>
+            <h5 class="mt-2 mb-3 text-secondary">Informations du visa à générer</h5>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="numeroVisa" class="form-label">Numéro du visa <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="numeroVisa" name="numeroVisa" 
+                        value="${prefillNumeroVisa}" required
+                        pattern="VISA-[A-Z0-9]{4}-[0-9]{6}" 
+                        placeholder="Exemple: VISA-MDGR-2024001">
+                    <div class="form-text">Format: VISA-XXXX-XXXXXX (X = lettre ou chiffre)</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="dateFinVisa" class="form-label">Date de fin de validité <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="dateFinVisa" name="dateFinVisa" 
+                        value="${prefillDateFinVisa}" required>
+                    <div class="form-text">La date doit être postérieure à la date d'entrée</div>
+                </div>
+            </div>
+
+            <hr>
             <h5 class="mt-2 mb-3 text-secondary">Pieces communes</h5>
 
             <div id="piecesCommunes" class="row">

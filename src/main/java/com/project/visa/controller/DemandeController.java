@@ -21,6 +21,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.project.visa.entity.*;
 import com.project.visa.service.*;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Controller
 public class DemandeController {
 
@@ -56,6 +58,12 @@ public class DemandeController {
 
     @Autowired
     private TypeVisaService typeVisaService;
+
+    @Autowired
+    private VisaService visaService;
+
+    @Autowired
+    private StatutVisaService statutVisaService;
 
     @GetMapping("/demande/choix_type_demande")
     public String choix_type_demande(Model model) {
@@ -98,7 +106,10 @@ public class DemandeController {
             BindingResult result,
             @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
             @RequestParam(value = "provenance", required = false) String provenance,
-            RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "numeroVisa", required = false) String numeroVisa,
+            @RequestParam(value = "dateFinVisa", required = false) String dateFinVisaStr,
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
 
         LocalDate currentDate = LocalDate.now();
 
@@ -224,6 +235,35 @@ public class DemandeController {
                     }
 
                 }
+            }
+
+            String numeroVisa1 = null;
+            LocalDate dateFinVisa = null;
+
+            if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
+                numeroVisa1 = request.getParameter("numeroVisa");
+                if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
+                    try {
+                        dateFinVisa = LocalDate.parse(dateFinVisaStr);
+                    } catch (Exception e) {
+
+                    }
+                }
+
+                VisaEntity visa = generateVisa(savedDemande, savedPasseport, numeroVisa1, dateFinVisa);
+                VisaEntity savedVisa = visaService.save(visa);
+
+                StatutVisaEntity statutVisa = new StatutVisaEntity();
+                statutVisa.setVisa(savedVisa);
+                statutVisa.setStatut(1); // non valide
+                statutVisa.setDateChangementStatut(currentDate);
+                statutVisaService.save(statutVisa);
+
+                redirectAttributes.addFlashAttribute("generatedVisaNumber", numeroVisa1);
+                redirectAttributes.addFlashAttribute("visaDateDebut", currentDate.toString());
+                redirectAttributes.addFlashAttribute("visaDateFin", dateFinVisa.toString());
+                redirectAttributes.addFlashAttribute("visaStatut", "Non valide");
+                redirectAttributes.addFlashAttribute("visaReference", buildReference(savedDemande));
             }
             redirectAttributes.addFlashAttribute("successMessage",
                     "Votre demande N° " + reference + " a été enregistrée");
@@ -500,6 +540,15 @@ public class DemandeController {
         model.addAttribute("template", "demande/formulaire");
         model.addAttribute("demande", new DemandeEntity());
         model.addAttribute("provenance", provenance);
+        model.addAttribute("formTitle", "Nouvelle demande avec génération de visa");
+        model.addAttribute("formAction", "/demande");
+        model.addAttribute("showVisaSection", true); 
+        model.addAttribute("template", "demande/modification");
+
+        model.addAttribute("prefillNumeroVisa",
+                "VISA-MDGR-" + LocalDate.now().getYear() + String.format("%04d", (int) (Math.random() * 10000)));
+        model.addAttribute("prefillDateFinVisa", LocalDate.now().plusYears(1).toString());
+
         return "template";
     }
 
@@ -607,5 +656,17 @@ public class DemandeController {
             case 5 -> "Rejetee";
             default -> "Cree";
         };
+    }
+
+    private VisaEntity generateVisa(DemandeEntity demande, PasseportEntity passeport,
+            String numeroVisa, LocalDate dateFinVisa) {
+        VisaEntity visa = new VisaEntity();
+        visa.setDemande(demande);
+        visa.setPasseport(passeport);
+        visa.setReference(numeroVisa);
+        visa.setDateDebut(LocalDate.now());
+        visa.setDateFin(dateFinVisa);
+
+        return visa;
     }
 }

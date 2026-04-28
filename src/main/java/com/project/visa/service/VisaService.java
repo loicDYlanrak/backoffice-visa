@@ -39,6 +39,22 @@ public class VisaService {
         return visaRepository.save(visa);
     }
 
+     public List<VisaEntity> findAll() {
+        return visaRepository.findAll();
+    }
+
+    public VisaEntity findById(int id) {
+        return visaRepository.findById(id).orElse(null);
+    }
+
+    public void delete(VisaEntity visa) {
+        visaRepository.delete(visa);
+    }
+
+    public void deleteById(int id) {
+        visaRepository.deleteById(id);
+    }
+
     public List<VisaEntity> findByDemandeId(int demandeId) {
         return visaRepository.findByDemandeId(demandeId);
     }
