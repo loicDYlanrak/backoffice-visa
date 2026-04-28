@@ -7,4 +7,5 @@ import com.project.visa.entity.TypeDemandeEntity;
 
 @Repository
 public interface TypeDemandeRepository extends JpaRepository<TypeDemandeEntity, Integer> {
+    TypeDemandeEntity findByLibelle(String libelle);
 }

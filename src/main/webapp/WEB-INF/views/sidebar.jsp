@@ -9,7 +9,7 @@
             </a>
         </li>
         <li class="mb-2">
-            <a href="${pageContext.request.contextPath}/demande/create" class="text-white text-decoration-none">
+            <a href="${pageContext.request.contextPath}/demande/choix_type_demande" class="text-white text-decoration-none">
                 <i class="bi bi-plus-circle"></i> Nouvelle demande
             </a>
         </li>

@@ -10,7 +10,7 @@
 
 		<div class="d-flex flex-wrap gap-2">
 			<a class="btn btn-primary" href="${pageContext.request.contextPath}/accueil">Accueil</a>
-			<a class="btn btn-success" href="${pageContext.request.contextPath}/demande/create">Nouvelle demande</a>
+			<a class="btn btn-success" href="${pageContext.request.contextPath}/demande/choix_type_demande">Nouvelle demande</a>
 			<a class="btn btn-secondary" href="${pageContext.request.contextPath}/demande/liste">Liste des demandes</a>
 		</div>
 	</div>
