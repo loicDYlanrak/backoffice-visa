@@ -258,7 +258,6 @@ public class ScanController {
         status.setStatut(10);
         status.setDateChangementStatut(LocalDate.now());
         statutDemandeRepository.save(status);
-        // 3. Envoyer les données à la JSP
         model.addAttribute("pieceDemande", piecedemande);
         model.addAttribute("idDemande", id);
         model.addAttribute("documentsStatus", docsAvecStatut);

@@ -54,15 +54,15 @@ INSERT INTO statut_passeport (id_passeport, statut, date_changement_statut) VALU
 (9, 4, '2023-12-20'),  -- volé
 (10, 1, '2022-04-18'); -- actif
 
-INSERT INTO type_visa (libelle) VALUES
-('investisseur'),
-('travailleur');
+    INSERT INTO type_visa (libelle) VALUES
+    ('investisseur'),
+    ('travailleur');
 
-INSERT INTO type_demande (libelle) VALUES
-('duplicata'),
-('transformation');
-INSERT INTO type_demande (libelle) VALUES
-('transfert de visa');
+    INSERT INTO type_demande (libelle) VALUES
+    ('duplicata'),
+    ('transformation');
+    INSERT INTO type_demande (libelle) VALUES
+    ('transfert de visa');
 
 INSERT INTO visa_transformable (id_demandeur, id_passeport, date_entree, date_sortie, numero_reference) VALUES
 (1, 1, '2024-01-15', '2024-06-15', 'VISA-2024-001'),

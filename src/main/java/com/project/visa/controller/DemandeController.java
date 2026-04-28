@@ -224,7 +224,8 @@ public class DemandeController {
             statutDemandeEntity.setDemande(savedDemande);
             statutDemandeEntity.setDateChangementStatut(currentDate);
             statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
-            if (provenance != null) {
+            System.out.println("provenace: "+ provenance);
+            if (provenance != null && !provenance.equals("CLASSIQUE")) {
                 statutDemandeEntity.setStatut(30);
             }
             statutDemandeService.save(statutDemandeEntity);
