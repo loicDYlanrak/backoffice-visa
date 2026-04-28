@@ -165,7 +165,7 @@
                     <input type="text" class="form-control" id="numeroVisa" name="numeroVisa" 
                         value="${prefillNumeroVisa}" required
                         pattern="VISA-[A-Z0-9]{4}-[0-9]{6}" 
-                        placeholder="Exemple: VISA-MDGR-2024001">
+                        placeholder="Exemple: VISA-MDGR-202615">
                     <div class="form-text">Format: VISA-XXXX-XXXXXX (X = lettre ou chiffre)</div>
                 </div>
                 <div class="col-md-6 mb-3">

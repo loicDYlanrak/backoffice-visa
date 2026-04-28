@@ -19,8 +19,31 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.project.visa.entity.*;
-import com.project.visa.service.*;
+import com.project.visa.entity.DemandeEntity;
+import com.project.visa.entity.DemandeurEntity;
+import com.project.visa.entity.NationaliteEntity;
+import com.project.visa.entity.PasseportEntity;
+import com.project.visa.entity.PieceDemandeEntity;
+import com.project.visa.entity.PieceEntity;
+import com.project.visa.entity.SituationFamilialeEntity;
+import com.project.visa.entity.StatutDemandeEntity;
+import com.project.visa.entity.StatutVisaEntity;
+import com.project.visa.entity.TypeDemandeEntity;
+import com.project.visa.entity.VisaEntity;
+import com.project.visa.entity.VisaTransformableEntity;
+import com.project.visa.service.DemandeService;
+import com.project.visa.service.DemandeurService;
+import com.project.visa.service.NationaliteService;
+import com.project.visa.service.PasseportService;
+import com.project.visa.service.PieceDemandeService;
+import com.project.visa.service.PieceService;
+import com.project.visa.service.SituationFamilialeService;
+import com.project.visa.service.StatutDemandeService;
+import com.project.visa.service.StatutVisaService;
+import com.project.visa.service.TypeDemandeService;
+import com.project.visa.service.TypeVisaService;
+import com.project.visa.service.VisaService;
+import com.project.visa.service.VisaTransformableService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -316,12 +339,20 @@ public class DemandeController {
             }
 
         } catch (Exception e) {
-            String message = e.getMessage() + " " + e.getStackTrace();
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la creation. Veuillez verifier les informations saisies." + message);
-            System.out.println("demande/formulaire");
-
+            String errorMessage = "Erreur lors de la creation. Veuillez verifier les informations saisies.";
+            
+            if (e.getMessage() != null) {
+                if (e.getMessage().contains("Duplicate entry")) {
+                    errorMessage = "Erreur : Ce numéro de référence ou de visa existe déjà. Veuillez utiliser une valeur unique.";
+                } else if (e.getMessage().contains("constraint")) {
+                    errorMessage = "Erreur : Violation de contrainte de la base de données. Veuillez verifier les informations.";
+                } else {
+                    errorMessage = "Erreur : " + e.getMessage();
+                }
+            }
+            
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             return "redirect:/demande/formulaire";
         }
         System.out.println("demande/liste");
@@ -391,6 +422,13 @@ public class DemandeController {
             model.addAttribute("prefillNumeroReference", visaTransformable.getNumeroReference());
             model.addAttribute("prefillDateEntree", visaTransformable.getDateEntree());
             model.addAttribute("prefillDateSortie", visaTransformable.getDateSortie());
+        }
+
+        // Charger les informations du visa généré s'il existe
+        if (demande.getVisas() != null && !demande.getVisas().isEmpty()) {
+            VisaEntity visa = demande.getVisas().get(0);
+            model.addAttribute("prefillNumeroVisa", visa.getReference());
+            model.addAttribute("prefillDateFinVisa", visa.getDateFin());
         }
 
         if (demande.getTypeDemande() != null) {
@@ -532,10 +570,20 @@ public class DemandeController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la modification. Veuillez verifier les informations saisies." + e.getMessage());
+            String errorMessage = "Erreur lors de la modification. Veuillez verifier les informations saisies.";
+            
+            if (e.getMessage() != null) {
+                if (e.getMessage().contains("Duplicate entry")) {
+                    errorMessage = "Erreur : Ce numéro de référence existe déjà. Veuillez utiliser une valeur unique.";
+                } else if (e.getMessage().contains("constraint")) {
+                    errorMessage = "Erreur : Violation de contrainte de la base de données. Veuillez verifier les informations.";
+                } else {
+                    errorMessage = "Erreur : " + e.getMessage();
+                }
+            }
+            
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
-
             return "redirect:/demande/modifier/" + id;
         }
 

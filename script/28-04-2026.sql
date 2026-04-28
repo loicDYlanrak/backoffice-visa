@@ -5,7 +5,7 @@ CREATE TABLE scan_fichier {
     date_upload date not null,
     FOREIGN key (id_piece_demande) references piece_demande(id) 
 };
-
+    
 CREATE TABLE statut_visa (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_visa INT NOT NULL,

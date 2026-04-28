@@ -109,6 +109,9 @@ modification de la page liste de demande
  
 :::::::TODO 3
 
+pre-rempli 6 chiffre dans le numero visa
+modifier rehefa misy erreur de averina daholo ilay donnee rehetra ilay namenona an'ilay input 
+
 PAGE : LISTE DES DEMANDES (MODIFICATION) 
  Modifier la page liste de demandes :
       - Si demande.status == "cree" :

@@ -21,5 +21,7 @@
         addHidden('demandeur.id', '${prefillDemandeurId}');
         addHidden('passeport.id', '${prefillPasseportId}');
         addHidden('visaTransformable.id', '${prefillVisaTransformableId}');
+        addHidden('numeroVisa', '${prefillNumeroVisa}');
+        addHidden('dateFinVisa', '${prefillDateFinVisa}');
     });
 </script>
