@@ -3,6 +3,7 @@ package com.project.visa.controller;
 import com.project.visa.entity.TestEntity;
 import com.project.visa.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -79,5 +80,12 @@ public class TestController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("template", "test/test-list"); 
         return "template";
+    }
+
+    @GetMapping("/api/list")
+    @ResponseBody
+    public ResponseEntity<List<TestEntity>> getTestsAsJson() {
+        List<TestEntity> tests = testService.findAll();
+        return ResponseEntity.ok(tests);
     }
 }
