@@ -19,7 +19,7 @@ public class StatutDemandeService {
     }
 
     public Optional<StatutDemandeEntity> findLatestByDemandeId(int demandeId) {
-        return statutDemandeRepository.findTopByDemandeIdOrderByDateChangementStatutDesc(demandeId);
+        return statutDemandeRepository.findFirstByDemandeIdOrderByIdDesc(demandeId);
     }
 
     public StatutDemandeEntity addStatut(DemandeEntity demande, Integer statutCode) {
