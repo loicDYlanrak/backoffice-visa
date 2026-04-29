@@ -2,7 +2,8 @@ package com.project.visa.controller;
 
 import java.time.LocalDate;
 import java.util.List;
-
+import java.util.ArrayList;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -149,29 +150,20 @@ public class RechercheController {
         if (demandeId == null && !model.containsAttribute("demande")) {
             return "redirect:/duplicata/recherche_numero";
         }
+         DemandeEntity demande =new DemandeEntity();
         if (demandeId != null && !model.containsAttribute("demande")) {
-            DemandeEntity demande = demandeRepository.findById(demandeId);
+         demande = demandeRepository.findById(demandeId);
             model.addAttribute("demande", demande);
             if (demande != null && !demande.getVisas().isEmpty()) {
                 model.addAttribute("visa", demande.getVisas().get(0));
             }
         }
 
-        List<DemandeurEntity> demandeur = demandeurRepository.findAll();
+        List<DemandeurEntity> demandeur = new ArrayList<>();
+        
+        demandeur.add(demande.getDemandeur());
         // System.out.println("Nombre de demandeurs trouvés : " + demandeur.size());
-        for (DemandeurEntity demander : demandeur) {
-            demander.getPasseports().size();
-
-            // System.out.println("Demandeur: " + demander.getNom() + " " +
-            // demander.getPrenom() + ", Passeports: " + demander.getPasseports().size());
-            // System.out.println("Détails des passeports:");
-            for (PasseportEntity passeport : demander.getPasseports()) {
-                passeport.getStatuts().size();
-                // System.out.println(" Passeport: " + passeport.getNumeroPasseport() + ",
-                // Statuts: " + passeport.getStatuts().size() + ", Visas: " +
-                // passeport.getVisas().size());
-            }
-        }
+        
         model.addAttribute("demandeurs", demandeur);
         model.addAttribute("duplicata", duplicata);
         model.addAttribute("prefillNumeroPasseport", "P1234568");
@@ -250,16 +242,28 @@ public class RechercheController {
             nouveauPasseport.setDemandeur(demande.getDemandeur());
 
         }
+       PasseportEntity passeportFinal;
 
-        VisaEntity visa = demande.getVisas().get(0);
-        visa.setPasseport(nouveauPasseport);
+        Optional<PasseportEntity> passeportExistant = passeportRepository.findByNumeroPasseport(nouveauPasseport.getNumeroPasseport());
+       if (passeportExistant.isPresent()) {
+            passeportFinal = passeportExistant.get();
+        } else {
+            passeportFinal = passeportRepository.saveAndFlush(nouveauPasseport);
+        }
+
+VisaEntity visa = demande.getVisas().get(0);
+visa.setPasseport(passeportFinal);
+        // VisaEntity visa = demande.getVisas().get(0);
+        // visa.setPasseport(nouveauPasseport);
 
         try {
             demandeRepository.save(demandeTransfert);
             try {
                 statutDemandeRepository.save(status);
                 try {
-                    passeportRepository.save(nouveauPasseport);
+                    if(!passeportRepository.existsByNumeroPasseport(nouveauPasseport.getNumeroPasseport())){
+                        passeportRepository.save(nouveauPasseport);
+                    }
                     try {
                         visaRepository.save(visa);
                     } catch (Exception e) {

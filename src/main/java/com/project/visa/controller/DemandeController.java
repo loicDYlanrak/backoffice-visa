@@ -475,7 +475,7 @@ public class DemandeController {
                     paysEmetteurs.add(passeportEntity.getPaysDelivrance());
 
                     // Ajout des attributs à redirectAttributes
-                    redirectAttributes.addAttribute("demandeId", savedDemande.getId());
+                    redirectAttributes.addAttribute("id", savedDemande.getId());
                     redirectAttributes.addAttribute("duplicata", "1");
                     redirectAttributes.addAttribute("demandeurId", demandeurIds);
                     redirectAttributes.addAttribute("nouveauNumPasseport", nouveauxNumPasseports);

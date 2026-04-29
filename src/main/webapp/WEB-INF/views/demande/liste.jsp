@@ -47,6 +47,7 @@
                         <th>Type visa</th>
                         <th>Date</th>
                         <th>Status</th>
+                        <th>type de demande</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -82,6 +83,9 @@
                                         <span class="badge bg-secondary">${status}</span>
                                     </c:otherwise>
                                 </c:choose>
+                            </td>
+                            <td>
+                                ${demande.typeDemande.libelle}
                             </td>
 
                             <%-- Actions --%>
