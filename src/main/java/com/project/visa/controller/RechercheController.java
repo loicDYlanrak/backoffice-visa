@@ -77,6 +77,7 @@ public class RechercheController {
         }
 
         if (demandeTrouvee != null) {
+            demandeTrouvee.getTypeVisa().getLibelle();
             redirectAttributes.addFlashAttribute("demande", demandeTrouvee);
             redirectAttributes.addFlashAttribute("transfer", transfer);
             redirectAttributes.addFlashAttribute("duplicata", duplicata);
