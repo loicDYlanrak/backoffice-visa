@@ -149,6 +149,7 @@ public class RechercheController {
         if (demandeId == null && !model.containsAttribute("demande")) {
             return "redirect:/duplicata/recherche_numero";
         }
+        
         if (demandeId != null && !model.containsAttribute("demande")) {
             DemandeEntity demande = demandeRepository.findById(demandeId);
             model.addAttribute("demande", demande);
