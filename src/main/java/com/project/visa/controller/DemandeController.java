@@ -483,7 +483,7 @@ public class DemandeController {
                     redirectAttributes.addAttribute("dateExpiration", dateExpirations);
                     redirectAttributes.addAttribute("paysEmetteur", paysEmetteurs);
 
-                    return "redirect:/transfert/resume_transfert";
+                    return "redirect:/duplicata/resume_duplicata";
                 }
             }
 
