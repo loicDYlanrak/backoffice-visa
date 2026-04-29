@@ -13,9 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ScanFichierService {
@@ -37,9 +37,10 @@ public class ScanFichierService {
 
     /**
      * Upload un fichier pour une demande et un document requis spécifique
-     * @param idDemande ID de la demande
+     * 
+     * @param idDemande        ID de la demande
      * @param idDocumentRequis ID du document requis (PieceEntity)
-     * @param fichier Fichier à uploader
+     * @param fichier          Fichier à uploader
      * @return ScanFichierEntity créé
      * @throws RuntimeException si le fichier est vide, mauvais type ou déjà uploadé
      */
@@ -63,10 +64,9 @@ public class ScanFichierService {
         try {
             // Récupérer la pieceDemande correspondante
             PieceDemandeEntity pieceDemande = pieceDemandeRepository.findByDemandeIdAndPieceId(
-                    idDemande.intValue(), 
-                    idDocumentRequis.intValue()
-            );
-            
+                    idDemande.intValue(),
+                    idDocumentRequis.intValue());
+
             if (pieceDemande == null) {
                 throw new RuntimeException("Document requis non trouvé pour cette demande");
             }
@@ -84,7 +84,7 @@ public class ScanFichierService {
                 extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
             String newFilename = UUID.randomUUID().toString() + extension;
-            
+
             // Sauvegarder le fichier
             Path filePath = uploadPath.resolve(newFilename);
             Files.copy(fichier.getInputStream(), filePath);
@@ -104,19 +104,20 @@ public class ScanFichierService {
 
     /**
      * Vérifie si un document a déjà été uploadé pour une demande
-     * @param idDemande ID de la demande
+     * 
+     * @param idDemande        ID de la demande
      * @param idDocumentRequis ID du document requis
      * @return true si déjà uploadé, false sinon
      */
     public boolean hasUploaded(Long idDemande, Long idDocumentRequis) {
         return scanFichierRepository.existsByIdDemandeAndIdPiece(
-            idDemande.intValue(), 
-            idDocumentRequis.intValue()
-        );
+                idDemande.intValue(),
+                idDocumentRequis.intValue());
     }
 
     /**
      * Récupère tous les fichiers uploadés pour une demande
+     * 
      * @param idDemande ID de la demande
      * @return Liste des ScanFichierEntity
      */
@@ -126,6 +127,7 @@ public class ScanFichierService {
 
     /**
      * Vérifie si tous les documents requis pour une demande ont été uploadés
+     * 
      * @param idDemande ID de la demande
      * @return true si tous les documents sont uploadés, false sinon
      */
@@ -137,7 +139,7 @@ public class ScanFichierService {
 
         // Récupérer tous les documents requis pour ce type de demande
         List<PieceEntity> documentsRequis = pieceService.findByTypeVisaId(demande.getTypeVisa().getId());
-        
+
         // Vérifier pour chaque document s'il a été uploadé
         for (PieceEntity document : documentsRequis) {
             if (!hasUploaded(idDemande, (long) document.getId())) {
@@ -148,12 +150,15 @@ public class ScanFichierService {
     }
 
     /**
-     * Récupère les documents requis avec leur statut d'upload pour un type de demande
+     * Récupère les documents requis avec leur statut d'upload pour un type de
+     * demande
+     * 
      * @param typeDemande Type de demande (PREMIERE, RENOUVELLEMENT, etc.)
      * @return Liste des documents avec leur statut
      */
     public List<DocumentUploadStatus> getDocumentsParTypeDemande(String typeDemande) {
-        // Cette méthode nécessite de connaître la relation entre typeDemande et les documents requis
+        // Cette méthode nécessite de connaître la relation entre typeDemande et les
+        // documents requis
         // Implémentation selon votre logique métier
         return null;
     }
@@ -173,13 +178,22 @@ public class ScanFichierService {
         }
 
         // Getters
-        public PieceEntity getPiece() { return piece; }
-        public boolean isUploaded() { return isUploaded; }
-        public ScanFichierEntity getScanFichier() { return scanFichier; }
+        public PieceEntity getPiece() {
+            return piece;
+        }
+
+        public boolean isUploaded() {
+            return isUploaded;
+        }
+
+        public ScanFichierEntity getScanFichier() {
+            return scanFichier;
+        }
     }
 
     /**
      * Récupère les documents requis pour une demande avec leur statut d'upload
+     * 
      * @param idDemande ID de la demande
      * @return Liste des documents avec statut d'upload
      */
@@ -192,12 +206,24 @@ public class ScanFichierService {
         List<PieceEntity> documentsRequis = pieceService.findByTypeVisaId(demande.getTypeVisa().getId());
         List<ScanFichierEntity> uploads = getUploadsParDemande(idDemande);
 
-        return documentsRequis.stream().map(document -> {
-            ScanFichierEntity scan = uploads.stream()
-                .filter(s -> s.getPieceDemande().getPiece().getId() == document.getId())
-                .findFirst()
-                .orElse(null);
-            return new DocumentUploadStatus(document, scan != null, scan);
-        }).collect(Collectors.toList());
+        List<DocumentUploadStatus> resultats = new ArrayList<>();
+
+        for (PieceEntity document : documentsRequis) {
+            ScanFichierEntity scanTrouve = null;
+
+            for (ScanFichierEntity upload : uploads) {
+                if (upload.getPieceDemande().getPiece().getId() == document.getId()) {
+                    scanTrouve = upload;
+                    break; 
+                }
+            }
+
+            boolean estUpload = (scanTrouve != null);
+            DocumentUploadStatus status = new DocumentUploadStatus(document, estUpload, scanTrouve);
+
+            resultats.add(status);
+        }
+
+        return resultats;
     }
 }
