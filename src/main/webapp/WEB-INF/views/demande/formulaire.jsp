@@ -103,7 +103,7 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email <span class="text-muted">(Optionnel)</span></label>
+                    <label for="email" class="form-label">Email <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
                     <input type="email" class="form-control" id="email" name="email" value="${prefillEmail}">
                 </div>
             </div>
@@ -117,7 +117,7 @@
                     <input type="text" class="form-control" id="numeroPasseport" name="numeroPasseport" value="${prefillNumeroPasseport}" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="paysDelivrance" class="form-label">Pays de delivrance <span class="text-muted">(Optionnel)</span></label>
+                    <label for="paysDelivrance" class="form-label">Pays de delivrance <span class="text-danger">*</span> <span class="text-muted">(Obligatoire)</span></label>
                     <input type="text" class="form-control" id="paysDelivrance" name="paysDelivrance" value="${prefillPaysDelivrance}">
                 </div>
             </div>
@@ -174,9 +174,9 @@
                 <div class="col-md-6 mb-3">
                     <label for="numeroVisa" class="form-label">Numéro du visa <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="numeroVisa" name="numeroVisa" 
-                        value="${prefillNumeroVisa}" required
+                        value="${empty prefillNumeroVisa ? 'VISA-MDGR-202628' : prefillNumeroVisa}" required
                         pattern="VISA-[A-Z0-9]{4}-[0-9]{6}" 
-                        placeholder="Exemple: VISA-MDGR-202615">
+                        placeholder="Exemple: VISA-MDGR-202628">
                     <div class="form-text">Format: VISA-XXXX-XXXXXX (X = lettre ou chiffre)</div>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -336,6 +336,128 @@
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    function getFieldLabel(field) {
+        var labels = {
+            nom: 'Nom',
+            prenom: 'Prenom',
+            dateNaissance: 'Date de naissance',
+            lieuNaissance: 'Lieu de naissance',
+            idSituationFamiliale: 'Situation familiale',
+            idNationaliteActuelle: 'Nationalite',
+            telephone: 'Contact',
+            adresse: 'Adresse',
+            email: 'Email',
+            numeroPasseport: 'Numero de passeport',
+            paysDelivrance: 'Pays de delivrance',
+            dateDelivrance: 'Date de delivrance',
+            dateExpiration: "Date d'expiration",
+            numeroReference: 'Numero de reference',
+            dateEntree: 'Date de delivrance',
+            dateSortie: "Date d'expiration",
+            typeDemande: 'Type de demande',
+            numeroVisa: 'Numero du visa',
+            dateFinVisa: 'Date de fin de validite',
+            typeVisa: 'Type de visa'
+        };
+        return labels[field.id] || labels[field.name] || 'Champ';
+    }
+
+    function getFieldErrorElement(field) {
+        var errorId = (field.id || field.name) + 'Error';
+        var existing = document.getElementById(errorId);
+        if (existing) {
+            return existing;
+        }
+
+        var error = document.createElement('div');
+        error.className = 'invalid-feedback d-block';
+        error.id = errorId;
+        field.insertAdjacentElement('afterend', error);
+        return error;
+    }
+
+    function setFieldError(field, message) {
+        if (!field) {
+            return;
+        }
+        var error = getFieldErrorElement(field);
+        field.classList.add('is-invalid');
+        error.textContent = message;
+    }
+
+    function clearFieldError(field) {
+        if (!field) {
+            return;
+        }
+        var errorId = (field.id || field.name) + 'Error';
+        var error = document.getElementById(errorId);
+        if (error) {
+            error.textContent = '';
+        }
+        field.classList.remove('is-invalid');
+    }
+
+    function validateRequiredFields(form) {
+        var fields = form.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), select, textarea');
+        var firstInvalid = null;
+        var hasError = false;
+
+        fields.forEach(function (field) {
+            var value = field.value == null ? '' : field.value.trim();
+            if (!value) {
+                setFieldError(field, 'Le champ ' + getFieldLabel(field) + ' est obligatoire.');
+                if (!firstInvalid) {
+                    firstInvalid = field;
+                }
+                hasError = true;
+                return;
+            }
+
+            clearFieldError(field);
+        });
+
+        var email = document.getElementById('email');
+        if (email && email.value.trim()) {
+            var emailRegex = /^[A-Za-z0-9+_.-]+@(.+)$/;
+            if (!emailRegex.test(email.value.trim())) {
+                setFieldError(email, 'Le format de l\'email est invalide.');
+                if (!firstInvalid) {
+                    firstInvalid = email;
+                }
+                hasError = true;
+            }
+        }
+
+        var numeroReference = document.getElementById('numeroReference');
+        if (numeroReference && numeroReference.value.trim()) {
+            var referenceRegex = /^(REF-\d{4}-\d{4}|VISA-\d{4}-\d{3})$/;
+            if (!referenceRegex.test(numeroReference.value.trim())) {
+                setFieldError(numeroReference, 'Le numero de reference doit suivre le format attendu.');
+                if (!firstInvalid) {
+                    firstInvalid = numeroReference;
+                }
+                hasError = true;
+            }
+        }
+
+        var numeroVisa = document.getElementById('numeroVisa');
+        if (numeroVisa && numeroVisa.value.trim()) {
+            var visaRegex = /^VISA-[A-Z0-9]{4}-[0-9]{6}$/;
+            if (!visaRegex.test(numeroVisa.value.trim())) {
+                setFieldError(numeroVisa, 'Le numero du visa doit suivre le format VISA-XXXX-XXXXXX.');
+                if (!firstInvalid) {
+                    firstInvalid = numeroVisa;
+                }
+                hasError = true;
+            }
+        }
+
+        return {
+            hasError: hasError,
+            firstInvalid: firstInvalid
+        };
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var typeVisa = document.getElementById('typeVisa');
         var form = document.getElementById('demandeForm');
@@ -348,12 +470,20 @@
 
         if (inputs.length) {
             inputs.forEach(function (input) {
-                input.addEventListener('input', function () {
+                if (input.type === 'hidden' || input.type === 'checkbox' || input.type === 'radio') {
+                    return;
+                }
+
+                var clearHandler = function () {
                     var errorBox = document.getElementById('formError');
                     if (errorBox) {
                         errorBox.style.display = 'none';
                     }
-                });
+                    clearFieldError(input);
+                };
+
+                input.addEventListener('input', clearHandler);
+                input.addEventListener('change', clearHandler);
             });
         }
 
@@ -363,27 +493,25 @@
                 if (errorBox) {
                     errorBox.style.display = 'none';
                 }
-                if (!form.checkValidity()) {
+
+                var validation = validateRequiredFields(form);
+                if (validation.hasError) {
                     event.preventDefault();
-                    form.reportValidity();
+                    if (validation.firstInvalid && validation.firstInvalid.focus) {
+                        validation.firstInvalid.focus();
+                    }
+                    showFormError('Veuillez remplir tous les champs obligatoires du formulaire.');
                     return;
                 }
 
                 var email = document.getElementById('email');
-                if (email && email.value) {
-                    var emailRegex = /^[A-Za-z0-9+_.-]+@(.+)$/;
-                    if (!emailRegex.test(email.value)) {
-                        event.preventDefault();
-                        showFormError('Le format de l\'email est invalide');
-                        return;
-                    }
-                }
 
                 var dateExpiration = parseDate(document.getElementById('dateExpiration').value);
                 var today = new Date();
                 today.setHours(0, 0, 0, 0);
                 if (dateExpiration && dateExpiration <= today) {
                     event.preventDefault();
+                    setFieldError(document.getElementById('dateExpiration'), 'La date d\'expiration doit etre superieure a aujourd\'hui.');
                     showFormError('La date d\'expiration doit etre superieure a aujourd\'hui');
                     return;
                 }
@@ -392,6 +520,7 @@
                 var dateSortie = parseDate(document.getElementById('dateSortie').value);
                 if (dateEntree && dateSortie && dateSortie <= dateEntree) {
                     event.preventDefault();
+                    setFieldError(document.getElementById('dateSortie'), 'La date de sortie doit etre superieure a la date d\'entree.');
                     showFormError('La date de sortie doit etre superieure a la date d\'entree');
                 }
             });
