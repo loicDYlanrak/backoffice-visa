@@ -24,4 +24,8 @@ public class PieceService {
         return pieceRepository.findByTypeVisaEntity_Id(typeVisaId);
     }
 
+    public List<PieceEntity> findByTypeVisaEntityIsNull() {
+        return pieceRepository.findByTypeVisaEntityIsNull();
+    }
+
 }

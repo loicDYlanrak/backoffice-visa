@@ -11,4 +11,5 @@ public interface PieceRepository extends JpaRepository<PieceEntity, Long> {
     PieceEntity findById(int id);
 
     List<PieceEntity> findByTypeVisaEntity_Id(int typeVisaId);
+    List<PieceEntity> findByTypeVisaEntityIsNull();
 }
