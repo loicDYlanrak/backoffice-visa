@@ -1,6 +1,7 @@
 package com.project.visa.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +21,11 @@ public interface VisaRepository extends JpaRepository<VisaEntity, Long> {
        "JOIN FETCH d.demandeur " +
        "WHERE v.reference = :ref")
     VisaEntity findByReference(@Param("ref") String reference);
-}
+
+    List<VisaEntity> findByDemandeId(int demandeId);
+
+    Optional<VisaEntity> findById(int id);
+    void deleteById(int id);
+
+    
+ }

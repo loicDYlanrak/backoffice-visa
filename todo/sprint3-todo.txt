@@ -1,0 +1,24 @@
+Team lead : 
+Dev : 
+
+backoffice
+brache sprint/3/1-ScanFichierTermniner
+	quand le status d'une demande dans la liste de demande est encore cree , on peut povoir une bouton scanner 
+
+	lorsqu on clique sur ce bouton , on se redirige vers une page qui liste tous les dossier necessaire qu demande
+	en parallele a chaque dossier on voit une bouton scanner , 
+	apres on upload un fichier et on ne peut plus cliquer sur le bouton mais il deviner uploader
+
+	lorsque tous les dossiers sont uploader , un bouton valider s afficher en bas 
+	apres avoir appuier sur ce bouron on se rediriger vers la liste de demande avec le status scanner 
+	on peut voir maintenant deux bouton valider et rejeter qui on tous les deux une page de confirmation 
+	de validation ou de rejet
+
+	quand on fait un sans donne interieur  	
+	
+
+	donne remplir input quand il y a erreur 
+	modal 
+	modificaiton transfoert donne visa ,
+	remplir 
+	prerempli visa a 6 chiffre 

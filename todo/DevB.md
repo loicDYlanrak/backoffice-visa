@@ -105,3 +105,41 @@ modification de la page liste de demande
  - ajoute colonne status pour afficher le status d une demande 
 
  NOTE: pour la modification mettre dans des variables le titre du formulaire et l url de l envoie du post comme ca on reutilise le formulaire d ajout pour les modificatioon de demande 
+
+ 
+:::::::TODO 3
+
+pre-rempli 6 chiffre dans le numero visa
+modifier rehefa misy erreur de averina daholo ilay donnee rehetra ilay namenona an'ilay input 
+
+PAGE : LISTE DES DEMANDES (MODIFICATION) 
+ Modifier la page liste de demandes :
+      - Si demande.status == "cree" :
+            Afficher un bouton " Scanner"
+      - Si demande.status == "scanner" :
+            Afficher deux boutons :
+                  Valider 
+                  Rejeter 
+      - Si demande.status == "valide" :
+            Afficher un badge vert "Validée"
+      - Si demande.status == "rejete" :
+            Afficher un badge rouge "Rejetée" 
+
+PAGE : DOCUMENTS À SCANNER 
+ Créer page documents_a_scanner.jsp :
+      - En-tête : "Demande N°{idDemande} - Scan des pièces justificatives"
+      - Barre de progression : X/N documents uploadés
+      - Pour chaque document requis :
+            Afficher une carte avec :
+                  - Nom du document (ex: "CIN recto/verso")
+                  - Statut : (Non uploadé / Uploadé)
+                  - Si non uploadé : 
+                        - on a un modal pour uplader les fichiers (hidden: s affiche que qu on clique sur scanner ou uploader : apres on voit un ipnut type file et bouton valider ) 
+                        - Bouton " Scanner / Uploader"
+                  - Si uploadé :
+                        - Message "✓ Fichier uploadé le {date}"
+                        - Bouton " Remplacer" 
+
+      - En bas de page :
+            - Bouton "Retour à la liste"
+            - Bouton "Valider tous les documents" (visible seulement quand tous sont uploadés)

@@ -2,6 +2,7 @@ package com.project.visa.controller;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,8 +19,33 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.project.visa.entity.*;
-import com.project.visa.service.*;
+import com.project.visa.entity.DemandeEntity;
+import com.project.visa.entity.DemandeurEntity;
+import com.project.visa.entity.NationaliteEntity;
+import com.project.visa.entity.PasseportEntity;
+import com.project.visa.entity.PieceDemandeEntity;
+import com.project.visa.entity.PieceEntity;
+import com.project.visa.entity.SituationFamilialeEntity;
+import com.project.visa.entity.StatutDemandeEntity;
+import com.project.visa.entity.StatutVisaEntity;
+import com.project.visa.entity.TypeDemandeEntity;
+import com.project.visa.entity.VisaEntity;
+import com.project.visa.entity.VisaTransformableEntity;
+import com.project.visa.service.DemandeService;
+import com.project.visa.service.DemandeurService;
+import com.project.visa.service.NationaliteService;
+import com.project.visa.service.PasseportService;
+import com.project.visa.service.PieceDemandeService;
+import com.project.visa.service.PieceService;
+import com.project.visa.service.SituationFamilialeService;
+import com.project.visa.service.StatutDemandeService;
+import com.project.visa.service.StatutVisaService;
+import com.project.visa.service.TypeDemandeService;
+import com.project.visa.service.TypeVisaService;
+import com.project.visa.service.VisaService;
+import com.project.visa.service.VisaTransformableService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class DemandeController {
@@ -57,6 +83,12 @@ public class DemandeController {
     @Autowired
     private TypeVisaService typeVisaService;
 
+    @Autowired
+    private VisaService visaService;
+
+    @Autowired
+    private StatutVisaService statutVisaService;
+
     @GetMapping("/demande/choix_type_demande")
     public String choix_type_demande(Model model) {
         model.addAttribute("template", "demande/choix_type_demande");
@@ -69,7 +101,10 @@ public class DemandeController {
         List<DemandeEntity> demandes = demandeService.findAll();
         Map<Integer, String> referenceMap = buildReferenceMap(demandes);
         Map<Integer, String> statusMap = buildStatusMap(demandes);
-
+        Map<Integer, Boolean> canBeScannedMap = new HashMap<>();
+        statusMap.forEach((id, statut) -> {
+            System.out.println("ID Demande: " + id + " | Statut: " + statut);
+        });
         if (reference != null && !reference.isBlank()) {
             String trimmed = reference.trim().toUpperCase();
             demandes = demandes.stream()
@@ -79,7 +114,12 @@ public class DemandeController {
                     })
                     .collect(Collectors.toList());
         }
+        for (DemandeEntity demande : demandes) {
+            boolean canScan = demandeService.canBeScan(demande);
+            canBeScannedMap.put(demande.getId(), canScan);
+        }
 
+        model.addAttribute("canBeScannedMap", canBeScannedMap);
         model.addAttribute("reference", reference);
         model.addAttribute("referenceMap", referenceMap);
         model.addAttribute("statusMap", statusMap);
@@ -98,14 +138,41 @@ public class DemandeController {
             BindingResult result,
             @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
             @RequestParam(value = "provenance", required = false) String provenance,
-            RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "numeroVisa", required = false) String numeroVisa,
+            @RequestParam(value = "dateFinVisa", required = false) String dateFinVisaStr,
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
 
         LocalDate currentDate = LocalDate.now();
+        List<String> fieldErrors = new ArrayList<>();
 
         if (demandeurEntity == null) {
-            redirectAttributes.addFlashAttribute("error",
-                    "Demandeur invalide : problème dans les informations personnelles.");
+            fieldErrors.add("Informations personnelles invalides");
+            redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+            redirectAttributes.addFlashAttribute("demandeurEntity", demandeurEntity);
+            redirectAttributes.addFlashAttribute("passeportEntity", passeportEntity);
+            redirectAttributes.addFlashAttribute("visaTransformableEntity", visaTransformableEntity);
+            redirectAttributes.addFlashAttribute("fieldErrors", fieldErrors);
             return "redirect:/demande/formulaire";
+        }
+
+        if (demandeurEntity.getNom() == null || demandeurEntity.getNom().trim().isEmpty()) {
+            fieldErrors.add("Le nom est obligatoire");
+        }
+        if (demandeurEntity.getPrenom() == null || demandeurEntity.getPrenom().trim().isEmpty()) {
+            fieldErrors.add("Le prénom est obligatoire");
+        }
+        if (demandeurEntity.getDateNaissance() == null) {
+            fieldErrors.add("La date de naissance est obligatoire");
+        }
+        if (demandeurEntity.getLieuNaissance() == null || demandeurEntity.getLieuNaissance().trim().isEmpty()) {
+            fieldErrors.add("Le lieu de naissance est obligatoire");
+        }
+        if (demandeurEntity.getTelephone() == null || demandeurEntity.getTelephone().trim().isEmpty()) {
+            fieldErrors.add("Le numéro de téléphone est obligatoire");
+        }
+        if (demandeurEntity.getAdresse() == null || demandeurEntity.getAdresse().trim().isEmpty()) {
+            fieldErrors.add("L'adresse est obligatoire");
         }
 
         if (idSituationFamiliale != null) {
@@ -122,11 +189,30 @@ public class DemandeController {
 
         // Valider le passeport
         if (passeportEntity == null) {
-            redirectAttributes.addFlashAttribute("error", "Passeport invalide : problème dans les dates de validité.");
-            return "redirect:/demande/formulaire";
+            fieldErrors.add("Informations du passeport invalides");
+        } else {
+            if (passeportEntity.getNumeroPasseport() == null || passeportEntity.getNumeroPasseport().trim().isEmpty()) {
+                fieldErrors.add("Le numéro de passeport est obligatoire");
+            }
+            if (passeportEntity.getDateDelivrance() == null) {
+                fieldErrors.add("La date de délivrance du passeport est obligatoire");
+            }
+            if (passeportEntity.getDateExpiration() == null) {
+                fieldErrors.add("La date d'expiration du passeport est obligatoire");
+            }
+
+            if (passeportEntity.getDateDelivrance() != null && passeportEntity.getDateExpiration() != null) {
+                if (passeportEntity.getDateExpiration().isBefore(passeportEntity.getDateDelivrance())) {
+                    fieldErrors.add("La date d'expiration du passeport doit être postérieure à la date de délivrance");
+                }
+                if (passeportEntity.getDateExpiration().isBefore(currentDate)) {
+                    fieldErrors.add("Le passeport est expiré");
+                }
+            }
+
+            passeportEntity.setDemandeur(demandeurEntity);
+            demandeurEntity.setPasseports(List.of(passeportEntity));
         }
-        passeportEntity.setDemandeur(demandeurEntity);
-        demandeurEntity.setPasseports(List.of(passeportEntity));
         if (!passeportEntity.isValid(currentDate)) {
             redirectAttributes.addFlashAttribute("error", "Passeport invalide : problème dans les dates de validité.");
             return "redirect:/demande/formulaire";
@@ -138,24 +224,46 @@ public class DemandeController {
             return "redirect:/demande/formulaire";
         }
 
-        // Valider le visa transformable
         if (visaTransformableEntity == null) {
-            redirectAttributes.addFlashAttribute("error",
-                    "Visa transformable invalide : problème dans les dates d'entrée/sortie.");
-            return "redirect:/demande/formulaire";
-        }
-        visaTransformableEntity.setDemandeur(demandeurEntity);
-        visaTransformableEntity.setPasseport(passeportEntity);
-        if (!visaTransformableEntity.demandeValide(currentDate)) {
-            redirectAttributes.addFlashAttribute("error",
-                    "Visa transformable invalide : problème dans les dates d'entrée/sortie.");
-            return "redirect:/demande/formulaire";
+            fieldErrors.add("Informations du visa transformable invalides");
+        } else {
+            if (visaTransformableEntity.getNumeroReference() == null
+                    || visaTransformableEntity.getNumeroReference().trim().isEmpty()) {
+                fieldErrors.add("Le numéro de référence du visa transformable est obligatoire");
+            }
+
+            if (visaTransformableEntity.getDateEntree() == null) {
+                fieldErrors.add("La date d'entrée du visa transformable est obligatoire");
+            }
+            if (visaTransformableEntity.getDateSortie() == null) {
+                fieldErrors.add("La date de sortie du visa transformable est obligatoire");
+            }
+
+            if (visaTransformableEntity.getDateEntree() != null && visaTransformableEntity.getDateSortie() != null) {
+                if (visaTransformableEntity.getDateSortie().isBefore(visaTransformableEntity.getDateEntree())) {
+                    fieldErrors.add("La date de sortie doit être postérieure à la date d'entrée");
+                }
+            }
+
+            visaTransformableEntity.setDemandeur(demandeurEntity);
+            visaTransformableEntity.setPasseport(passeportEntity);
         }
 
         // Valider la demande
         if (demandeEntity == null) {
-            redirectAttributes.addFlashAttribute("error", "Demande invalide : problème dans les dates ou types.");
-            return "redirect:/demande/formulaire";
+            fieldErrors.add("Informations de la demande invalides");
+        } else {
+            if (demandeEntity.getTypeDemande() == null || demandeEntity.getTypeVisa() == null) {
+                fieldErrors.add("Le type de demande est obligatoire");
+            }
+
+            if (demandeEntity.getTypeVisa() == null || demandeEntity.getTypeVisa() == null) {
+                fieldErrors.add("Le type de visa est obligatoire");
+            }
+
+            demandeEntity.setVisaTransformable(visaTransformableEntity);
+            demandeEntity.setDemandeur(demandeurEntity);
+            demandeEntity.setDateDemande(currentDate);
         }
         if (demandeEntity.getTypeDemande() == null) {
             TypeDemandeEntity typeDemande = new TypeDemandeEntity();
@@ -165,11 +273,98 @@ public class DemandeController {
         demandeEntity.setVisaTransformable(visaTransformableEntity);
         demandeEntity.setDemandeur(demandeurEntity);
         demandeEntity.setDateDemande(currentDate);
-        if (!demandeEntity.isValide()) {
-            redirectAttributes.addFlashAttribute("error", "Demande invalide : problème dans les dates ou types.");
-            return "redirect:/demande/formulaire";
+
+        String numeroVisa1 = null;
+        LocalDate dateFinVisa = null;
+        
+        if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
+            numeroVisa1 = request.getParameter("numeroVisa");
+            String visaPattern = "VISA-[A-Z0-9]{4}-[0-9]{6}";
+            if (!numeroVisa1.matches(visaPattern)) {
+                fieldErrors.add("Le numéro de visa doit être au format VISA-XXXX-XXXXXX");
+            }
+            
+            if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
+                try {
+                    dateFinVisa = LocalDate.parse(dateFinVisaStr);
+                    if (dateFinVisa.isBefore(currentDate)) {
+                        fieldErrors.add("La date de fin de validité du visa doit être postérieure à aujourd'hui");
+                    }
+                    if (visaTransformableEntity != null && visaTransformableEntity.getDateEntree() != null) {
+                        if (dateFinVisa.isBefore(visaTransformableEntity.getDateEntree())) {
+                            fieldErrors.add("La date de fin de validité du visa doit être postérieure à la date d'entrée");
+                        }
+                    }
+                } catch (Exception e) {
+                    fieldErrors.add("Format de date de fin de visa invalide");
+                }
+            } else {
+                fieldErrors.add("La date de fin de validité du visa est obligatoire si un numéro de visa est fourni");
+            }
         }
 
+        if (!fieldErrors.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Veuillez corriger les erreurs ci-dessous");
+            redirectAttributes.addFlashAttribute("fieldErrors", fieldErrors);
+
+            // Conserver toutes les valeurs saisies
+            redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+            redirectAttributes.addFlashAttribute("demandeurEntity", demandeurEntity);
+            redirectAttributes.addFlashAttribute("passeportEntity", passeportEntity);
+            redirectAttributes.addFlashAttribute("visaTransformableEntity", visaTransformableEntity);
+            redirectAttributes.addFlashAttribute("prefillNom", demandeurEntity != null ? demandeurEntity.getNom() : "");
+            redirectAttributes.addFlashAttribute("prefillPrenom",
+                    demandeurEntity != null ? demandeurEntity.getPrenom() : "");
+            redirectAttributes.addFlashAttribute("prefillDateNaissance",
+                    demandeurEntity != null && demandeurEntity.getDateNaissance() != null
+                            ? demandeurEntity.getDateNaissance().toString()
+                            : "");
+            redirectAttributes.addFlashAttribute("prefillLieuNaissance",
+                    demandeurEntity != null ? demandeurEntity.getLieuNaissance() : "");
+            redirectAttributes.addFlashAttribute("prefillTelephone",
+                    demandeurEntity != null ? demandeurEntity.getTelephone() : "");
+            redirectAttributes.addFlashAttribute("prefillAdresse",
+                    demandeurEntity != null ? demandeurEntity.getAdresse() : "");
+            redirectAttributes.addFlashAttribute("prefillEmail",
+                    demandeurEntity != null ? demandeurEntity.getEmail() : "");
+            redirectAttributes.addFlashAttribute("prefillSituationId", idSituationFamiliale);
+            redirectAttributes.addFlashAttribute("prefillNationaliteActuelleId", idNationaliteActuelle);
+            redirectAttributes.addFlashAttribute("prefillNumeroPasseport",
+                    passeportEntity != null ? passeportEntity.getNumeroPasseport() : "");
+            redirectAttributes.addFlashAttribute("prefillPaysDelivrance",
+                    passeportEntity != null ? passeportEntity.getPaysDelivrance() : "");
+            redirectAttributes.addFlashAttribute("prefillDateDelivrance",
+                    passeportEntity != null && passeportEntity.getDateDelivrance() != null
+                            ? passeportEntity.getDateDelivrance().toString()
+                            : "");
+            redirectAttributes.addFlashAttribute("prefillDateExpiration",
+                    passeportEntity != null && passeportEntity.getDateExpiration() != null
+                            ? passeportEntity.getDateExpiration().toString()
+                            : "");
+            redirectAttributes.addFlashAttribute("prefillNumeroReference",
+                    visaTransformableEntity != null ? visaTransformableEntity.getNumeroReference() : "");
+            redirectAttributes.addFlashAttribute("prefillDateEntree",
+                    visaTransformableEntity != null && visaTransformableEntity.getDateEntree() != null
+                            ? visaTransformableEntity.getDateEntree().toString()
+                            : "");
+            redirectAttributes.addFlashAttribute("prefillDateSortie",
+                    visaTransformableEntity != null && visaTransformableEntity.getDateSortie() != null
+                            ? visaTransformableEntity.getDateSortie().toString()
+                            : "");
+            redirectAttributes.addFlashAttribute("prefillTypeDemandeId",
+                    demandeEntity != null && demandeEntity.getTypeDemande() != null
+                            ? demandeEntity.getTypeDemande().getId()
+                            : null);
+            redirectAttributes.addFlashAttribute("prefillTypeVisaId",
+                    demandeEntity != null && demandeEntity.getTypeVisa() != null ? demandeEntity.getTypeVisa().getId()
+                            : null);
+            redirectAttributes.addFlashAttribute("prefillNumeroVisa", numeroVisa1);
+            redirectAttributes.addFlashAttribute("prefillDateFinVisa", dateFinVisaStr);
+            redirectAttributes.addFlashAttribute("piecesIds", piecesIds);
+            redirectAttributes.addFlashAttribute("provenance", provenance);
+
+            return "redirect:/demande/formulaire";
+        }
         // ========== 2. SAUVEGARDE (seulement si tout est valide) ==========
 
         try {
@@ -206,7 +401,8 @@ public class DemandeController {
             statutDemandeEntity.setDemande(savedDemande);
             statutDemandeEntity.setDateChangementStatut(currentDate);
             statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
-            if (provenance != null) {
+            System.out.println("provenace: " + provenance);
+            if (provenance != null && !provenance.equals("CLASSIQUE")) {
                 statutDemandeEntity.setStatut(30);
             }
             statutDemandeService.save(statutDemandeEntity);
@@ -225,18 +421,45 @@ public class DemandeController {
 
                 }
             }
+
+            StatutVisaEntity statutVisa = new StatutVisaEntity();
+
+            if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
+                numeroVisa1 = request.getParameter("numeroVisa");
+                if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
+                    try {
+                        dateFinVisa = LocalDate.parse(dateFinVisaStr);
+                    } catch (Exception e) {
+
+                    }
+                }
+
+                VisaEntity visa = generateVisa(savedDemande, savedPasseport, numeroVisa1, dateFinVisa);
+                VisaEntity savedVisa = visaService.save(visa);
+
+                statutVisa.setVisa(savedVisa);
+                statutVisa.setStatut(1); // non valide
+                statutVisa.setDateChangementStatut(currentDate);
+
+                redirectAttributes.addFlashAttribute("generatedVisaNumber", numeroVisa1);
+                redirectAttributes.addFlashAttribute("visaDateDebut", currentDate.toString());
+                redirectAttributes.addFlashAttribute("visaDateFin", dateFinVisa.toString());
+                redirectAttributes.addFlashAttribute("visaStatut", "Non valide");
+                redirectAttributes.addFlashAttribute("visaReference", buildReference(savedDemande));
+            }
             redirectAttributes.addFlashAttribute("successMessage",
                     "Votre demande N° " + reference + " a été enregistrée");
 
             if (provenance != null) {
                 if (provenance.equals("TRANSFERT")) {
-                    // Redirection pour le transfert
-                    redirectAttributes.addAttribute("demandeId", savedDemande.getId());
-                    return "redirect:/transfert/formulaire";
+                    statutVisa.setStatut(30);
+                    statutVisaService.save(statutVisa);
+                    redirectAttributes.addAttribute("id", savedDemande.getId());
+                    return "redirect:/duplicata/nouveau_passeport?duplicata=0";
 
                 } else if (provenance.equals("DUPLICATA")) {
-                    // Redirection pour le duplicata avec les paramètres nécessaires
-                    // Récupérer les IDs des demandeurs (dans votre cas, un seul demandeur)
+                    statutVisa.setStatut(30);
+                    statutVisaService.save(statutVisa);
                     List<Integer> demandeurIds = new ArrayList<>();
                     demandeurIds.add(savedDemandeur.getId());
 
@@ -252,7 +475,7 @@ public class DemandeController {
                     paysEmetteurs.add(passeportEntity.getPaysDelivrance());
 
                     // Ajout des attributs à redirectAttributes
-                    redirectAttributes.addAttribute("demandeId", savedDemande.getId());
+                    redirectAttributes.addAttribute("id", savedDemande.getId());
                     redirectAttributes.addAttribute("duplicata", "1");
                     redirectAttributes.addAttribute("demandeurId", demandeurIds);
                     redirectAttributes.addAttribute("nouveauNumPasseport", nouveauxNumPasseports);
@@ -260,22 +483,27 @@ public class DemandeController {
                     redirectAttributes.addAttribute("dateExpiration", dateExpirations);
                     redirectAttributes.addAttribute("paysEmetteur", paysEmetteurs);
 
-                    return "redirect:/transfert/resume_transfert";
+                    return "redirect:/duplicata/resume_duplicata";
                 }
             }
 
-        } catch (Exception e) {
-            String message = e.getMessage() + " " + e.getStackTrace();
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la creation. Veuillez verifier les informations saisies." + message);
-            System.out.println("demande/formulaire");
+            if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
+                statutVisaService.save(statutVisa);
 
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Erreur technique : " + e.getMessage());
+            redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
+            redirectAttributes.addFlashAttribute("demandeurEntity", demandeurEntity);
+            redirectAttributes.addFlashAttribute("passeportEntity", passeportEntity);
+            redirectAttributes.addFlashAttribute("visaTransformableEntity", visaTransformableEntity);
+            redirectAttributes.addFlashAttribute("fieldErrors", List.of("Erreur technique : " + e.getMessage()));
             return "redirect:/demande/formulaire";
         }
-        System.out.println("demande/liste");
-        return "redirect:/demande/liste";
 
+        return "redirect:/demande/liste";
     }
 
     @GetMapping("/demande/formulaire")
@@ -340,6 +568,13 @@ public class DemandeController {
             model.addAttribute("prefillNumeroReference", visaTransformable.getNumeroReference());
             model.addAttribute("prefillDateEntree", visaTransformable.getDateEntree());
             model.addAttribute("prefillDateSortie", visaTransformable.getDateSortie());
+        }
+
+        // Charger les informations du visa généré s'il existe
+        if (demande.getVisas() != null && !demande.getVisas().isEmpty()) {
+            VisaEntity visa = demande.getVisas().get(0);
+            model.addAttribute("prefillNumeroVisa", visa.getReference());
+            model.addAttribute("prefillDateFinVisa", visa.getDateFin());
         }
 
         if (demande.getTypeDemande() != null) {
@@ -481,10 +716,20 @@ public class DemandeController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la modification. Veuillez verifier les informations saisies." + e.getMessage());
+            String errorMessage = "Erreur lors de la modification. Veuillez verifier les informations saisies.";
+            
+            if (e.getMessage() != null) {
+                if (e.getMessage().contains("Duplicate entry")) {
+                    errorMessage = "Erreur : Ce numéro de référence existe déjà. Veuillez utiliser une valeur unique.";
+                } else if (e.getMessage().contains("constraint")) {
+                    errorMessage = "Erreur : Violation de contrainte de la base de données. Veuillez verifier les informations.";
+                } else {
+                    errorMessage = "Erreur : " + e.getMessage();
+                }
+            }
+            
+            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
-
             return "redirect:/demande/modifier/" + id;
         }
 
@@ -500,6 +745,15 @@ public class DemandeController {
         model.addAttribute("template", "demande/formulaire");
         model.addAttribute("demande", new DemandeEntity());
         model.addAttribute("provenance", provenance);
+        model.addAttribute("formTitle", "Nouvelle demande avec génération de visa");
+        model.addAttribute("formAction", "/demande");
+        model.addAttribute("showVisaSection", true);
+        model.addAttribute("template", "demande/modification");
+
+        model.addAttribute("prefillNumeroVisa",
+                "VISA-MDGR-" + LocalDate.now().getYear() + String.format("%04d", (int) (Math.random() * 10000)));
+        model.addAttribute("prefillDateFinVisa", LocalDate.now().plusYears(1).toString());
+
         return "template";
     }
 
@@ -591,21 +845,19 @@ public class DemandeController {
         return demandes.stream().collect(Collectors.toMap(
                 DemandeEntity::getId,
                 demande -> statutDemandeService.findLatestByDemandeId(demande.getId())
-                        .map(statut -> mapStatutLabel(statut.getStatut()))
+                        .<String>map(statut -> statut.getLibelleStatut())
                         .orElse("Cree")));
     }
 
-    private String mapStatutLabel(Integer statut) {
-        if (statut == null) {
-            return "Cree";
-        }
-        return switch (statut) {
-            case 1 -> "Cree";
-            case 2 -> "Soumise";
-            case 3 -> "En cours";
-            case 4 -> "Validee";
-            case 5 -> "Rejetee";
-            default -> "Cree";
-        };
+    private VisaEntity generateVisa(DemandeEntity demande, PasseportEntity passeport,
+            String numeroVisa, LocalDate dateFinVisa) {
+        VisaEntity visa = new VisaEntity();
+        visa.setDemande(demande);
+        visa.setPasseport(passeport);
+        visa.setReference(numeroVisa);
+        visa.setDateDebut(LocalDate.now());
+        visa.setDateFin(dateFinVisa);
+
+        return visa;
     }
 }

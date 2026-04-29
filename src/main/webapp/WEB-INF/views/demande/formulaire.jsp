@@ -1,4 +1,6 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+
 <div id="formError" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
     <span id="formErrorText"></span>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -10,13 +12,24 @@
     <div class="card-body">
         <c:if test="${not empty error}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                ${error}
+                <strong>Erreur :</strong> ${error}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                ${errorMessage}
+                <strong>Erreur de validation :</strong> ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+        <c:if test="${not empty fieldErrors}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Veuillez corriger les erreurs suivantes :</strong>
+                <ul>
+                    <c:forEach items="${fieldErrors}" var="error">
+                        <li>${error}</li>
+                    </c:forEach>
+                </ul>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
@@ -155,6 +168,26 @@
             </div>
 
             <hr>
+            <h5 class="mt-2 mb-3 text-secondary">Informations du visa à générer</h5>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="numeroVisa" class="form-label">Numéro du visa <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="numeroVisa" name="numeroVisa" 
+                        value="${prefillNumeroVisa}" required
+                        pattern="VISA-[A-Z0-9]{4}-[0-9]{6}" 
+                        placeholder="Exemple: VISA-MDGR-202615">
+                    <div class="form-text">Format: VISA-XXXX-XXXXXX (X = lettre ou chiffre)</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="dateFinVisa" class="form-label">Date de fin de validité <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="dateFinVisa" name="dateFinVisa" 
+                        value="${prefillDateFinVisa}" required>
+                    <div class="form-text">La date doit être postérieure à la date d'entrée</div>
+                </div>
+            </div>
+
+            <hr>
             <h5 class="mt-2 mb-3 text-secondary">Pieces communes</h5>
 
             <div id="piecesCommunes" class="row">
@@ -191,7 +224,7 @@
                         <option value="">-- Selectionner --</option>
                         <c:forEach items="${typeVisas}" var="tv">
                             <option value="${tv.id}" data-visa-label="${tv.libelle}" 
-                                ${demande.typeVisa.id == tv.id ? 'selected' : ''}>
+                                ${(not empty prefillTypeVisaId and prefillTypeVisaId == tv.id) or (demandeEntity.typeVisa.id == tv.id) ? 'selected' : ''}>
                                 ${tv.libelle}
                             </option>
                         </c:forEach>
