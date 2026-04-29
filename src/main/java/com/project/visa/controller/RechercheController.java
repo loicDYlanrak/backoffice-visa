@@ -278,6 +278,7 @@ public class RechercheController {
                 return "redirect:/duplicata/recherche_numero";
             }
         } catch (Exception e) {
+            e.printStackTrace();
             ra.addFlashAttribute("errorMessage",
                     "Erreur lors de la création du transfert : " + e.getMessage());
             return "redirect:/duplicata/recherche_numero";
