@@ -202,16 +202,19 @@ public class ScanFichierService {
         if (demande == null) {
             return List.of();
         }
-
-        List<PieceEntity> documentsRequis = pieceService.findByTypeVisaId(demande.getTypeVisa().getId());
+        List<PieceEntity> documentsRequis = pieceService.findByTypeVisaEntityIsNull(); 
+        documentsRequis.addAll(pieceService.findByTypeVisaId(demande.getTypeVisa().getId()));
+        
         List<ScanFichierEntity> uploads = getUploadsParDemande(idDemande);
 
         List<DocumentUploadStatus> resultats = new ArrayList<>();
 
         for (PieceEntity document : documentsRequis) {
             ScanFichierEntity scanTrouve = null;
-
+            System.out.println("Vérification pour document ID = " + document.getId());
             for (ScanFichierEntity upload : uploads) {
+                System.out.println("Comparaison: upload piece ID = " + upload.getPieceDemande().getPiece().getId() +
+                        " vs document ID = " + document.getId());
                 if (upload.getPieceDemande().getPiece().getId() == document.getId()) {
                     scanTrouve = upload;
                     break; 
