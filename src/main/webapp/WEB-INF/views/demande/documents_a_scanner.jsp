@@ -96,7 +96,7 @@
                                 <h5 class="modal-title">Numérisation : ${pd.piece.libelle}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                            <form action="${pageContext.request.contextPath}/demande/upload-doc" method="post" enctype="multipart/form-data">
+                            <form action="${pageContext.request.contextPath}/upload-doc" method="post" enctype="multipart/form-data">
                                 <div class="modal-body">
                                     <input type="hidden" name="demandeId" value="${idDemande}">
                                     <%-- On envoie l'ID de la pièce pour le service --%>
