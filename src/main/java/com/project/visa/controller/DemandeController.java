@@ -28,6 +28,7 @@ import com.project.visa.entity.NationaliteEntity;
 import com.project.visa.entity.PasseportEntity;
 import com.project.visa.entity.PieceDemandeEntity;
 import com.project.visa.entity.PieceEntity;
+import com.project.visa.entity.ScanFichierEntity;
 import com.project.visa.entity.SituationFamilialeEntity;
 import com.project.visa.entity.StatutDemandeEntity;
 import com.project.visa.entity.StatutVisaEntity;
@@ -50,6 +51,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class DemandeController {
+
+    @Autowired
+    private ScanFichierService scanFichierService;
 
     @Autowired
     private DemandeService demandeService;
@@ -924,18 +928,29 @@ public class DemandeController {
         }
     }
     @GetMapping("/demandeDetails/HistoStatut/{idDemande}")
-public ResponseEntity<?> getHistoStatut(@PathVariable int idDemande) {
-     DemandeEntity demandeOpt = demandeService.findById(idDemande);
-    if (demandeOpt==null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande introuvable");
-    }
+    public ResponseEntity<?> getHistoStatut(@PathVariable int idDemande) {
+        DemandeEntity demandeOpt = demandeService.findById(idDemande);
+        if (demandeOpt==null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande introuvable");
+        }
 
-    List<StatutDemandeEntity> historique = demandeOpt.getStatuts();
+        List<StatutDemandeEntity> historique = demandeOpt.getStatuts();
 
-    if (historique == null || historique.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Aucun historique pour cette demande");
+        if (historique == null || historique.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Aucun historique pour cette demande");
+        }
+        return ResponseEntity.ok(historique);
     }
-    return ResponseEntity.ok(historique);
+    @GetMapping("/demandeDetails/DetailsFichier/{idDemande}")
+    public ResponseEntity<?> getDetailsFichier(@PathVariable Long idDemande) {
+        List<ScanFichierEntity> fichiers = scanFichierService.getUploadsParDemande(idDemande);
+
+        if (fichiers == null || fichiers.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("Aucun fichier uploadé pour cette demande.");
+        }
+
+        return ResponseEntity.ok(fichiers);
     }
 
 }
