@@ -1,6 +1,8 @@
 package com.project.visa.entity;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 @Entity
 @Table(name = "Piece")
@@ -17,6 +19,7 @@ public class PieceEntity {
     private TypeVisaEntity typeVisaEntity;
 
     @OneToMany(mappedBy = "piece")
+    @JsonIgnore
     private List<PieceDemandeEntity> demandes;
     
     public PieceEntity() {

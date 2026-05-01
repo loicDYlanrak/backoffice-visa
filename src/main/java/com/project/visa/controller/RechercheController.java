@@ -3,17 +3,21 @@ package com.project.visa.controller;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.project.visa.repository.*;
 import com.project.visa.entity.*;
-
+import java.util.Set;
 @Controller
 public class RechercheController {
     @Autowired
@@ -25,11 +29,10 @@ public class RechercheController {
     @Autowired
     private TypeDemandeRepository typeDemandeRepository;
     @Autowired
-    private DemandeurRepository demandeurRepository;
-    @Autowired
     private StatutDemandeRepository statutDemandeRepository;
     @Autowired
     private PasseportRepository passeportRepository;
+
 
     @GetMapping("/duplicata/recherche_numero")
     public String recherche_numero(
@@ -296,5 +299,44 @@ visa.setPasseport(passeportFinal);
 
         ra.addFlashAttribute("successMessage", "Transfert terminé avec succès.");
         return "redirect:/demande/liste";
+    }
+    @GetMapping("/demandesRecherche")
+    @ResponseBody
+    public ResponseEntity<Set<DemandeEntity>> recherche_demande(@RequestParam(value = "numeroDemande", required = false) Integer numeroDemande,
+                                    @RequestParam(value = "numeroPasseport", required = false) String numeroPasseport
+                                     ){
+        
+       if ((numeroDemande == null ) && 
+            (numeroPasseport == null || numeroPasseport.trim().isEmpty())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LinkedHashSet<>());
+            
+         }
+        Set<DemandeEntity> demandes=new LinkedHashSet<>();
+         if(numeroDemande!=null){
+
+            DemandeEntity demande=demandeRepository.findById(numeroDemande);
+            if(demande!=null){
+                demandes.add(demande);
+                 List<DemandeEntity> autreDemandes= demandeRepository.findByDemandeurId(demande.getDemandeur().getId());
+            if(!autreDemandes.isEmpty()){
+                demandes.addAll(autreDemandes);
+            }
+            }
+             else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LinkedHashSet<>());
+            }
+           
+           
+            
+         }
+         if(numeroPasseport!=null&&!numeroPasseport.isEmpty()){
+            List<DemandeEntity> autreDemandes=demandeRepository.rechercherParNumeroPasseport(numeroPasseport);
+            if(!autreDemandes.isEmpty()){
+                demandes.addAll(autreDemandes);
+            }else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LinkedHashSet<>());
+            }
+         }
+        return ResponseEntity.ok(demandes);
     }
 }

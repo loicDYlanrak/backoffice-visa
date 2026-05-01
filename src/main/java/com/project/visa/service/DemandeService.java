@@ -26,11 +26,13 @@ public class DemandeService {
     public List<DemandeEntity> findAll() {
         return demandeRepository.findAll();
     }
-
+    
     public DemandeEntity findById(int id) {
         return demandeRepository.findById(id);
     }
-
+    public List<DemandeEntity>findByDemandeurId(int id){
+        return demandeRepository.findByDemandeurId(id);
+    }
     public DemandeEntity save(DemandeEntity demandeEntity) {
         return demandeRepository.save(demandeEntity);
     }

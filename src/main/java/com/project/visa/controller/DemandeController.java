@@ -45,6 +45,15 @@ import com.project.visa.service.TypeVisaService;
 import com.project.visa.service.VisaService;
 import com.project.visa.service.VisaTransformableService;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
+import java.nio.file.*;
+import java.io.File;
+
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
@@ -61,6 +70,9 @@ public class DemandeController {
 
     @Autowired
     private PieceService pieceService;
+
+    @Autowired
+    private ServletContext servletContext;
 
     @Autowired
     private PieceDemandeService pieceDemandeService;
@@ -401,10 +413,28 @@ public class DemandeController {
             statutDemandeEntity.setDemande(savedDemande);
             statutDemandeEntity.setDateChangementStatut(currentDate);
             statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
+            try{
+                    String folderPath = servletContext.getRealPath("/images/qrcodes/");
+                  
+                    String fileName = "qr_" + savedDemande.getId() + ".png";
+                    String fullPath = folderPath + File.separator + fileName;
+                 
+                    String baseUrlReact = "http://localhost:3000/demandes/"; 
+                    String urlFiche = baseUrlReact + savedDemande.getId();
+                    genererQRCode(urlFiche, fullPath);
+                    savedDemande.setCheminQR(fullPath);
+                    savedDemande = demandeService.save(savedDemande);
+
+            
+            }catch(Exception e){
+                e.printStackTrace();
+
+            }
             System.out.println("provenace: " + provenance);
             if (provenance != null && !provenance.equals("CLASSIQUE")) {
                 statutDemandeEntity.setStatut(30);
             }
+            
             statutDemandeService.save(statutDemandeEntity);
 
             String reference = buildReference(savedDemande);
@@ -859,5 +889,11 @@ public class DemandeController {
         visa.setDateFin(dateFinVisa);
 
         return visa;
+    }
+    private void genererQRCode(String texte, String nomFichier) throws Exception {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(texte, BarcodeFormat.QR_CODE, 300, 300);
+        Path path = FileSystems.getDefault().getPath(nomFichier);
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
     }
 }
