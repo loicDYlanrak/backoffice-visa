@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "Statut_demande")
 public class StatutDemandeEntity {
@@ -21,6 +23,7 @@ public class StatutDemandeEntity {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demande", nullable = false)
+    @JsonIgnore
     private DemandeEntity demande;
     
     @Column(nullable = false)

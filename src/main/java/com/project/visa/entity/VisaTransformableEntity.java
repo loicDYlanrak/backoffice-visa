@@ -29,10 +29,12 @@ public class VisaTransformableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demandeur", nullable = false)
+    @JsonIgnore
     private DemandeurEntity demandeur;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_passeport", nullable = false)
+    @JsonIgnore
     private PasseportEntity passeport;
 
     @Column(name = "date_entree", nullable = false)

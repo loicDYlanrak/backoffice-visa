@@ -169,7 +169,7 @@ lorsqu on clique sur les booutons :
         x- Statut actuel
         x- Visa et carte de résidence (si statut = approuvé)
 
- API GET /demandeDetails/HistoStatut/{idDemande}
+ API GET/demandeDetails/HistoStatut/{idDemande} 
     - Endpoint : /demandeDetails/HistoStatut/{idDemande}
     - Retourne : historique complet des statuts (avec dates)
 

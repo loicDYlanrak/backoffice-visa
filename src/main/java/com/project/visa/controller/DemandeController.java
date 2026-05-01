@@ -902,7 +902,8 @@ public class DemandeController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande non trouvée");
             }
             Map<String, Object> response = new HashMap<>();
-            response.put("demande", demande);
+            // response.put("demande", demande);
+            response.put("idDemande", demande.getId());
             response.put("qrChemin",demande.getCheminQR());
             response.put("EtatCivil", demande.getDemandeur());
             response.put("passeport", demande.getVisaTransformable() != null ? demande.getVisaTransformable().getPasseport() : null);
@@ -922,4 +923,19 @@ public class DemandeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la récupération des détails de la demande: " + e.getMessage());
         }
     }
+    @GetMapping("/demandeDetails/HistoStatut/{idDemande}")
+public ResponseEntity<?> getHistoStatut(@PathVariable int idDemande) {
+     DemandeEntity demandeOpt = demandeService.findById(idDemande);
+    if (demandeOpt==null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande introuvable");
+    }
+
+    List<StatutDemandeEntity> historique = demandeOpt.getStatuts();
+
+    if (historique == null || historique.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Aucun historique pour cette demande");
+    }
+    return ResponseEntity.ok(historique);
+    }
+
 }
