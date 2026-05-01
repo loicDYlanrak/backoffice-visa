@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.project.visa.entity.CarteResidentEntity;
 import com.project.visa.entity.DemandeEntity;
 import com.project.visa.entity.DemandeurEntity;
 import com.project.visa.entity.NationaliteEntity;
@@ -31,19 +34,8 @@ import com.project.visa.entity.StatutVisaEntity;
 import com.project.visa.entity.TypeDemandeEntity;
 import com.project.visa.entity.VisaEntity;
 import com.project.visa.entity.VisaTransformableEntity;
-import com.project.visa.service.DemandeService;
-import com.project.visa.service.DemandeurService;
-import com.project.visa.service.NationaliteService;
-import com.project.visa.service.PasseportService;
-import com.project.visa.service.PieceDemandeService;
-import com.project.visa.service.PieceService;
-import com.project.visa.service.SituationFamilialeService;
-import com.project.visa.service.StatutDemandeService;
-import com.project.visa.service.StatutVisaService;
-import com.project.visa.service.TypeDemandeService;
-import com.project.visa.service.TypeVisaService;
-import com.project.visa.service.VisaService;
-import com.project.visa.service.VisaTransformableService;
+import com.project.visa.service.*;
+
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -91,6 +83,10 @@ public class DemandeController {
 
     @Autowired
     private TypeDemandeService typeDemandeService;
+
+    @Autowired
+    private CarteResidentService carteResidentService;
+
 
     @Autowired
     private TypeVisaService typeVisaService;
@@ -895,5 +891,35 @@ public class DemandeController {
         BitMatrix bitMatrix = qrCodeWriter.encode(texte, BarcodeFormat.QR_CODE, 300, 300);
         Path path = FileSystems.getDefault().getPath(nomFichier);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+    }
+
+
+    @GetMapping("/demandeDetails/{idDemande}")
+    public ResponseEntity<?> getDemandeDetails(@PathVariable Long idDemande) {
+        try {
+            DemandeEntity demande = demandeService.findById(idDemande.intValue());
+            if (demande == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande non trouvée");
+            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("demande", demande);
+            response.put("qrChemin",demande.getCheminQR());
+            response.put("EtatCivil", demande.getDemandeur());
+            response.put("passeport", demande.getVisaTransformable() != null ? demande.getVisaTransformable().getPasseport() : null);
+            response.put("visaTransformable", demande.getVisaTransformable());
+            response.put("typeDemande", demande.getTypeDemande());
+            response.put("typeVisa", demande.getTypeVisa());
+            List<StatutDemandeEntity> statuts = demande.getStatuts();
+            response.put("Status",statuts.get(statuts.size() - 1).getLibelleStatut());
+            if(statuts.get(statuts.size() - 1).getLibelleStatut()=="Approuvé"){
+                List<VisaEntity> visas=visaService.findByDemandeId(demande.getId());
+                response.put("visa",visas.get(visas.size() - 1));
+                List<CarteResidentEntity> cartes=carteResidentService.findByDemandeId(demande.getId());
+                response.put("carteResident",cartes.get(cartes.size() - 1));
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la récupération des détails de la demande: " + e.getMessage());
+        }
     }
 }

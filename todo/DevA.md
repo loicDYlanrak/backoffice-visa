@@ -162,12 +162,12 @@ lorsqu on clique sur les booutons :
  API GET /demandeDetails/{idDemande}
     - Endpoint : /demandeDetails/{idDemande}
     - Retourne :
-        - qrCode
-        - Etat civil
-        - Passeport
-        - Visa transformable
-        - Statut actuel
-        - Visa et carte de résidence (si statut = approuvé)
+        x- qrCode
+        x- Etat civil
+        x- Passeport
+        x- Visa transformable
+        x- Statut actuel
+        x- Visa et carte de résidence (si statut = approuvé)
 
  API GET /demandeDetails/HistoStatut/{idDemande}
     - Endpoint : /demandeDetails/HistoStatut/{idDemande}
