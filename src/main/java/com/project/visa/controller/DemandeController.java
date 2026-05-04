@@ -419,12 +419,12 @@ public class DemandeController {
                     String folderPath = servletContext.getRealPath("/images/qrcodes/");
                   
                     String fileName = "qr_" + savedDemande.getId() + ".png";
-                    String fullPath = folderPath + File.separator + fileName;
-                    
+                    String fullPath = folderPath + fileName;
+                    String pathSave= "images/qrcodes/"+fileName;
                     String baseUrlReact = apiUrl; 
                     String urlFiche = baseUrlReact + savedDemande.getId();
                     genererQRCode(urlFiche, fullPath);
-                    savedDemande.setCheminQR(fullPath);
+                    savedDemande.setCheminQR(pathSave);
                     savedDemande = demandeService.save(savedDemande);
 
             
