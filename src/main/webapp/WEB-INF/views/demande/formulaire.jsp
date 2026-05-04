@@ -172,18 +172,14 @@
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="numeroVisa" class="form-label">Numéro du visa <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="numeroVisa" name="numeroVisa" 
-                        value="${empty prefillNumeroVisa ? 'VISA-MDGR-202628' : prefillNumeroVisa}" required
-                        pattern="VISA-[A-Z0-9]{4}-[0-9]{6}" 
-                        placeholder="Exemple: VISA-MDGR-202628">
-                    <div class="form-text">Format: VISA-XXXX-XXXXXX (X = lettre ou chiffre)</div>
+                    <label for="dateDebutVisa" class="form-label">Date de debut de validité <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="dateDebutVisa" name="dateFinVisa" 
+                        value="${prefillDateDebutVisa}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="dateFinVisa" class="form-label">Date de fin de validité <span class="text-danger">*</span></label>
                     <input type="date" class="form-control" id="dateFinVisa" name="dateFinVisa" 
                         value="${prefillDateFinVisa}" required>
-                    <div class="form-text">La date doit être postérieure à la date d'entrée</div>
                 </div>
             </div>
 
@@ -355,7 +351,7 @@
             dateEntree: 'Date de delivrance',
             dateSortie: "Date d'expiration",
             typeDemande: 'Type de demande',
-            numeroVisa: 'Numero du visa',
+            dateDebutVisa: 'Date de debut de validite',
             dateFinVisa: 'Date de fin de validite',
             typeVisa: 'Type de visa'
         };
@@ -435,18 +431,6 @@
                 setFieldError(numeroReference, 'Le numero de reference doit suivre le format attendu.');
                 if (!firstInvalid) {
                     firstInvalid = numeroReference;
-                }
-                hasError = true;
-            }
-        }
-
-        var numeroVisa = document.getElementById('numeroVisa');
-        if (numeroVisa && numeroVisa.value.trim()) {
-            var visaRegex = /^VISA-[A-Z0-9]{4}-[0-9]{6}$/;
-            if (!visaRegex.test(numeroVisa.value.trim())) {
-                setFieldError(numeroVisa, 'Le numero du visa doit suivre le format VISA-XXXX-XXXXXX.');
-                if (!firstInvalid) {
-                    firstInvalid = numeroVisa;
                 }
                 hasError = true;
             }

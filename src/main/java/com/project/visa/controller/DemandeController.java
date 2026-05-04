@@ -1,6 +1,8 @@
 package com.project.visa.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +46,9 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.nio.file.*;
-import java.io.File;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
+
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -152,7 +155,7 @@ public class DemandeController {
             BindingResult result,
             @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
             @RequestParam(value = "provenance", required = false) String provenance,
-            @RequestParam(value = "numeroVisa", required = false) String numeroVisa,
+            @RequestParam(value = "dateDebutVisa", required = false) String dateDebutVisaStr,
             @RequestParam(value = "dateFinVisa", required = false) String dateFinVisaStr,
             RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
@@ -289,6 +292,7 @@ public class DemandeController {
         demandeEntity.setDateDemande(currentDate);
 
         String numeroVisa1 = null;
+        LocalDate dateDebutVisa = null;
         LocalDate dateFinVisa = null;
         
         if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
@@ -297,7 +301,15 @@ public class DemandeController {
             if (!numeroVisa1.matches(visaPattern)) {
                 fieldErrors.add("Le numéro de visa doit être au format VISA-XXXX-XXXXXX");
             }
-            
+            if (dateDebutVisaStr != null && !dateDebutVisaStr.isEmpty()) {
+                try {
+                    dateDebutVisa = LocalDate.parse(dateDebutVisaStr);
+                } catch (Exception e) {
+                    fieldErrors.add("Format de date de debut de visa invalide");
+                }
+            } else {
+                fieldErrors.add("La date de fin de validité du visa est obligatoire si un numéro de visa est fourni");
+            }
             if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
                 try {
                     dateFinVisa = LocalDate.parse(dateFinVisaStr);
@@ -321,7 +333,6 @@ public class DemandeController {
             redirectAttributes.addFlashAttribute("errorMessage", "Veuillez corriger les erreurs ci-dessous");
             redirectAttributes.addFlashAttribute("fieldErrors", fieldErrors);
 
-            // Conserver toutes les valeurs saisies
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
             redirectAttributes.addFlashAttribute("demandeurEntity", demandeurEntity);
             redirectAttributes.addFlashAttribute("passeportEntity", passeportEntity);
@@ -373,6 +384,7 @@ public class DemandeController {
                     demandeEntity != null && demandeEntity.getTypeVisa() != null ? demandeEntity.getTypeVisa().getId()
                             : null);
             redirectAttributes.addFlashAttribute("prefillNumeroVisa", numeroVisa1);
+            redirectAttributes.addFlashAttribute("prefillDateDebutVisa", dateDebutVisaStr);
             redirectAttributes.addFlashAttribute("prefillDateFinVisa", dateFinVisaStr);
             redirectAttributes.addFlashAttribute("piecesIds", piecesIds);
             redirectAttributes.addFlashAttribute("provenance", provenance);
@@ -456,8 +468,8 @@ public class DemandeController {
 
             StatutVisaEntity statutVisa = new StatutVisaEntity();
 
-            if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
-                numeroVisa1 = request.getParameter("numeroVisa");
+            if (dateDebutVisaStr != null && !dateDebutVisaStr.isEmpty()) {
+                dateDebutVisa = LocalDate.parse(dateDebutVisaStr);
                 if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
                     try {
                         dateFinVisa = LocalDate.parse(dateFinVisaStr);
@@ -466,11 +478,11 @@ public class DemandeController {
                     }
                 }
 
-                VisaEntity visa = generateVisa(savedDemande, savedPasseport, numeroVisa1, dateFinVisa);
+                VisaEntity visa = generateVisa(savedDemande, savedPasseport, dateDebutVisa, dateFinVisa);
                 VisaEntity savedVisa = visaService.save(visa);
 
                 statutVisa.setVisa(savedVisa);
-                statutVisa.setStatut(1); // non valide
+                statutVisa.setStatut(1); 
                 statutVisa.setDateChangementStatut(currentDate);
 
                 redirectAttributes.addFlashAttribute("generatedVisaNumber", numeroVisa1);
@@ -606,6 +618,7 @@ public class DemandeController {
         if (demande.getVisas() != null && !demande.getVisas().isEmpty()) {
             VisaEntity visa = demande.getVisas().get(0);
             model.addAttribute("prefillNumeroVisa", visa.getReference());
+            model.addAttribute("prefillDateDebutVisa", visa.getDateDebut());
             model.addAttribute("prefillDateFinVisa", visa.getDateFin());
         }
 
@@ -781,9 +794,9 @@ public class DemandeController {
         model.addAttribute("formAction", "/demande");
         model.addAttribute("showVisaSection", true);
         model.addAttribute("template", "demande/modification");
-
         model.addAttribute("prefillNumeroVisa",
-                "VISA-MDGR-" + LocalDate.now().getYear() + String.format("%04d", (int) (Math.random() * 10000)));
+                "VISA-MDGR-" + LocalDate.now().getYear() + "23");
+        model.addAttribute("prefillDateDebutVisa", LocalDate.now().minusYears(1).toString());
         model.addAttribute("prefillDateFinVisa", LocalDate.now().plusYears(1).toString());
 
         return "template";
@@ -815,7 +828,7 @@ public class DemandeController {
         model.addAttribute("prefillNumeroReference", "VISA-2024-001");
         model.addAttribute("prefillSituationId", 1);
         model.addAttribute("prefillNationaliteActuelleId", 1);
-        model.addAttribute("prefillTypeVisaId", 1);
+        model.addAttribute("prefillTypeVisaId", 2);
         model.addAttribute("prefillTypeDemandeId", 1);
     }
 
@@ -882,16 +895,24 @@ public class DemandeController {
     }
 
     private VisaEntity generateVisa(DemandeEntity demande, PasseportEntity passeport,
-            String numeroVisa, LocalDate dateFinVisa) {
+             LocalDate dateDebutVisa, LocalDate dateFinVisa) {
         VisaEntity visa = new VisaEntity();
         visa.setDemande(demande);
         visa.setPasseport(passeport);
-        visa.setReference(numeroVisa);
-        visa.setDateDebut(LocalDate.now());
+        visa.setReference(generateVisaReference());
+        visa.setDateDebut(dateDebutVisa);
         visa.setDateFin(dateFinVisa);
 
         return visa;
     }
+
+    public String generateVisaReference() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-ssSSS");
+        
+        return "VISA-" + now.format(formatter);
+    }
+
     private void genererQRCode(String texte, String nomFichier) throws Exception {
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(texte, BarcodeFormat.QR_CODE, 300, 300);
