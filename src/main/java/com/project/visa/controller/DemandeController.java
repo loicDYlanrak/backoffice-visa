@@ -45,13 +45,15 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.nio.file.*;
 import java.io.File;
-
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class DemandeController {
 
+    @Value("${Front_url}")
+    private String apiUrl;
     @Autowired
     private ScanFichierService scanFichierService;
 
@@ -418,8 +420,8 @@ public class DemandeController {
                   
                     String fileName = "qr_" + savedDemande.getId() + ".png";
                     String fullPath = folderPath + File.separator + fileName;
-                 
-                    String baseUrlReact = "http://localhost:3000/demandes/"; 
+                    
+                    String baseUrlReact = apiUrl; 
                     String urlFiche = baseUrlReact + savedDemande.getId();
                     genererQRCode(urlFiche, fullPath);
                     savedDemande.setCheminQR(fullPath);
