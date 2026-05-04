@@ -173,7 +173,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="dateDebutVisa" class="form-label">Date de debut de validité <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="dateDebutVisa" name="dateFinVisa" 
+                    <input type="date" class="form-control" id="dateDebutVisa" name="dateDebutVisa" 
                         value="${prefillDateDebutVisa}" required>
                 </div>
                 <div class="col-md-6 mb-3">

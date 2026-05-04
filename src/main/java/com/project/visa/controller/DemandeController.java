@@ -51,6 +51,7 @@ import org.springframework.cglib.core.Local;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 
 @Controller
 public class DemandeController {
@@ -146,6 +147,7 @@ public class DemandeController {
     }
 
     @PostMapping("/demande")
+    @Transactional
     public String createDemande(@ModelAttribute DemandeEntity demandeEntity,
             @ModelAttribute DemandeurEntity demandeurEntity,
             @ModelAttribute PasseportEntity passeportEntity,
@@ -465,9 +467,9 @@ public class DemandeController {
 
                 }
             }
+                System.out.println("Date fin Str: " + dateFinVisaStr);
 
             StatutVisaEntity statutVisa = new StatutVisaEntity();
-
             if (dateDebutVisaStr != null && !dateDebutVisaStr.isEmpty()) {
                 dateDebutVisa = LocalDate.parse(dateDebutVisaStr);
                 if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
@@ -479,6 +481,8 @@ public class DemandeController {
                 }
 
                 VisaEntity visa = generateVisa(savedDemande, savedPasseport, dateDebutVisa, dateFinVisa);
+                System.out.println("Date début: " + dateDebutVisa);
+                System.out.println("Date fin: " + dateFinVisa);
                 VisaEntity savedVisa = visaService.save(visa);
 
                 statutVisa.setVisa(savedVisa);
@@ -829,7 +833,7 @@ public class DemandeController {
         model.addAttribute("prefillSituationId", 1);
         model.addAttribute("prefillNationaliteActuelleId", 1);
         model.addAttribute("prefillTypeVisaId", 2);
-        model.addAttribute("prefillTypeDemandeId", 1);
+        model.addAttribute("prefillTypeDemandeId", 2);
     }
 
     private void populateFormOptions(Model model) {
