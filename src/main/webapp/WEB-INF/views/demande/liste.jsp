@@ -105,7 +105,7 @@
                                             </div>
                                             <div class="modal-body text-center">
                                                 <%-- On utilise le chemin stocké en base. Assurez-vous que le chemin est accessible via une URL --%>
-                                                <img src="${pageContext.request.contextPath}${demande.cheminQR}" 
+                                                <img src="${pageContext.request.contextPath}/${demande.cheminQR}" 
                                                     alt="QR Code" 
                                                     class="img-fluid" 
                                                     style="max-width: 300px;">
