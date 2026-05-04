@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -431,7 +431,14 @@ public class DemandeController {
             statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
             try{
                     String folderPath = servletContext.getRealPath("/images/qrcodes/");
-                  
+                    File folder = new File(folderPath);
+
+                    if (!folder.exists()) {
+                        boolean created = folder.mkdirs();
+                        if (created) {
+                            System.out.println("Dossier créé avec succès : " + folderPath);
+                        }
+                    }  
                     String fileName = "qr_" + savedDemande.getId() + ".png";
                     String fullPath = folderPath + fileName;
                     String pathSave= "images/qrcodes/"+fileName;
