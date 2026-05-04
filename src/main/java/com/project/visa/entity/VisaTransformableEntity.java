@@ -32,9 +32,8 @@ public class VisaTransformableEntity {
     @JsonIgnore
     private DemandeurEntity demandeur;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_passeport", nullable = false)
-    @JsonIgnore
     private PasseportEntity passeport;
 
     @Column(name = "date_entree", nullable = false)

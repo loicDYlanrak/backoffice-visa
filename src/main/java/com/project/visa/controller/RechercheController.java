@@ -1,10 +1,12 @@
 package com.project.visa.controller;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.project.visa.repository.*;
-import com.project.visa.entity.*;
-import java.util.Set;
+
+import com.project.visa.entity.CarteResidentEntity;
+import com.project.visa.entity.DemandeEntity;
+import com.project.visa.entity.DemandeurEntity;
+import com.project.visa.entity.PasseportEntity;
+import com.project.visa.entity.StatutDemandeEntity;
+import com.project.visa.entity.VisaEntity;
+import com.project.visa.repository.CarteResidentRepository;
+import com.project.visa.repository.DemandeRepository;
+import com.project.visa.repository.PasseportRepository;
+import com.project.visa.repository.StatutDemandeRepository;
+import com.project.visa.repository.TypeDemandeRepository;
+import com.project.visa.repository.VisaRepository;
 @Controller
 public class RechercheController {
     @Autowired
@@ -318,6 +330,7 @@ visa.setPasseport(passeportFinal);
             if(demande!=null){
                 demandes.add(demande);
                  List<DemandeEntity> autreDemandes= demandeRepository.findByDemandeurId(demande.getDemandeur().getId());
+                  autreDemandes.removeIf(d -> d.getId() == numeroDemande);
             if(!autreDemandes.isEmpty()){
                 demandes.addAll(autreDemandes);
             }
