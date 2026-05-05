@@ -4,8 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "Demande")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DemandeEntity {
     
     @Id
@@ -36,17 +40,28 @@ public class DemandeEntity {
     private LocalDate dateTraitement;
     
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<VisaEntity> visas;
     
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<CarteResidentEntity> cartesResident;
 
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<StatutDemandeEntity> statuts;
     
+    @Column(name = "chemin_qr")
+    private String cheminQR;
     public DemandeEntity() {
     }
 
+    public String getCheminQR() {
+        return cheminQR;
+    }
+    public void setCheminQR(String cheminQR) {
+        this.cheminQR = cheminQR;
+    }
     // Getters et Setters
     public int getId() {
         return id;

@@ -139,3 +139,41 @@ lorsqu on clique sur les booutons :
             - rediriger vers formulaire_demande pour inserer les demandes
             - valider le formulaire avec champ caché provenance (DUPLICATA ou TRANSFERT ou les deux) 
             - après validation du formulaire -> retourner à la page resume correspondante (avec le nouveau numéro généré)
+
+:::::::TODO 4
+
+ Entité Demande & QR Code
+    - Ajouter l'attribut `cheminQR` (string) à l'entité Demande.
+    - Générer automatiquement un QR Code à la création d'une demande.(statut creer)
+        - Contenu du QR : URL vers la fiche React (Frontend) de la demande.
+        (recuperer le lien vers la fiche duw demande dans le projet frontend react)
+
+ API GET /demandesRecherche
+    - Endpoint : /demandesRecherche
+    - Paramètres : numeroDemande (string, optionnel), numeroPasseport (string, optionnel)
+    - Règles métier :
+        x- Si les deux paramètres sont vides -> retourner [] (liste vide)
+        x- Si numeroDemande fourni -> retourner la demande + toutes les demandes du même demandeur
+        x- Si numeroPasseport fourni -> retourner toutes les demandes liées à ce passeport (tri chronologique)
+    - Gestion d'erreur :
+        x- 400 si les deux paramètres sont vides
+        x- 404 si aucune demande trouvée (mais si liste vide, retourner 200 avec [] ? À clarifier : spec dit 404 si aucune trouvée)
+
+ API GET /demandeDetails/{idDemande}
+    - Endpoint : /demandeDetails/{idDemande}
+    - Retourne :
+        x- qrCode
+        x- Etat civil
+        x- Passeport
+        x- Visa transformable
+        x- Statut actuel
+        x- Visa et carte de résidence (si statut = approuvé)
+
+ API GET/demandeDetails/HistoStatut/{idDemande} 
+    - Endpoint : /demandeDetails/HistoStatut/{idDemande}
+    - Retourne : historique complet des statuts (avec dates)
+
+ API GET /demandeDetails/DetailsFichier/{idDemande}
+    - Endpoint : /demandeDetails/DetailsFichier/{idDemande}
+    - Retourne : liste des fichiers uploadés
+        - Pour chaque fichier : nomFichier, apercu (base64 ou URL), statut (coché/non coché)

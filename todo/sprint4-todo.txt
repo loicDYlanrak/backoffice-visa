@@ -1,0 +1,68 @@
+Team lead : 
+Dev : 
+
+backoffice
+brache sprint/4/ListeDemandeApi
+    ajouter attribus cheminQR a l entite demande 
+    losrque on a creer le demande au debut on genere un QR Code 
+    (QR code : url vers l application react fiche des la demande )
+
+    creer api GET qui retourne JSON 
+        /demandesRecherche/ prend deux parametres : numeroDemande (string, optionnel) et numeroPasseport (string, optionnel)
+            - retourne une liste de demandes
+            - si les deux parametres sont vides, retourne une liste vide
+            - si numeroDemande est fourni : retourne la demande correspondante + toutes les demandes du meme demandeur
+            - si numeroPasseport est fourni : retourne toutes les demandes liees a ce passeport triees par ordre chronologique
+            - gestion d'erreur : retourner code 400 si les deux parametres sont vides, 404 si aucune demande trouvee
+
+        /demandeDetails/{idDemande} (GET)
+            - parametre : idDemande (integer, requis)
+            - retourne les details complets d'une demande specifique incluant : qrCode, etat civil, passeport, visa transformable, statut actuel, visa et carte de residence (si statut approuve)
+
+        /demandeDetails/HistoStatut/{idDemande} (GET)
+            - parametre : idDemande (integer, requis)
+            - retourne l'historique complet des statuts avec dates pour la demande specifiee
+
+        /demandeDetails/DetailsFichier/{idDemande} (GET)
+            - parametre : idDemande (integer, requis)
+            - retourne la liste des fichiers uploades avec : nom fichier, apercu (base64 ou url), statut coche/non coche
+
+frontoffice
+brache sprint/4/ListeDemandeApi
+    creer un page d accueil avec sidebars et headers
+    creer un component Recherche.jsx qui contient:
+        un formulaire avec deux inputs 
+            un pour le numero demande  
+            un pour le numero passeport 
+        on choisi quelle input remplir , le formulaire doit marcher meme si l un des deux
+        input n est pas rempli , quand les deux sont vides on affiche juste aucune demande trouver
+    quand on a cliquer sur le bouton rechercher on afficher le components ListeDemande
+
+    creer un component ListeDemande.jsx pour lister les demandes
+    dans la liste de demande afficher :
+            iddemande, nom et prenom demandeur , numero passeport, numero visa_transformable, type demande, type visa, date_demande, QR code
+        si on a recherche par numero de demande on affiche la demande et 
+        on affiche les demandes associer a cette demande en bas (meme demandeur)
+        si on a recherche par numero de passeport on affiche tous les demande qui sont lie par ce passeport
+        et cela par ordre chronologique
+        ajouter colonne action avec bouton voir details(redirige vers FicheDemande)
+
+    creer un component FicheDemande.jsx pour afficher les details concernant un demande
+        , qrCode, etat civil , passeport , visa transformablne, status actuelle,visa et carte de residence(si statut approuve)
+        afficher aussi l historique de statut avec date ,juste 3, ajouter bouton voir plus (redirige vers page HistoStatutDemande)
+        afficher les fichiers et mettre un cocher et non cocher, ajouter bouton voir detail upload (redirige vers page FichiersDetailDemande)
+    creer un component HistoStatutDemande.jsx pour afficher l' historque de statut
+    creer un component FichiersDetailDemande.jsx pour afficher les fichiers uploader nom fichier et apercu
+
+Note : 
+apres avoir effectuer un recherhe on garde en input la valeur recherche que ce soit
+l input de numero de demande ou l input de numero de passeport apres chaque recherche
+separer les logique de traitement des listes dans fichier .js et l appelle fecth 
+
+
+======================================================
+[ ] S'assurer que le QR Code généré en backend pointe vers la bonne URL React (FicheDemande)
+[ ] Tester les cas de recherche : les deux champs vides, un seul rempli, etc.
+[ ] Gérer les états de chargement (loading) et erreurs (404, 400, etc.)
+[ ] Valider que le tri chronologique fonctionne sur le frontend (ou backend selon l'implémentation)
+

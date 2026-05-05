@@ -58,6 +58,9 @@ public class VisaService {
     public List<VisaEntity> findByDemandeId(int demandeId) {
         return visaRepository.findByDemandeId(demandeId);
     }
+    // public VisaEntity findByDemandeId(int demandeId) {
+    //     return visaRepository.findByDemandeId(demandeId);
+    // }
 
     public VisaEntity createVisaFromDemande(DemandeEntity demande) {
         VisaEntity visa = new VisaEntity();

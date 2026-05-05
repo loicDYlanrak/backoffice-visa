@@ -1,21 +1,44 @@
 package com.project.visa.controller;
 
+import java.io.File;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.project.visa.repository.*;
-import com.project.visa.entity.*;
+
+import com.project.visa.entity.CarteResidentEntity;
+import com.project.visa.entity.DemandeEntity;
+import com.project.visa.entity.DemandeurEntity;
+import com.project.visa.entity.PasseportEntity;
+import com.project.visa.entity.StatutDemandeEntity;
+import com.project.visa.entity.VisaEntity;
+import com.project.visa.repository.CarteResidentRepository;
+import com.project.visa.repository.DemandeRepository;
+import com.project.visa.repository.PasseportRepository;
+import com.project.visa.repository.StatutDemandeRepository;
+import com.project.visa.repository.TypeDemandeRepository;
+import com.project.visa.repository.VisaRepository;
+import com.project.visa.service.DemandeService;
+import com.project.visa.util.Util;
 
 @Controller
 public class RechercheController {
+    @Value("${Front_url}")
+    private String apiUrl;
     @Autowired
     private CarteResidentRepository carteResidentRepository;
     @Autowired
@@ -25,11 +48,13 @@ public class RechercheController {
     @Autowired
     private TypeDemandeRepository typeDemandeRepository;
     @Autowired
-    private DemandeurRepository demandeurRepository;
-    @Autowired
     private StatutDemandeRepository statutDemandeRepository;
     @Autowired
     private PasseportRepository passeportRepository;
+    @Autowired
+    private ServletContext servletContext;
+    @Autowired
+    private DemandeService demandeService;
 
     @GetMapping("/duplicata/recherche_numero")
     public String recherche_numero(
@@ -77,6 +102,7 @@ public class RechercheController {
         }
 
         if (demandeTrouvee != null) {
+            demandeTrouvee.getTypeVisa().getLibelle();
             redirectAttributes.addFlashAttribute("demande", demandeTrouvee);
             redirectAttributes.addFlashAttribute("transfer", transfer);
             redirectAttributes.addFlashAttribute("duplicata", duplicata);
@@ -129,6 +155,30 @@ public class RechercheController {
             demandeRepository.save(demandeDuplicata);
             try {
                 statutDemandeRepository.save(status);
+                try{
+                    String folderPath = servletContext.getRealPath("/images/qrcodes/");
+                    File folder = new File(folderPath);
+
+                    if (!folder.exists()) {
+                        boolean created = folder.mkdirs();
+                        if (created) {
+                            System.out.println("Dossier créé avec succès : " + folderPath);
+                        }
+                    }  
+                        String fileName = "qr_" + demandeDuplicata.getId() + ".png";
+                        String fullPath = folderPath + fileName;
+                        String pathSave= "images/qrcodes/"+fileName;
+                        String baseUrlReact = apiUrl; 
+                        String urlFiche = baseUrlReact + demandeDuplicata.getId();
+                        Util.genererQRCode(urlFiche, fullPath);
+                        demandeDuplicata.setCheminQR(pathSave);
+                        demandeDuplicata = demandeService.save(demandeDuplicata);
+
+                
+                }catch(Exception e){
+                    e.printStackTrace();
+
+                }
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "Erreur lors de la mise à jour du statut : " + e.getMessage());
@@ -258,6 +308,30 @@ visa.setPasseport(passeportFinal);
 
         try {
             demandeRepository.save(demandeTransfert);
+            try{
+                    String folderPath = servletContext.getRealPath("/images/qrcodes/");
+                    File folder = new File(folderPath);
+
+                    if (!folder.exists()) {
+                        boolean created = folder.mkdirs();
+                        if (created) {
+                            System.out.println("Dossier créé avec succès : " + folderPath);
+                        }
+                    }  
+                        String fileName = "qr_" + demandeTransfert.getId() + ".png";
+                        String fullPath = folderPath + fileName;
+                        String pathSave= "images/qrcodes/"+fileName;
+                        String baseUrlReact = apiUrl; 
+                        String urlFiche = baseUrlReact + demandeTransfert.getId();
+                        Util.genererQRCode(urlFiche, fullPath);
+                        demandeTransfert.setCheminQR(pathSave);
+                        demandeTransfert = demandeService.save(demandeTransfert);
+
+                
+                }catch(Exception e){
+                    e.printStackTrace();
+
+                }
             try {
                 statutDemandeRepository.save(status);
                 try {
@@ -266,6 +340,7 @@ visa.setPasseport(passeportFinal);
                     }
                     try {
                         visaRepository.save(visa);
+
                     } catch (Exception e) {
                         ra.addFlashAttribute("errorMessage",
                                 "Erreur lors de la mise à jour du visa : " + e.getMessage());
@@ -295,5 +370,45 @@ visa.setPasseport(passeportFinal);
 
         ra.addFlashAttribute("successMessage", "Transfert terminé avec succès.");
         return "redirect:/demande/liste";
+    }
+    @GetMapping("/demandesRecherche")
+    @ResponseBody
+    public ResponseEntity<Set<DemandeEntity>> recherche_demande(@RequestParam(value = "numeroDemande", required = false) Integer numeroDemande,
+                                    @RequestParam(value = "numeroPasseport", required = false) String numeroPasseport
+                                     ){
+        
+       if ((numeroDemande == null ) && 
+            (numeroPasseport == null || numeroPasseport.trim().isEmpty())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LinkedHashSet<>());
+            
+         }
+        Set<DemandeEntity> demandes=new LinkedHashSet<>();
+         if(numeroDemande!=null){
+
+            DemandeEntity demande=demandeRepository.findById(numeroDemande);
+            if(demande!=null){
+                demandes.add(demande);
+                 List<DemandeEntity> autreDemandes= demandeRepository.findByDemandeurId(demande.getDemandeur().getId());
+                  autreDemandes.removeIf(d -> d.getId() == numeroDemande);
+            if(!autreDemandes.isEmpty()){
+                demandes.addAll(autreDemandes);
+            }
+            }
+             else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LinkedHashSet<>());
+            }
+           
+           
+            
+         }
+         if(numeroPasseport!=null&&!numeroPasseport.isEmpty()){
+            List<DemandeEntity> autreDemandes=demandeRepository.rechercherParNumeroPasseport(numeroPasseport);
+            if(!autreDemandes.isEmpty()){
+                demandes.addAll(autreDemandes);
+            }else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new LinkedHashSet<>());
+            }
+         }
+        return ResponseEntity.ok(demandes);
     }
 }

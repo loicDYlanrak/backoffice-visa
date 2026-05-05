@@ -3,8 +3,12 @@ package com.project.visa.entity;
 import jakarta.persistence.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "Situation_familiale")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SituationFamilialeEntity {
     
     @Id
@@ -15,6 +19,7 @@ public class SituationFamilialeEntity {
     private String libelle;
     
     @OneToMany(mappedBy = "situationFamiliale")
+    @JsonIgnore
     private List<DemandeurEntity> demandeurs;
     
     public SituationFamilialeEntity() {

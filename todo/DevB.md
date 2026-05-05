@@ -143,3 +143,64 @@ PAGE : DOCUMENTS À SCANNER
       - En bas de page :
             - Bouton "Retour à la liste"
             - Bouton "Valider tous les documents" (visible seulement quand tous sont uploadés)
+
+:::::::TODO 4
+
+Structure de base
+    - Créer la page d'accueil avec Sidebar et Header
+    - Mettre en place le routing React Router
+
+Composant Recherche.jsx
+    - Formulaire avec deux inputs :
+        - Input : numéro demande
+        - Input : numéro passeport
+    - Comportement :
+        - Fonctionne même si un seul input est rempli
+        - Si les deux inputs sont vides -> afficher "Aucune demande trouvée"
+    - Bouton "Rechercher" → déclenche l'appel API et affiche ListeDemande
+
+Composant ListeDemande.jsx
+    - Afficher les colonnes :
+        - idDemande
+        - Nom et prénom demandeur
+        - Numéro passeport
+        - Numéro visa_transformable
+        - Type demande
+        - Type visa
+        - Date_demande
+        - QR code
+    - Cas particuliers :
+        - Recherche par numéro demande : afficher la demande + ligne de seprations et ajouter un titre demande associer + les demandes associées (même demandeur) en bas
+        - Recherche par numéro passeport : afficher toutes les demandes liées à ce passeport (ordre chronologique)
+    - Colonne "Action" :
+        - Bouton "Voir détails" → redirige vers FicheDemande
+
+Composant FicheDemande.jsx
+    - Afficher :
+        - QR Code
+        - Etat civil
+        - Passeport
+        - Visa transformable
+        - Statut actuel
+        - Visa et carte de résidence (si statut approuvé)
+    - Bloc "Historique de statut" :
+        - Afficher les 3 derniers statuts (avec date)
+        - Bouton "Voir plus" → redirige vers HistoStatutDemande
+    - Bloc "Fichiers" :
+        - Afficher les fichiers avec case à cocher (coché/non coché)
+        - Bouton "Voir détail upload" → redirige vers FichiersDetailDemande
+
+Composant HistoStatutDemande.jsx
+    - Afficher l'historique complet des statuts (tous) d une demande specifique
+
+Composant FichiersDetailDemande.jsx
+    - Afficher la liste des fichiers :
+        - Nom du fichier
+        - Aperçu (base64 ou URL)
+    d une demande specifique
+
+Logique et appels API
+    - Séparer la logique de traitement des listes dans des fichiers .js dédiés
+    - Isoler les appels fetch dans des services/api.js
+    - Conserver la valeur de recherche dans les inputs après chaque recherche
+    - respecter le style de page existant

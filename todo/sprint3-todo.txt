@@ -17,8 +17,8 @@ brache sprint/3/1-ScanFichierTermniner
 	quand on fait un sans donne interieur  	
 	
 
-	donne remplir input quand il y a erreur 
-	modal 
-	modificaiton transfoert donne visa ,
-	remplir 
-	prerempli visa a 6 chiffre 
+	ajouter la creation de carte de resident quand on fait sans donnes interieur 
+
+	creer une page liste de passeport
+	creer une page liste de visa 
+	creer une page liste de carte de residence

@@ -1,9 +1,12 @@
 package com.project.visa.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Type_visa")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TypeVisaEntity {
 
     @Id

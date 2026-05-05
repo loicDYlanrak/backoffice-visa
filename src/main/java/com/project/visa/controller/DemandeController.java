@@ -1,14 +1,18 @@
 package com.project.visa.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,36 +23,44 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.project.visa.entity.CarteResidentEntity;
 import com.project.visa.entity.DemandeEntity;
 import com.project.visa.entity.DemandeurEntity;
 import com.project.visa.entity.NationaliteEntity;
 import com.project.visa.entity.PasseportEntity;
 import com.project.visa.entity.PieceDemandeEntity;
 import com.project.visa.entity.PieceEntity;
+import com.project.visa.entity.ScanFichierEntity;
 import com.project.visa.entity.SituationFamilialeEntity;
 import com.project.visa.entity.StatutDemandeEntity;
 import com.project.visa.entity.StatutVisaEntity;
 import com.project.visa.entity.TypeDemandeEntity;
 import com.project.visa.entity.VisaEntity;
 import com.project.visa.entity.VisaTransformableEntity;
-import com.project.visa.service.DemandeService;
-import com.project.visa.service.DemandeurService;
-import com.project.visa.service.NationaliteService;
-import com.project.visa.service.PasseportService;
-import com.project.visa.service.PieceDemandeService;
-import com.project.visa.service.PieceService;
-import com.project.visa.service.SituationFamilialeService;
-import com.project.visa.service.StatutDemandeService;
-import com.project.visa.service.StatutVisaService;
-import com.project.visa.service.TypeDemandeService;
-import com.project.visa.service.TypeVisaService;
-import com.project.visa.service.VisaService;
-import com.project.visa.service.VisaTransformableService;
+import com.project.visa.util.*;
+import com.project.visa.service.*;
 
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
+import java.nio.file.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
+
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 
 @Controller
 public class DemandeController {
+
+    @Value("${Front_url}")
+    private String apiUrl;
+    @Autowired
+    private ScanFichierService scanFichierService;
 
     @Autowired
     private DemandeService demandeService;
@@ -61,6 +73,9 @@ public class DemandeController {
 
     @Autowired
     private PieceService pieceService;
+
+    @Autowired
+    private ServletContext servletContext;
 
     @Autowired
     private PieceDemandeService pieceDemandeService;
@@ -79,6 +94,10 @@ public class DemandeController {
 
     @Autowired
     private TypeDemandeService typeDemandeService;
+
+    @Autowired
+    private CarteResidentService carteResidentService;
+
 
     @Autowired
     private TypeVisaService typeVisaService;
@@ -125,10 +144,12 @@ public class DemandeController {
         model.addAttribute("statusMap", statusMap);
         model.addAttribute("demandes", demandes);
         model.addAttribute("template", "demande/liste");
+        model.addAttribute("api", apiUrl);
         return "template";
     }
 
     @PostMapping("/demande")
+    @Transactional
     public String createDemande(@ModelAttribute DemandeEntity demandeEntity,
             @ModelAttribute DemandeurEntity demandeurEntity,
             @ModelAttribute PasseportEntity passeportEntity,
@@ -138,7 +159,7 @@ public class DemandeController {
             BindingResult result,
             @RequestParam(value = "piecesIds", required = false) List<Long> piecesIds,
             @RequestParam(value = "provenance", required = false) String provenance,
-            @RequestParam(value = "numeroVisa", required = false) String numeroVisa,
+            @RequestParam(value = "dateDebutVisa", required = false) String dateDebutVisaStr,
             @RequestParam(value = "dateFinVisa", required = false) String dateFinVisaStr,
             RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
@@ -275,6 +296,7 @@ public class DemandeController {
         demandeEntity.setDateDemande(currentDate);
 
         String numeroVisa1 = null;
+        LocalDate dateDebutVisa = null;
         LocalDate dateFinVisa = null;
         
         if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
@@ -283,7 +305,15 @@ public class DemandeController {
             if (!numeroVisa1.matches(visaPattern)) {
                 fieldErrors.add("Le numéro de visa doit être au format VISA-XXXX-XXXXXX");
             }
-            
+            if (dateDebutVisaStr != null && !dateDebutVisaStr.isEmpty()) {
+                try {
+                    dateDebutVisa = LocalDate.parse(dateDebutVisaStr);
+                } catch (Exception e) {
+                    fieldErrors.add("Format de date de debut de visa invalide");
+                }
+            } else {
+                fieldErrors.add("La date de fin de validité du visa est obligatoire si un numéro de visa est fourni");
+            }
             if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
                 try {
                     dateFinVisa = LocalDate.parse(dateFinVisaStr);
@@ -307,7 +337,6 @@ public class DemandeController {
             redirectAttributes.addFlashAttribute("errorMessage", "Veuillez corriger les erreurs ci-dessous");
             redirectAttributes.addFlashAttribute("fieldErrors", fieldErrors);
 
-            // Conserver toutes les valeurs saisies
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
             redirectAttributes.addFlashAttribute("demandeurEntity", demandeurEntity);
             redirectAttributes.addFlashAttribute("passeportEntity", passeportEntity);
@@ -359,6 +388,7 @@ public class DemandeController {
                     demandeEntity != null && demandeEntity.getTypeVisa() != null ? demandeEntity.getTypeVisa().getId()
                             : null);
             redirectAttributes.addFlashAttribute("prefillNumeroVisa", numeroVisa1);
+            redirectAttributes.addFlashAttribute("prefillDateDebutVisa", dateDebutVisaStr);
             redirectAttributes.addFlashAttribute("prefillDateFinVisa", dateFinVisaStr);
             redirectAttributes.addFlashAttribute("piecesIds", piecesIds);
             redirectAttributes.addFlashAttribute("provenance", provenance);
@@ -401,10 +431,35 @@ public class DemandeController {
             statutDemandeEntity.setDemande(savedDemande);
             statutDemandeEntity.setDateChangementStatut(currentDate);
             statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
+            try{
+                    String folderPath = servletContext.getRealPath("/images/qrcodes/");
+                    File folder = new File(folderPath);
+
+                    if (!folder.exists()) {
+                        boolean created = folder.mkdirs();
+                        if (created) {
+                            System.out.println("Dossier créé avec succès : " + folderPath);
+                        }
+                    }  
+                    String fileName = "qr_" + savedDemande.getId() + ".png";
+                    String fullPath = folderPath + fileName;
+                    String pathSave= "images/qrcodes/"+fileName;
+                    String baseUrlReact = apiUrl; 
+                    String urlFiche = baseUrlReact + savedDemande.getId();
+                    Util.genererQRCode(urlFiche, fullPath);
+                    savedDemande.setCheminQR(pathSave);
+                    savedDemande = demandeService.save(savedDemande);
+
+            
+            }catch(Exception e){
+                e.printStackTrace();
+
+            }
             System.out.println("provenace: " + provenance);
             if (provenance != null && !provenance.equals("CLASSIQUE")) {
                 statutDemandeEntity.setStatut(30);
             }
+            
             statutDemandeService.save(statutDemandeEntity);
 
             String reference = buildReference(savedDemande);
@@ -421,11 +476,11 @@ public class DemandeController {
 
                 }
             }
+                System.out.println("Date fin Str: " + dateFinVisaStr);
 
             StatutVisaEntity statutVisa = new StatutVisaEntity();
-
-            if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
-                numeroVisa1 = request.getParameter("numeroVisa");
+            if (dateDebutVisaStr != null && !dateDebutVisaStr.isEmpty()) {
+                dateDebutVisa = LocalDate.parse(dateDebutVisaStr);
                 if (dateFinVisaStr != null && !dateFinVisaStr.isEmpty()) {
                     try {
                         dateFinVisa = LocalDate.parse(dateFinVisaStr);
@@ -434,11 +489,13 @@ public class DemandeController {
                     }
                 }
 
-                VisaEntity visa = generateVisa(savedDemande, savedPasseport, numeroVisa1, dateFinVisa);
+                VisaEntity visa = generateVisa(savedDemande, savedPasseport, dateDebutVisa, dateFinVisa);
+                System.out.println("Date début: " + dateDebutVisa);
+                System.out.println("Date fin: " + dateFinVisa);
                 VisaEntity savedVisa = visaService.save(visa);
 
                 statutVisa.setVisa(savedVisa);
-                statutVisa.setStatut(1); // non valide
+                statutVisa.setStatut(1); 
                 statutVisa.setDateChangementStatut(currentDate);
 
                 redirectAttributes.addFlashAttribute("generatedVisaNumber", numeroVisa1);
@@ -574,6 +631,7 @@ public class DemandeController {
         if (demande.getVisas() != null && !demande.getVisas().isEmpty()) {
             VisaEntity visa = demande.getVisas().get(0);
             model.addAttribute("prefillNumeroVisa", visa.getReference());
+            model.addAttribute("prefillDateDebutVisa", visa.getDateDebut());
             model.addAttribute("prefillDateFinVisa", visa.getDateFin());
         }
 
@@ -749,9 +807,9 @@ public class DemandeController {
         model.addAttribute("formAction", "/demande");
         model.addAttribute("showVisaSection", true);
         model.addAttribute("template", "demande/modification");
-
         model.addAttribute("prefillNumeroVisa",
-                "VISA-MDGR-" + LocalDate.now().getYear() + String.format("%04d", (int) (Math.random() * 10000)));
+                "VISA-MDGR-" + LocalDate.now().getYear() + "23");
+        model.addAttribute("prefillDateDebutVisa", LocalDate.now().minusYears(1).toString());
         model.addAttribute("prefillDateFinVisa", LocalDate.now().plusYears(1).toString());
 
         return "template";
@@ -783,8 +841,8 @@ public class DemandeController {
         model.addAttribute("prefillNumeroReference", "VISA-2024-001");
         model.addAttribute("prefillSituationId", 1);
         model.addAttribute("prefillNationaliteActuelleId", 1);
-        model.addAttribute("prefillTypeVisaId", 1);
-        model.addAttribute("prefillTypeDemandeId", 1);
+        model.addAttribute("prefillTypeVisaId", 2);
+        model.addAttribute("prefillTypeDemandeId", 2);
     }
 
     private void populateFormOptions(Model model) {
@@ -850,14 +908,80 @@ public class DemandeController {
     }
 
     private VisaEntity generateVisa(DemandeEntity demande, PasseportEntity passeport,
-            String numeroVisa, LocalDate dateFinVisa) {
+             LocalDate dateDebutVisa, LocalDate dateFinVisa) {
         VisaEntity visa = new VisaEntity();
         visa.setDemande(demande);
         visa.setPasseport(passeport);
-        visa.setReference(numeroVisa);
-        visa.setDateDebut(LocalDate.now());
+        visa.setReference(generateVisaReference());
+        visa.setDateDebut(dateDebutVisa);
         visa.setDateFin(dateFinVisa);
 
         return visa;
     }
+
+    public String generateVisaReference() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-ssSSS");
+        
+        return "VISA-" + now.format(formatter);
+    }
+
+   
+
+
+    @GetMapping("/demandeDetails/{idDemande}")
+    public ResponseEntity<?> getDemandeDetails(@PathVariable Long idDemande) {
+        try {
+            DemandeEntity demande = demandeService.findById(idDemande.intValue());
+            if (demande == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande non trouvée");
+            }
+            Map<String, Object> response = new HashMap<>();
+            // response.put("demande", demande);
+            response.put("idDemande", demande.getId());
+            response.put("qrChemin",demande.getCheminQR());
+            response.put("EtatCivil", demande.getDemandeur());
+            response.put("passeport", demande.getVisaTransformable() != null ? demande.getVisaTransformable().getPasseport() : null);
+            response.put("visaTransformable", demande.getVisaTransformable());
+            response.put("typeDemande", demande.getTypeDemande());
+            response.put("typeVisa", demande.getTypeVisa());
+            List<StatutDemandeEntity> statuts = demande.getStatuts();
+            response.put("Status",statuts.get(statuts.size() - 1).getLibelleStatut());
+            if(statuts.get(statuts.size() - 1).getLibelleStatut()=="Approuvé"){
+                List<VisaEntity> visas=visaService.findByDemandeId(demande.getId());
+                response.put("visa",visas.get(visas.size() - 1));
+                List<CarteResidentEntity> cartes=carteResidentService.findByDemandeId(demande.getId());
+                response.put("carteResident",cartes.get(cartes.size() - 1));
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la récupération des détails de la demande: " + e.getMessage());
+        }
+    }
+    @GetMapping("/demandeDetails/HistoStatut/{idDemande}")
+    public ResponseEntity<?> getHistoStatut(@PathVariable int idDemande) {
+        DemandeEntity demandeOpt = demandeService.findById(idDemande);
+        if (demandeOpt==null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande introuvable");
+        }
+
+        List<StatutDemandeEntity> historique = demandeOpt.getStatuts();
+
+        if (historique == null || historique.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Aucun historique pour cette demande");
+        }
+        return ResponseEntity.ok(historique);
+    }
+    @GetMapping("/demandeDetails/DetailsFichier/{idDemande}")
+    public ResponseEntity<?> getDetailsFichier(@PathVariable Long idDemande) {
+        List<ScanFichierEntity> fichiers = scanFichierService.getUploadsParDemande(idDemande);
+
+        if (fichiers == null || fichiers.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("Aucun fichier uploadé pour cette demande.");
+        }
+
+        return ResponseEntity.ok(fichiers);
+    }
+
 }
