@@ -110,9 +110,19 @@
                                                     class="img-fluid" 
                                                     style="max-width: 300px;">
                                             </div>
+                                             
                                             <div class="modal-footer">
+
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="button" class="btn btn-secondary">
+                                                <a href="${api}${demande.getId()}" target="_blank">
+                                                ${api}${demande.getId()}
+                                            </a>
+                                             </button>
                                             </div>
+                                             
+                                            
+                                            
                                         </div>
                                     </div>
                                 </div>

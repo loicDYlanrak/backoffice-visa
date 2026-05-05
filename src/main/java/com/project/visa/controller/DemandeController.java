@@ -143,6 +143,7 @@ public class DemandeController {
         model.addAttribute("statusMap", statusMap);
         model.addAttribute("demandes", demandes);
         model.addAttribute("template", "demande/liste");
+        model.addAttribute("api", apiUrl);
         return "template";
     }
 
