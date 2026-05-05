@@ -1,13 +1,15 @@
 package com.project.visa.controller;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
+import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,8 +32,13 @@ import com.project.visa.repository.PasseportRepository;
 import com.project.visa.repository.StatutDemandeRepository;
 import com.project.visa.repository.TypeDemandeRepository;
 import com.project.visa.repository.VisaRepository;
+import com.project.visa.service.DemandeService;
+import com.project.visa.util.Util;
+
 @Controller
 public class RechercheController {
+    @Value("${Front_url}")
+    private String apiUrl;
     @Autowired
     private CarteResidentRepository carteResidentRepository;
     @Autowired
@@ -44,7 +51,10 @@ public class RechercheController {
     private StatutDemandeRepository statutDemandeRepository;
     @Autowired
     private PasseportRepository passeportRepository;
-
+    @Autowired
+    private ServletContext servletContext;
+    @Autowired
+    private DemandeService demandeService;
 
     @GetMapping("/duplicata/recherche_numero")
     public String recherche_numero(
@@ -145,6 +155,30 @@ public class RechercheController {
             demandeRepository.save(demandeDuplicata);
             try {
                 statutDemandeRepository.save(status);
+                try{
+                    String folderPath = servletContext.getRealPath("/images/qrcodes/");
+                    File folder = new File(folderPath);
+
+                    if (!folder.exists()) {
+                        boolean created = folder.mkdirs();
+                        if (created) {
+                            System.out.println("Dossier créé avec succès : " + folderPath);
+                        }
+                    }  
+                        String fileName = "qr_" + demandeDuplicata.getId() + ".png";
+                        String fullPath = folderPath + fileName;
+                        String pathSave= "images/qrcodes/"+fileName;
+                        String baseUrlReact = apiUrl; 
+                        String urlFiche = baseUrlReact + demandeDuplicata.getId();
+                        Util.genererQRCode(urlFiche, fullPath);
+                        demandeDuplicata.setCheminQR(pathSave);
+                        demandeDuplicata = demandeService.save(demandeDuplicata);
+
+                
+                }catch(Exception e){
+                    e.printStackTrace();
+
+                }
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMessage",
                         "Erreur lors de la mise à jour du statut : " + e.getMessage());
@@ -274,6 +308,30 @@ visa.setPasseport(passeportFinal);
 
         try {
             demandeRepository.save(demandeTransfert);
+            try{
+                    String folderPath = servletContext.getRealPath("/images/qrcodes/");
+                    File folder = new File(folderPath);
+
+                    if (!folder.exists()) {
+                        boolean created = folder.mkdirs();
+                        if (created) {
+                            System.out.println("Dossier créé avec succès : " + folderPath);
+                        }
+                    }  
+                        String fileName = "qr_" + demandeTransfert.getId() + ".png";
+                        String fullPath = folderPath + fileName;
+                        String pathSave= "images/qrcodes/"+fileName;
+                        String baseUrlReact = apiUrl; 
+                        String urlFiche = baseUrlReact + demandeTransfert.getId();
+                        Util.genererQRCode(urlFiche, fullPath);
+                        demandeTransfert.setCheminQR(pathSave);
+                        demandeTransfert = demandeService.save(demandeTransfert);
+
+                
+                }catch(Exception e){
+                    e.printStackTrace();
+
+                }
             try {
                 statutDemandeRepository.save(status);
                 try {
@@ -282,6 +340,7 @@ visa.setPasseport(passeportFinal);
                     }
                     try {
                         visaRepository.save(visa);
+
                     } catch (Exception e) {
                         ra.addFlashAttribute("errorMessage",
                                 "Erreur lors de la mise à jour du visa : " + e.getMessage());

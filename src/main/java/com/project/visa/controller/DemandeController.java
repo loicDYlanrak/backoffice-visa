@@ -37,6 +37,7 @@ import com.project.visa.entity.StatutVisaEntity;
 import com.project.visa.entity.TypeDemandeEntity;
 import com.project.visa.entity.VisaEntity;
 import com.project.visa.entity.VisaTransformableEntity;
+import com.project.visa.util.*;
 import com.project.visa.service.*;
 
 
@@ -445,7 +446,7 @@ public class DemandeController {
                     String pathSave= "images/qrcodes/"+fileName;
                     String baseUrlReact = apiUrl; 
                     String urlFiche = baseUrlReact + savedDemande.getId();
-                    genererQRCode(urlFiche, fullPath);
+                    Util.genererQRCode(urlFiche, fullPath);
                     savedDemande.setCheminQR(pathSave);
                     savedDemande = demandeService.save(savedDemande);
 
@@ -925,12 +926,7 @@ public class DemandeController {
         return "VISA-" + now.format(formatter);
     }
 
-    private void genererQRCode(String texte, String nomFichier) throws Exception {
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode(texte, BarcodeFormat.QR_CODE, 300, 300);
-        Path path = FileSystems.getDefault().getPath(nomFichier);
-        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-    }
+   
 
 
     @GetMapping("/demandeDetails/{idDemande}")
