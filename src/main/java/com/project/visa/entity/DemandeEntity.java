@@ -9,40 +9,39 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "Demande")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DemandeEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_visa_transformable", nullable = false)
     private VisaTransformableEntity visaTransformable;
-    
+
     @Column(name = "date_demande", nullable = false)
     private LocalDate dateDemande;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_demandeur", nullable = false)
     private DemandeurEntity demandeur;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_type_visa", nullable = false)
     private TypeVisaEntity typeVisa;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_type_demande", nullable = false)
     private TypeDemandeEntity typeDemande;
-    
-    
+
     @Column(name = "date_traitement")
     private LocalDate dateTraitement;
-    
+
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<VisaEntity> visas;
-    
+
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<CarteResidentEntity> cartesResident;
@@ -50,18 +49,25 @@ public class DemandeEntity {
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<StatutDemandeEntity> statuts;
-    
+
+    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<PhotoSignatureDemandeEntity> photosSignatures;
+
     @Column(name = "chemin_qr")
     private String cheminQR;
+
     public DemandeEntity() {
     }
 
     public String getCheminQR() {
         return cheminQR;
     }
+
     public void setCheminQR(String cheminQR) {
         this.cheminQR = cheminQR;
     }
+
     // Getters et Setters
     public int getId() {
         return id;
@@ -144,13 +150,26 @@ public class DemandeEntity {
     }
 
     public boolean isValide() {
-        if (visaTransformable == null || dateDemande == null || demandeur == null || typeVisa == null || typeDemande == null) {
+        if (visaTransformable == null || dateDemande == null || demandeur == null || typeVisa == null
+                || typeDemande == null) {
             return false;
         }
-        if(visaTransformable.demandeValide(dateDemande)) {
+        if (visaTransformable.demandeValide(dateDemande)) {
             return true;
-        }else {
+        } else {
             return false;
         }
+    }
+
+    public List<PhotoSignatureDemandeEntity> getPhotosSignatures() {
+        return photosSignatures;
+    }
+
+    public void setPhotosSignatures(List<PhotoSignatureDemandeEntity> photosSignatures) {
+        this.photosSignatures = photosSignatures;
+    }
+
+    public boolean hasPhotoAndSignature() {
+        return photosSignatures != null && !photosSignatures.isEmpty();
     }
 }
