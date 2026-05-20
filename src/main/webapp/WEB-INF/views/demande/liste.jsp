@@ -89,94 +89,101 @@
                                 ${demande.typeDemande.libelle}
                             </td>
                             <td>
-                            <c:if test="${not empty demande.cheminQR}">
-                                <!-- Icône cliquable pour ouvrir la modale -->
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#qrModal${demande.id}">
-                                    <i class="bi bi-qr-code-scan" style="font-size: 1.5rem; color: #0d6efd;"></i>
-                                </a>
+                                <c:if test="${not empty demande.cheminQR}">
+                                    <!-- Icône cliquable pour ouvrir la modale -->
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#qrModal${demande.id}">
+                                        <i class="bi bi-qr-code-scan" style="font-size: 1.5rem; color: #0d6efd;"></i>
+                                    </a>
 
-                                <!-- Modale Bootstrap propre à chaque demande -->
-                                <div class="modal fade" id="qrModal${demande.id}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">QR Code - ${referenceMap[demande.id]}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body text-center">
-                                                <%-- On utilise le chemin stocké en base. Assurez-vous que le chemin est accessible via une URL --%>
-                                                <img src="${pageContext.request.contextPath}/${demande.cheminQR}" 
-                                                    alt="QR Code" 
-                                                    class="img-fluid" 
+                                    <!-- Modale Bootstrap propre à chaque demande -->
+                                    <div class="modal fade" id="qrModal${demande.id}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">QR Code - ${referenceMap[demande.id]}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    <%-- On utilise le chemin stocké en base. Assurez-vous que le chemin est accessible via une URL --%>
+                                                    <img src="${pageContext.request.contextPath}/${demande.cheminQR}"
+                                                    alt="QR Code"
+                                                    class="img-fluid"
                                                     style="max-width: 300px;">
-                                            </div>
-                                             
-                                            <div class="modal-footer">
+                                                </div>
 
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="button" class="btn btn-secondary">
-                                                <a href="${api}${demande.getId()}" target="_blank">
-                                                ${api}${demande.getId()}
-                                            </a>
-                                             </button>
+                                                <div class="modal-footer">
+
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                    <button type="button" class="btn btn-secondary">
+                                                        <a href="${api}${demande.getId()}" target="_blank">
+                                                            ${api}${demande.getId()}
+                                                        </a>
+                                                    </button>
+                                                </div>
+
+
+
                                             </div>
-                                             
-                                            
-                                            
                                         </div>
                                     </div>
-                                </div>
-                            </c:if>
-                            <c:if test="${empty demande.cheminQR}">
-                                <span class="text-muted small">N/A</span>
-                            </c:if>
-                        </td>
+                                </c:if>
+                                <c:if test="${empty demande.cheminQR}">
+                                    <span class="text-muted small">N/A</span>
+                                </c:if>
+                            </td>
                             <%-- Actions --%>
                             <td>
                                 <div class="d-flex gap-1">
                                     <%-- Correction : Ajout du <c:choose> obligatoire autour des <c:when> --%>
                                     <c:choose>
                                         <%-- Logique pour le statut Cree --%>
+                                    <c:when test="${status == 'Photo et signature Termine'}">
+                                        <c:if test="${canScan}">
+                                            <a href="${pageContext.request.contextPath}/demande/scanner/${demande.id}"
+                                            class="btn btn-sm btn-info text-white">Scanner</a>
+                                        </c:if>
+                                            <a href="${pageContext.request.contextPath}/demande/modifier/${demande.id}"
+                                            class="btn btn-sm btn-warning">Modifier</a>
+                                    </c:when>
+                                    <c:when test="${status == 'Créé' || status == 'En cours de scan'}">
+                                            <a href="${pageContext.request.contextPath}/demande/photo-signature/${demande.id}"
+                                                class="btn btn-sm btn-primary">
+                                                <i class="bi bi-camera"></i> Photo/Signature
+                                            </a>
+                                        
+                                        <c:if test="${status == 'Créé'}">
+                                            <a href="${pageContext.request.contextPath}/demande/modifier/${demande.id}"
+                                            class="btn btn-sm btn-warning">Modifier</a>
+                                        </c:if>
 
-                                        <c:when test="${status == 'Créé' || status == 'En cours de scan'}">
+                                    </c:when>
 
-                                            <c:if test="${canScan}">
-                                                <a href="${pageContext.request.contextPath}/demande/scanner/${demande.id}"
-                                                class="btn btn-sm btn-info text-white">Scanner</a>
-                                            </c:if>
-                                            <c:if test="${status == 'Créé'}">
-                                                <a href="${pageContext.request.contextPath}/demande/modifier/${demande.id}"
-                                                class="btn btn-sm btn-warning">Modifier</a>
-                                            </c:if>
+                                    <%-- Logique pour le statut Scanner --%>
+                                    <c:when test="${status == 'Scanner'}">
+                                        <a href="${pageContext.request.contextPath}/demande/valider/${demande.id}"
+                                        class="btn btn-sm btn-success">Valider</a>
+                                        <a href="${pageContext.request.contextPath}/demande/rejeter/${demande.id}"
+                                        class="btn btn-sm btn-danger">Rejeter</a>
+                                    </c:when>
 
-                                        </c:when>
+                                    <c:otherwise>
+                                        <span class="text-muted small">Aucune action</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
 
-                                        <%-- Logique pour le statut Scanner --%>
-                                        <c:when test="${status == 'Scanner'}">
-                                            <a href="${pageContext.request.contextPath}/demande/valider/${demande.id}"
-                                            class="btn btn-sm btn-success">Valider</a>
-                                            <a href="${pageContext.request.contextPath}/demande/rejeter/${demande.id}"
-                                            class="btn btn-sm btn-danger">Rejeter</a>
-                                        </c:when>
-
-                                        <c:otherwise>
-                                            <span class="text-muted small">Aucune action</span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                            </td>
-                        </tr>
-                    </c:forEach>
-
-                    <c:if test="${empty demandes}">
-                        <tr>
-                            <td colspan="6" class="text-center text-muted">
-                                Aucune demande trouvee.
-                            </td>
-                        </tr>
-                    </c:if>
-                </tbody>
-            </table>
-        </div>
+                <c:if test="${empty demandes}">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            Aucune demande trouvee.
+                        </td>
+                    </tr>
+                </c:if>
+            </tbody>
+        </table>
     </div>
+</div>
 </div>

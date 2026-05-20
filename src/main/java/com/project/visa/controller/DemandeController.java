@@ -40,7 +40,6 @@ import com.project.visa.entity.VisaTransformableEntity;
 import com.project.visa.util.*;
 import com.project.visa.service.*;
 
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
@@ -97,7 +96,6 @@ public class DemandeController {
 
     @Autowired
     private CarteResidentService carteResidentService;
-
 
     @Autowired
     private TypeVisaService typeVisaService;
@@ -298,7 +296,7 @@ public class DemandeController {
         String numeroVisa1 = null;
         LocalDate dateDebutVisa = null;
         LocalDate dateFinVisa = null;
-        
+
         if (request.getParameter("numeroVisa") != null && !request.getParameter("numeroVisa").isEmpty()) {
             numeroVisa1 = request.getParameter("numeroVisa");
             String visaPattern = "VISA-[A-Z0-9]{4}-[0-9]{6}";
@@ -322,7 +320,8 @@ public class DemandeController {
                     }
                     if (visaTransformableEntity != null && visaTransformableEntity.getDateEntree() != null) {
                         if (dateFinVisa.isBefore(visaTransformableEntity.getDateEntree())) {
-                            fieldErrors.add("La date de fin de validité du visa doit être postérieure à la date d'entrée");
+                            fieldErrors
+                                    .add("La date de fin de validité du visa doit être postérieure à la date d'entrée");
                         }
                     }
                 } catch (Exception e) {
@@ -431,27 +430,26 @@ public class DemandeController {
             statutDemandeEntity.setDemande(savedDemande);
             statutDemandeEntity.setDateChangementStatut(currentDate);
             statutDemandeEntity.setStatut(1); // 1 = "soumise" ou "en attente"
-            try{
-                    String folderPath = servletContext.getRealPath("/images/qrcodes/");
-                    File folder = new File(folderPath);
+            try {
+                String folderPath = servletContext.getRealPath("/images/qrcodes/");
+                File folder = new File(folderPath);
 
-                    if (!folder.exists()) {
-                        boolean created = folder.mkdirs();
-                        if (created) {
-                            System.out.println("Dossier créé avec succès : " + folderPath);
-                        }
-                    }  
-                    String fileName = "qr_" + savedDemande.getId() + ".png";
-                    String fullPath = folderPath + fileName;
-                    String pathSave= "images/qrcodes/"+fileName;
-                    String baseUrlReact = apiUrl; 
-                    String urlFiche = baseUrlReact + savedDemande.getId();
-                    Util.genererQRCode(urlFiche, fullPath);
-                    savedDemande.setCheminQR(pathSave);
-                    savedDemande = demandeService.save(savedDemande);
+                if (!folder.exists()) {
+                    boolean created = folder.mkdirs();
+                    if (created) {
+                        System.out.println("Dossier créé avec succès : " + folderPath);
+                    }
+                }
+                String fileName = "qr_" + savedDemande.getId() + ".png";
+                String fullPath = folderPath + fileName;
+                String pathSave = "images/qrcodes/" + fileName;
+                String baseUrlReact = apiUrl;
+                String urlFiche = baseUrlReact + savedDemande.getId();
+                Util.genererQRCode(urlFiche, fullPath);
+                savedDemande.setCheminQR(pathSave);
+                savedDemande = demandeService.save(savedDemande);
 
-            
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
 
             }
@@ -459,7 +457,7 @@ public class DemandeController {
             if (provenance != null && !provenance.equals("CLASSIQUE")) {
                 statutDemandeEntity.setStatut(30);
             }
-            
+
             statutDemandeService.save(statutDemandeEntity);
 
             String reference = buildReference(savedDemande);
@@ -476,7 +474,7 @@ public class DemandeController {
 
                 }
             }
-                System.out.println("Date fin Str: " + dateFinVisaStr);
+            System.out.println("Date fin Str: " + dateFinVisaStr);
 
             StatutVisaEntity statutVisa = new StatutVisaEntity();
             if (dateDebutVisaStr != null && !dateDebutVisaStr.isEmpty()) {
@@ -495,7 +493,7 @@ public class DemandeController {
                 VisaEntity savedVisa = visaService.save(visa);
 
                 statutVisa.setVisa(savedVisa);
-                statutVisa.setStatut(1); 
+                statutVisa.setStatut(1);
                 statutVisa.setDateChangementStatut(currentDate);
 
                 redirectAttributes.addFlashAttribute("generatedVisaNumber", numeroVisa1);
@@ -775,7 +773,7 @@ public class DemandeController {
         } catch (Exception e) {
             e.printStackTrace();
             String errorMessage = "Erreur lors de la modification. Veuillez verifier les informations saisies.";
-            
+
             if (e.getMessage() != null) {
                 if (e.getMessage().contains("Duplicate entry")) {
                     errorMessage = "Erreur : Ce numéro de référence existe déjà. Veuillez utiliser une valeur unique.";
@@ -785,7 +783,7 @@ public class DemandeController {
                     errorMessage = "Erreur : " + e.getMessage();
                 }
             }
-            
+
             redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
             redirectAttributes.addFlashAttribute("demandeEntity", demandeEntity);
             return "redirect:/demande/modifier/" + id;
@@ -908,7 +906,7 @@ public class DemandeController {
     }
 
     private VisaEntity generateVisa(DemandeEntity demande, PasseportEntity passeport,
-             LocalDate dateDebutVisa, LocalDate dateFinVisa) {
+            LocalDate dateDebutVisa, LocalDate dateFinVisa) {
         VisaEntity visa = new VisaEntity();
         visa.setDemande(demande);
         visa.setPasseport(passeport);
@@ -922,12 +920,9 @@ public class DemandeController {
     public String generateVisaReference() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-ssSSS");
-        
+
         return "VISA-" + now.format(formatter);
     }
-
-   
-
 
     @GetMapping("/demandeDetails/{idDemande}")
     public ResponseEntity<?> getDemandeDetails(@PathVariable Long idDemande) {
@@ -939,29 +934,33 @@ public class DemandeController {
             Map<String, Object> response = new HashMap<>();
             // response.put("demande", demande);
             response.put("idDemande", demande.getId());
-            response.put("qrChemin",demande.getCheminQR());
+            response.put("qrChemin", demande.getCheminQR());
             response.put("EtatCivil", demande.getDemandeur());
-            response.put("passeport", demande.getVisaTransformable() != null ? demande.getVisaTransformable().getPasseport() : null);
+            response.put("passeport",
+                    demande.getVisaTransformable() != null ? demande.getVisaTransformable().getPasseport() : null);
             response.put("visaTransformable", demande.getVisaTransformable());
             response.put("typeDemande", demande.getTypeDemande());
             response.put("typeVisa", demande.getTypeVisa());
+            response.put("photoSignature", demande.getPhotosSignatures());
             List<StatutDemandeEntity> statuts = demande.getStatuts();
-            response.put("Status",statuts.get(statuts.size() - 1).getLibelleStatut());
-            if(statuts.get(statuts.size() - 1).getLibelleStatut()=="Approuvé"){
-                List<VisaEntity> visas=visaService.findByDemandeId(demande.getId());
-                response.put("visa",visas.get(visas.size() - 1));
-                List<CarteResidentEntity> cartes=carteResidentService.findByDemandeId(demande.getId());
-                response.put("carteResident",cartes.get(cartes.size() - 1));
+            response.put("Status", statuts.get(statuts.size() - 1).getLibelleStatut());
+            if (statuts.get(statuts.size() - 1).getLibelleStatut() == "Approuvé") {
+                List<VisaEntity> visas = visaService.findByDemandeId(demande.getId());
+                response.put("visa", visas.get(visas.size() - 1));
+                List<CarteResidentEntity> cartes = carteResidentService.findByDemandeId(demande.getId());
+                response.put("carteResident", cartes.get(cartes.size() - 1));
             }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la récupération des détails de la demande: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la récupération des détails de la demande: " + e.getMessage());
         }
     }
+
     @GetMapping("/demandeDetails/HistoStatut/{idDemande}")
     public ResponseEntity<?> getHistoStatut(@PathVariable int idDemande) {
         DemandeEntity demandeOpt = demandeService.findById(idDemande);
-        if (demandeOpt==null) {
+        if (demandeOpt == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Demande introuvable");
         }
 
@@ -972,13 +971,14 @@ public class DemandeController {
         }
         return ResponseEntity.ok(historique);
     }
+
     @GetMapping("/demandeDetails/DetailsFichier/{idDemande}")
     public ResponseEntity<?> getDetailsFichier(@PathVariable Long idDemande) {
         List<ScanFichierEntity> fichiers = scanFichierService.getUploadsParDemande(idDemande);
 
         if (fichiers == null || fichiers.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("Aucun fichier uploadé pour cette demande.");
+                    .body("Aucun fichier uploadé pour cette demande.");
         }
 
         return ResponseEntity.ok(fichiers);

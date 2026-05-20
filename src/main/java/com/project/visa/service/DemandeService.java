@@ -22,17 +22,21 @@ public class DemandeService {
 
     @Autowired
     private PieceRepository pieceRepository;
+    @Autowired
+    private PhotoSignatureDemandeService photoSignatureService;
 
     public List<DemandeEntity> findAll() {
         return demandeRepository.findAll();
     }
-    
+
     public DemandeEntity findById(int id) {
         return demandeRepository.findById(id);
     }
-    public List<DemandeEntity>findByDemandeurId(int id){
+
+    public List<DemandeEntity> findByDemandeurId(int id) {
         return demandeRepository.findByDemandeurId(id);
     }
+
     public DemandeEntity save(DemandeEntity demandeEntity) {
         return demandeRepository.save(demandeEntity);
     }
@@ -74,7 +78,7 @@ public class DemandeService {
     }
 
     public boolean canBeScan(DemandeEntity demande) {
-       
+
         if (demande == null || demande.getVisaTransformable() == null) {
             return false;
         }
@@ -92,7 +96,7 @@ public class DemandeService {
 
         for (PieceEntity pieceGenerale : piecesGenerales) {
             if (!uploadedPieceIds.contains(pieceGenerale.getId())) {
-                return false; 
+                return false;
             }
         }
 
@@ -107,4 +111,12 @@ public class DemandeService {
         return true;
     }
 
+    public boolean hasValidPhotoAndSignature(int demandeId) {
+        PhotoSignatureDemandeEntity latest = photoSignatureService.findLatestByDemandeId(demandeId);
+        return latest != null &&
+                latest.getPhotoUrl() != null &&
+                !latest.getPhotoUrl().isEmpty() &&
+                latest.getSignatureUrl() != null &&
+                !latest.getSignatureUrl().isEmpty();
+    }
 }

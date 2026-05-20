@@ -1,0 +1,11 @@
+Team lead : 
+Dev : 
+
+backoffice
+branche sprint/5/PhotoSignature
+    on ajoute un bouton prendre photo et signature 
+    et lorsque on clique sur le bouton on prend un photo et signature
+    on change le status en photo et signature terminer 
+    
+frontoffice
+branche sprint/5/PhotoSignature 
