@@ -106,6 +106,9 @@ public class DemandeController {
     @Autowired
     private StatutVisaService statutVisaService;
 
+    @Autowired
+    private AccuseReceptionService accuseReceptionService;
+
     @GetMapping("/demande/choix_type_demande")
     public String choix_type_demande(Model model) {
         model.addAttribute("template", "demande/choix_type_demande");
@@ -982,6 +985,119 @@ public class DemandeController {
         }
 
         return ResponseEntity.ok(fichiers);
+    }
+
+    /**
+     * Récupère les documents uploadés pour une demande au format JSON
+     * Retourne le nom du fichier, le type de pièce et le chemin du fichier
+     * 
+     * @param idDemande ID de la demande
+     * @return JSON avec la liste des documents
+     */
+    @GetMapping("/api/demande/{idDemande}/documents-apercu")
+    public ResponseEntity<?> getDocumentsApercu(@PathVariable Long idDemande) {
+        try {
+            DemandeEntity demande = demandeService.findById(idDemande.intValue());
+            if (demande == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Demande non trouvée"));
+            }
+
+            List<ScanFichierEntity> fichiers = scanFichierService.getUploadsParDemande(idDemande);
+
+            if (fichiers == null || fichiers.isEmpty()) {
+                return ResponseEntity.ok(List.of());
+            }
+
+            List<Map<String, Object>> documents = new ArrayList<>();
+
+            for (ScanFichierEntity fichier : fichiers) {
+                PieceDemandeEntity pieceDemande = fichier.getPieceDemande();
+                PieceEntity piece = pieceDemande.getPiece();
+
+                String fichierUrl = fichier.getCheminFichier();
+                fichierUrl = fichierUrl.replace("\\", "/");
+
+                Map<String, Object> doc = new HashMap<>();
+                doc.put("id", fichier.getId());
+                doc.put("nomPiece", piece.getLibelle());
+                doc.put("cheminFichier", fichierUrl);
+                doc.put("dateUpload", fichier.getDateUpload());
+                doc.put("typeDocument", getTypeDocument(fichierUrl)); // "pdf", "image", etc.
+
+                documents.add(doc);
+            }
+
+            return ResponseEntity.ok(documents);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erreur lors de la récupération des documents",
+                            "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Détermine le type de document à partir du chemin du fichier
+     * 
+     * @param cheminFichier Chemin du fichier
+     * @return Type de document ("pdf", "image", etc.)
+     */
+    private String getTypeDocument(String cheminFichier) {
+        String extension = cheminFichier.substring(cheminFichier.lastIndexOf(".") + 1).toLowerCase();
+
+        switch (extension) {
+            case "pdf":
+                return "pdf";
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+                return "image";
+            default:
+                return "fichier";
+        }
+    }
+
+    @GetMapping("/demande/telecharger-accuse/{demandeId}")
+    public ResponseEntity<?> telechargerAccuseReception(@PathVariable int demandeId) {
+        try {
+            DemandeEntity demande = demandeService.findById(demandeId);
+            if (demande == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Demande non trouvée");
+            }
+
+            // Récupérer le statut actuel
+            List<StatutDemandeEntity> statuts = demande.getStatuts();
+            if (statuts == null || statuts.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Aucun statut trouvé pour cette demande");
+            }
+
+            StatutDemandeEntity statutActuel = statuts.get(statuts.size() - 1);
+
+            // Vérifier si le statut est "Scanné Termine" (STATUT_SCANNE = 20)
+            if (statutActuel.getStatut() != StatutDemandeEntity.STATUT_SCANNE) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("La demande doit avoir le statut 'Scanné Terminé' pour télécharger l'accusé de réception");
+            }
+
+            // Générer le PDF
+            byte[] pdfContent = accuseReceptionService.genererAccuseReception(demande);
+
+            String fileName = "Accuse_Reception_RES-" + LocalDate.now().getYear() + "-"
+                    + String.format("%03d", demande.getId()) + ".pdf";
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/pdf")
+                    .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                    .body(pdfContent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de la génération du PDF: " + e.getMessage());
+        }
     }
 
 }

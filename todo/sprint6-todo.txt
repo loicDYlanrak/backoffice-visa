@@ -1,0 +1,15 @@
+Team lead : 
+Dev : 
+
+backoffice
+branche sprint/6/PhotoSignature
+
+dans l affichage de la liste des demandes avec statut scan terminer , 
+on peut voir une bouton apercu lorsque on clique dessus on peut voir:
+un grand modal qui nous permet de voir en appercu des documetns qu on a telecharger 
+avec le nom du documents et le type de piece (ex photo d itendite , document ect )
+
+pour les demandes avec status scan terminer on peut aussi voir un bouton telecharger pdf
+qui me telecharger un accuse de reception avec la photo de la personne (dans l entite photoSignature) 
+qui dit que votre demande a bien ete enregistrer avec un peu de detail de la demande
+ 

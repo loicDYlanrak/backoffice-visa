@@ -7,6 +7,8 @@ import com.project.visa.service.DemandeService;
 import com.project.visa.service.PhotoSignatureDemandeService;
 import com.project.visa.service.StatutDemandeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +19,20 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 public class PhotoSignatureController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PhotoSignatureController.class);
 
     @Autowired
     private DemandeService demandeService;
@@ -111,32 +118,65 @@ public class PhotoSignatureController {
 
     @GetMapping("/uploads/{demandeId}/{filename}")
     @ResponseBody
-    public ResponseEntity<byte[]> getUploadedFile(
+    public ResponseEntity<Resource> getUploadedFile(
             @PathVariable int demandeId,
             @PathVariable String filename) {
         try {
             String baseUploadPath = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
             String filePath = baseUploadPath + "demande_" + demandeId + File.separator + filename;
-            // Normaliser le chemin (corrige les slashs)
             Path path = Paths.get(filePath).normalize();
 
+            logger.info("=== Requête de fichier ===");
+            logger.info("demandeId: " + demandeId);
+            logger.info("filename: " + filename);
+            logger.info("baseUploadPath: " + baseUploadPath);
+            logger.info("filePath construit: " + filePath);
+            logger.info("chemin normalisé: " + path.toString());
+            logger.info("fichier existe: " + Files.exists(path));
+
             if (!Files.exists(path)) {
+                logger.warn("Fichier non trouvé à: " + path.toString());
+                // Essayer d'autres chemins possibles
+                logger.info("Tentative de chemins alternatifs:");
+
+                // Essai 1: sans "demande_"
+                String altPath1 = baseUploadPath + demandeId + File.separator + filename;
+                logger.info("  Alt1: " + altPath1 + " existe? " + Files.exists(Paths.get(altPath1)));
+
+                // Essai 2: uploads + demandeId directement
+                String altPath2 = System.getProperty("user.dir") + File.separator + "uploads" + demandeId
+                        + File.separator + filename;
+                logger.info("  Alt2: " + altPath2 + " existe? " + Files.exists(Paths.get(altPath2)));
+
+                // Essai 3: uploadsdemande_
+                String altPath3 = baseUploadPath + "uploadsdemande_" + demandeId + File.separator + filename;
+                logger.info("  Alt3: " + altPath3 + " existe? " + Files.exists(Paths.get(altPath3)));
+
                 return ResponseEntity.notFound().build();
             }
 
-            byte[] fileContent = Files.readAllBytes(path);
+            Resource resource = new UrlResource(path.toUri());
 
-            String contentType = Files.probeContentType(path);
-            if (contentType == null) {
-                contentType = "image/png";
+            String contentType;
+            if (filename.toLowerCase().endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else {
+                contentType = Files.probeContentType(path);
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
             }
 
+            logger.info("Fichier trouvé, contentType: " + contentType);
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .body(fileContent);
+                    .body(resource);
 
+        } catch (MalformedURLException e) {
+            logger.error("Erreur MalformedURLException: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Erreur IOException: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
